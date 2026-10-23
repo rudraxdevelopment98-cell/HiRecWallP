@@ -116,10 +116,10 @@ seed/                     # Local sample wallpaper source assets (gitignored ori
 
 1. [x] Project scaffold (Next + TS + Tailwind + test tooling)
 2. [x] CLAUDE.md
-3. [ ] Supabase SQL migration (Phase 1 tables + RLS) + seed script — **confirm with owner**
-4. [ ] Core lib: env validation, Supabase clients, geo/region, payments adapter iface, security headers
-5. [ ] Public pages: home, explore, detail, collections, sets, free, search, legal
-6. [ ] **PAUSE — confirm folder structure + SQL migration before wiring payments**
+3. [x] Supabase SQL migration (Phase 1 tables + RLS) + seed script — **confirm with owner**
+4. [x] Core lib: env validation, Supabase clients, geo/region, payments adapter iface, security headers
+5. [x] Public pages: home, explore, detail, collections, sets, free, search, legal + takedown form
+6. [ ] **PAUSE — confirm folder structure + SQL migration before wiring payments** ← we are here
 7. [ ] Razorpay (INR per-item + sets; international credit packs); spend credits
 8. [ ] Secure download flow (presigned 60s URLs, counters, rate limits)
 9. [ ] Admin upload (sharp → variants/previews/crop/free) + catalogue
