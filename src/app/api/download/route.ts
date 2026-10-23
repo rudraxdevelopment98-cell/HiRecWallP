@@ -48,11 +48,11 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   const { wallpaperId, variant } = parsed.data;
-
-  const ipHash = hashIp(clientIp(request));
   const userAgent = request.headers.get('user-agent') ?? null;
 
   try {
+    // Reads DOWNLOAD_TOKEN_SECRET; a missing secret surfaces as 503, not 500.
+    const ipHash = hashIp(clientIp(request));
     const supabase = createServiceClient();
 
     // Resolve the asset (service role; private rows are never exposed to anon).

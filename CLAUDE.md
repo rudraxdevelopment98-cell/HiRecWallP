@@ -119,12 +119,12 @@ seed/                     # Local sample wallpaper source assets (gitignored ori
 3. [x] Supabase SQL migration (Phase 1 tables + RLS) + seed script — **confirm with owner**
 4. [x] Core lib: env validation, Supabase clients, geo/region, payments adapter iface, security headers
 5. [x] Public pages: home, explore, detail, collections, sets, free, search, legal + takedown form
-6. [ ] **PAUSE — confirm folder structure + SQL migration before wiring payments** ← we are here
-7. [ ] Razorpay (INR per-item + sets; international credit packs); spend credits
-8. [ ] Secure download flow (presigned 60s URLs, counters, rate limits)
-9. [ ] Admin upload (sharp → variants/previews/crop/free) + catalogue
-10. [ ] My Library with download counters
-11. [ ] Event tracking, SEO basics, Playwright critical-flow tests
+6. [x] **PAUSE — folder structure + SQL migration confirmed; defaults accepted**
+7. [x] Razorpay (INR per-item + sets; international credit packs); spend credits
+8. [x] Secure download flow (presigned 60s URLs, counters, rate limits)
+9. [x] Admin upload (sharp → variants/previews/crop/free) + catalogue
+10. [x] My Library with download counters
+11. [x] Event tracking, SEO basics (sitemap/robots/JSON-LD), Playwright critical-flow tests
 
 ## Manual setup owner must do (grows as we go)
 

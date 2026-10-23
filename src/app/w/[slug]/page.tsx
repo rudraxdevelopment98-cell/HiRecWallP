@@ -7,6 +7,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { getDisplayRegion, getWallpaperBySlug } from '@/lib/catalogue';
 import { formatRegionPrice } from '@/lib/format';
 import { publicEnv } from '@/lib/env';
+import { TrackEvent } from '@/components/track-event';
 
 export async function generateMetadata({
   params,
@@ -56,6 +57,7 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
         // JSON-LD is trusted, server-generated metadata.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <TrackEvent type="detail_view" wallpaperId={w.id} />
 
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl border bg-muted">
         {w.previewUrl ? (
