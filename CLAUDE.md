@@ -22,7 +22,7 @@ We are currently building **Phase 1 (MVP)** — `phases[0]` in the spec.
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 14 (App Router) + TypeScript (**strict**) |
-| Styling | Tailwind CSS + shadcn/ui-style tokens |
+| Styling | Tailwind CSS + shadcn/ui-style tokens · **"Obsidian Stone" dark theme** (warm stone neutrals) with CSS/IntersectionObserver motion (reduced-motion + no-JS safe) |
 | DB / Auth | Supabase (Postgres, Auth: email OTP + Google, **RLS on every table**) |
 | Originals | Cloudflare R2 **private** bucket (S3 API) — never public |
 | Previews | Cloudflare R2 **public** bucket behind CDN |

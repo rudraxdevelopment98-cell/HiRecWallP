@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { WallpaperCard } from '@/components/wallpaper-card';
+import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listPublishedWallpapers } from '@/lib/catalogue';
 import { publicEnv } from '@/lib/env';
 
@@ -12,23 +13,30 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="container space-y-16 py-12">
+    <main className="space-y-24 pb-24">
       {/* Hero */}
-      <section className="flex flex-col items-center gap-6 py-12 text-center">
-        <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
-          Ultra-HD wallpapers, made for your screen
-        </h1>
-        <p className="max-w-xl text-balance text-muted-foreground">
-          {publicEnv.NEXT_PUBLIC_BRAND_NAME} — AI-generated wallpapers for phone, desktop and
-          tablet. Free picks, cheap premium downloads, priced for your country.
-        </p>
-        <div className="flex gap-3">
-          <Link href="/explore" className={buttonVariants({ size: 'lg' })}>
-            Browse
-          </Link>
-          <Link href="/free" className={buttonVariants({ size: 'lg', variant: 'outline' })}>
-            Free picks
-          </Link>
+      <section className="relative overflow-hidden">
+        <div className="aurora" aria-hidden />
+        <div className="container relative flex flex-col items-center gap-6 py-28 text-center">
+          <span className="animate-fade-up glass rounded-full px-4 py-1.5 text-xs tracking-wide text-muted-foreground">
+            Ultra-HD · AI-crafted · priced for your country
+          </span>
+          <h1 className="animate-fade-up text-balance text-5xl font-semibold tracking-tight sm:text-7xl [animation-delay:80ms]">
+            <span className="text-gradient">Wallpapers carved</span>
+            <br className="hidden sm:block" /> for your screen
+          </h1>
+          <p className="animate-fade-up max-w-xl text-balance text-muted-foreground [animation-delay:160ms]">
+            {publicEnv.NEXT_PUBLIC_BRAND_NAME} — a quiet, premium collection of ultra-HD
+            wallpapers for phone, desktop and tablet. Free picks, cheap premium downloads.
+          </p>
+          <div className="animate-fade-up flex gap-3 [animation-delay:240ms]">
+            <Link href="/explore" className={buttonVariants({ size: 'lg' })}>
+              Browse the collection
+            </Link>
+            <Link href="/free" className={buttonVariants({ size: 'lg', variant: 'outline' })}>
+              Free picks
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -48,21 +56,23 @@ function Section({
   items: Awaited<ReturnType<typeof listPublishedWallpapers>>;
 }) {
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">{title}</h2>
-        <Link href={href} className="text-sm text-muted-foreground hover:text-foreground">
+    <section className="container space-y-6">
+      <Reveal className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+        <Link href={href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
           See all →
         </Link>
-      </div>
+      </Reveal>
       {items.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+        <Reveal className="glass rounded-2xl p-12 text-center text-sm text-muted-foreground">
           No wallpapers yet — publish some from the admin upload to see them here.
-        </p>
+        </Reveal>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {items.map((w) => (
-            <WallpaperCard key={w.id} wallpaper={w} />
+          {items.map((w, i) => (
+            <Reveal key={w.id} delay={(i % 5) * 60}>
+              <WallpaperCard wallpaper={w} />
+            </Reveal>
           ))}
         </div>
       )}

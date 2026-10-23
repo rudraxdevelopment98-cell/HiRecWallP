@@ -2,42 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================================================
+   HirecWallp — "Obsidian Stone" theme
+   Warm, near-black stone neutrals (not cold blue-black), monochrome premium
+   accents, glassmorphism and motion. Dark by default.
+   ========================================================================== */
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 6% 10%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 262 83% 58%;
-    --radius: 0.65rem;
-  }
+    /* Warm stone neutrals */
+    --background: 24 10% 4%; /* ~#0b0a09 warm obsidian */
+    --foreground: 30 8% 92%;
+    --card: 24 9% 7%;
+    --card-foreground: 30 8% 92%;
+    --popover: 24 9% 6%;
+    --popover-foreground: 30 8% 92%;
 
-  .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
-    --primary: 262 83% 67%;
-    --primary-foreground: 240 6% 10%;
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 98%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 262 83% 67%;
+    /* Monochrome stone primary (crisp near-white CTA on dark) */
+    --primary: 30 8% 90%;
+    --primary-foreground: 24 12% 7%;
+
+    --secondary: 24 7% 13%;
+    --secondary-foreground: 30 8% 90%;
+    --muted: 24 6% 12%;
+    --muted-foreground: 30 6% 60%;
+    --accent: 28 10% 16%;
+    --accent-foreground: 30 8% 92%;
+
+    --border: 30 6% 15%;
+    --input: 30 6% 15%;
+    --ring: 30 10% 70%;
+    --radius: 0.9rem;
+
+    /* Warm glow used by aurora + hover halos */
+    --glow: 32 45% 55%;
   }
 }
 
@@ -45,7 +43,134 @@
   * {
     @apply border-border;
   }
+  html {
+    color-scheme: dark;
+  }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(60rem 60rem at 110% -10%, hsl(var(--glow) / 0.08), transparent 60%),
+      radial-gradient(50rem 50rem at -10% 10%, hsl(30 8% 40% / 0.06), transparent 55%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: hsl(var(--glow) / 0.3);
+  }
+}
+
+@layer components {
+  /* Frosted stone surface */
+  .glass {
+    background: hsl(24 9% 8% / 0.6);
+    backdrop-filter: blur(14px);
+    border: 1px solid hsl(30 8% 100% / 0.06);
+  }
+
+  /* Animated aurora backdrop for the hero */
+  .aurora {
+    position: absolute;
+    inset: -20% -10% auto -10%;
+    height: 120%;
+    pointer-events: none;
+    background:
+      radial-gradient(35rem 22rem at 20% 20%, hsl(var(--glow) / 0.16), transparent 60%),
+      radial-gradient(32rem 22rem at 80% 10%, hsl(20 20% 55% / 0.12), transparent 60%),
+      radial-gradient(40rem 26rem at 50% 80%, hsl(30 10% 50% / 0.1), transparent 60%);
+    filter: blur(14px);
+    animation: aurora-drift 18s ease-in-out infinite alternate;
+  }
+
+  .text-gradient {
+    background: linear-gradient(180deg, hsl(30 10% 98%), hsl(30 8% 62%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@layer utilities {
+  /* Hover lift + warm halo */
+  .hover-lift {
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s ease,
+      border-color 0.35s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 18px 40px -20px hsl(var(--glow) / 0.35),
+      0 0 0 1px hsl(30 8% 100% / 0.08);
+  }
+
+  /* Scroll-reveal: hidden only when JS is active (so no-JS stays visible) */
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .js .reveal.in-view {
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .shimmer {
+    background: linear-gradient(
+      100deg,
+      hsl(24 6% 12%) 30%,
+      hsl(24 6% 18%) 50%,
+      hsl(24 6% 12%) 70%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(2%, 2%, 0) scale(1.08);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Respect reduced-motion: no transforms/animations, everything visible */
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .animate-fade-up,
+  .shimmer {
+    animation: none !important;
+  }
+  .js .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .hover-lift {
+    transition: none !important;
   }
 }

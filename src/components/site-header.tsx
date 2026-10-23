@@ -15,9 +15,10 @@ const NAV = [
 export function SiteHeader() {
   const region = getDisplayRegion();
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur">
+    <header className="glass sticky top-0 z-40 w-full border-x-0 border-t-0">
       <div className="container flex h-16 items-center gap-4">
-        <Link href="/" className="font-semibold tracking-tight">
+        <Link href="/" className="group flex items-center gap-2 font-semibold tracking-tight">
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--glow))] shadow-[0_0_12px_2px_hsl(var(--glow)/0.6)] transition-transform group-hover:scale-125" />
           {publicEnv.NEXT_PUBLIC_BRAND_NAME}
         </Link>
         <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">

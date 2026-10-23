@@ -27,6 +27,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Mark JS active before paint so scroll-reveals hide without a flash
+            and content stays visible when JS is unavailable. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('js')`,
+          }}
+        />
+      </head>
       <body className="flex min-h-screen flex-col antialiased">
         <SiteHeader />
         <div className="flex-1">{children}</div>

@@ -34,8 +34,8 @@ export default async function PricingPage() {
       ) : packs.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-3">
           {packs.map((pack) => (
-            <div key={pack.id} className="rounded-lg border p-6 text-center">
-              <p className="text-3xl font-semibold">{pack.credits}</p>
+            <div key={pack.id} className="glass hover-lift rounded-2xl p-6 text-center">
+              <p className="text-4xl font-semibold text-gradient">{pack.credits}</p>
               <p className="text-sm text-muted-foreground">credits</p>
               <p className="mt-4 text-lg font-medium">
                 {formatMoneyMinor(pack.amount_minor, pack.currency)}
