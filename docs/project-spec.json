@@ -1,0 +1,421 @@
+{
+  "kickoff_prompt": "You are the lead engineer for a premium AI wallpaper platform called HirecWallp (hirecwallp.com, business registered in India). Read /docs/BLUEPRINT.md and /docs/project-spec.json fully before writing code. Build ONLY Phase 1 (MVP) as defined in phases[0]. First: create CLAUDE.md summarising stack, conventions and commands; then propose the folder structure and the Supabase SQL migration, and wait for my confirmation before installing payments. Work in small commits, run lint/typecheck/tests after each step, and never put secrets in code. Treat every item under security_requirements as mandatory acceptance criteria. When Phase 1 acceptance_criteria all pass, stop and give me a checklist of what I must configure manually (API keys, webhooks, DNS).",
+  "project": {
+    "name": "HirecWallp",
+    "name_is_placeholder": false,
+    "config_key_for_brand": "BRAND_NAME",
+    "one_liner": "Ultra-HD AI-generated wallpapers (phone, desktop, tablet) — free and paid — with country-based dynamic pricing, secure delivery, automated social marketing, and a future creator marketplace.",
+    "launch_niches": [
+      "indian-devotional-and-culture",
+      "dark-amoled-minimal"
+    ],
+    "primary_markets": [
+      "IN",
+      "GB",
+      "US",
+      "EU"
+    ],
+    "owner_role": "single admin at launch",
+    "domain": "hirecwallp.com",
+    "business_entity_country": "IN"
+  },
+  "tech_stack": {
+    "framework": "Next.js (App Router) + TypeScript (strict)",
+    "styling": "Tailwind CSS + shadcn/ui",
+    "database_auth": "Supabase (Postgres, Auth with email OTP + Google, Row Level Security on every table)",
+    "storage": {
+      "originals": "Cloudflare R2 private bucket (no public access, S3 API)",
+      "previews": "Cloudflare R2 public bucket behind CDN"
+    },
+    "image_processing": "sharp (resize, visible watermark, phone/desktop mockups, preview generation)",
+    "forensic_watermark_worker": "Python FastAPI service using invisible-watermark (dwtDct) + XMP metadata writer; called by API with a shared secret; deployable separately (Phase 2)",
+    "payments": {
+      "india": "Razorpay Orders + Checkout (INR, UPI first), webhook signature verification (HMAC-SHA256)",
+      "international": "Razorpay International card payments for credit packs (USD/GBP/EUR), same webhook verification",
+      "adapter": "PaymentProvider interface so Stripe / PayPal / a Merchant-of-Record can be added later without touching business logic",
+      "note": "Business entity is in India; Stripe is invite-only for Indian businesses, so it is NOT used in Phase 1."
+    },
+    "ai": {
+      "image_generation": "provider-agnostic adapter (IMAGE_PROVIDER env); only providers whose terms allow commercial resale",
+      "upscaling": "provider-agnostic adapter (UPSCALE_PROVIDER env)",
+      "metadata_and_quality_review": "Claude API (vision) for titles, tags, alt text, quality score"
+    },
+    "social": [
+      "Instagram Graph API content publishing (Professional account)",
+      "Pinterest API v5"
+    ],
+    "email": "Resend",
+    "analytics": "own events table + PostHog (optional)",
+    "scheduling": "Vercel Cron for light jobs; GitHub Actions for heavy generation batches",
+    "hosting": "Vercel (web), Supabase (db), R2 (files)",
+    "testing": "Vitest (unit), Playwright (critical flows: browse, free download, purchase, secure download)"
+  },
+  "env_vars": [
+    "BRAND_NAME",
+    "NEXT_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "R2_ACCOUNT_ID",
+    "R2_ACCESS_KEY_ID",
+    "R2_SECRET_ACCESS_KEY",
+    "R2_PRIVATE_BUCKET",
+    "R2_PUBLIC_BUCKET",
+    "R2_PUBLIC_BASE_URL",
+    "RAZORPAY_KEY_ID",
+    "RAZORPAY_KEY_SECRET",
+    "RAZORPAY_WEBHOOK_SECRET",
+    "DOWNLOAD_TOKEN_SECRET",
+    "WATERMARK_WORKER_URL",
+    "WATERMARK_WORKER_SECRET",
+    "IMAGE_PROVIDER",
+    "IMAGE_PROVIDER_API_KEY",
+    "UPSCALE_PROVIDER",
+    "UPSCALE_PROVIDER_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "IG_BUSINESS_ACCOUNT_ID",
+    "IG_ACCESS_TOKEN",
+    "PINTEREST_ACCESS_TOKEN",
+    "PINTEREST_BOARD_IDS",
+    "RESEND_API_KEY",
+    "CRON_SECRET"
+  ],
+  "data_model": {
+    "profiles": "id (=auth.users.id), display_name, role enum(buyer|creator|admin), country_code, created_at",
+    "categories": "id, slug, name, parent_id, sort_order",
+    "wallpapers": "id, slug, title, description, alt_text, category_id, tags text[], is_free bool, status enum(draft|pending_review|published|archived), creator_id nullable, is_ai_generated bool, human_edited bool, set_id nullable, launch_at, created_at",
+    "wallpaper_sets": "id, slug, title, description",
+    "wallpaper_assets": "id, wallpaper_id, variant enum(phone|phone_depth|desktop_4k|desktop_5k|tablet|ultrawide|free_phone|free_desktop|preview|preview_crop), width, height, bytes, storage_bucket enum(private|public), storage_key, phash, created_at",
+    "regions": "code (IN|T1|T2|T3), name, currency, pricing_unit enum(money|credits), country_codes text[]",
+    "price_rules": "id, scope enum(global|category|wallpaper), scope_id nullable, region_code, min_price, max_price, base_price, snap_points numeric[], max_step_pct, cooldown_hours, launch_price, launch_hours, frozen bool",
+    "prices": "wallpaper_id, region_code, current_price, last_changed_at  (PK wallpaper_id+region_code)",
+    "price_history": "id, wallpaper_id, region_code, old_price, new_price, reason text, metrics jsonb, changed_by enum(job|admin), created_at",
+    "price_quotes": "id, user_id, wallpaper_id, region_code, price, expires_at (15 min lock)",
+    "credit_packs": "id, region_code, currency, amount_minor, credits, provider_plan_ref, active",
+    "credit_ledger": "id, user_id, delta int, reason enum(purchase|spend|refund|admin_adjust), ref_id, created_at  (balance = SUM(delta))",
+    "orders": "id, user_id, provider enum(razorpay|razorpay_intl|paypal|credits), provider_order_id, status enum(created|paid|failed|refunded), currency, amount_minor, billing_country, created_at",
+    "order_items": "id, order_id, wallpaper_id nullable, set_id nullable, credit_pack_id nullable, unit_price, credits_spent",
+    "entitlements": "id, user_id, wallpaper_id, order_id, licence enum(personal|commercial), max_downloads int default 5, downloads_used int default 0, created_at  (UNIQUE user_id+wallpaper_id+licence)",
+    "downloads": "id, user_id nullable, wallpaper_id, asset_id, entitlement_id nullable, ip_hash, user_agent, watermark_payload, created_at",
+    "events": "id, user_id nullable, anon_id, type enum(view|detail_view|preview_zoom|free_download|add_to_cart|checkout_start|purchase|paid_download), wallpaper_id nullable, region_code, country_code, created_at",
+    "prompt_library": "id, niche, festival nullable, prompt, negative_prompt, aspect, style_notes, active",
+    "generation_jobs": "id, prompt_id, provider, status enum(queued|generating|filtering|upscaling|awaiting_review|approved|rejected|failed), candidates jsonb, quality_scores jsonb, cost_minor, error, created_at",
+    "social_posts": "id, wallpaper_id, platform enum(instagram|pinterest|youtube_shorts), format enum(image|carousel|reel|pin), caption, hashtags, media_url, scheduled_for, status enum(scheduled|posted|failed|skipped), external_id, error",
+    "jobs_log": "id, job_name, started_at, finished_at, status, details jsonb",
+    "takedown_reports": "id, reporter_email, url, wallpaper_id nullable, details, status, created_at",
+    "phase3_creators": "creators(user_id, payout_provider enum(razorpay_route|paypal_payouts), payout_account_id, kyc_status, commission_pct default 30), creator_payouts(id, creator_id, period, gross, commission, net, status)"
+  },
+  "security_requirements": [
+    "Original full-resolution files are ONLY in the private bucket; no code path returns a permanent or public URL to them.",
+    "Public previews: max 720px long edge, JPEG quality ~70, tiled diagonal visible watermark with brand name; generated server-side at publish time.",
+    "Detail crop preview: max 600x600 region at 1:1, also watermarked.",
+    "Download flow: POST /api/download {wallpaperId, variant} → auth check → entitlement check (or is_free for free variants) → increment downloads_used atomically → issue presigned R2 URL valid 60 seconds → log row in downloads.",
+    "Max 5 downloads per entitlement (configurable); rate limit 30 downloads/hour per user and per IP hash.",
+    "Free variants require no login but are rate-limited per IP and never include the 4K+ originals.",
+    "Payment webhooks verify signatures; entitlements are created ONLY from verified webhooks, never from client redirects.",
+    "Idempotency: webhook handlers are idempotent on provider event id.",
+    "Row Level Security on all tables; users can read only their own orders, entitlements, credit_ledger, downloads.",
+    "Admin routes protected by role check on the server (middleware + RLS), not only hidden in UI.",
+    "Region pricing: display by IP geolocation, but at checkout compare with billing/card country; on mismatch use the higher-priced region.",
+    "Phase 2: per-buyer forensic watermark — first paid download of each variant is processed by the watermark worker embedding order_id, cached per entitlement; XMP metadata includes licence + order reference.",
+    "Store perceptual hash (pHash) for every asset; reject uploads that near-match existing assets (Phase 2/3).",
+    "Secrets only via env vars; add .env.example; no secrets in client bundles.",
+    "Security headers: CSP, HSTS, X-Frame-Options, Referrer-Policy; CSRF protection on mutating routes."
+  ],
+  "dynamic_pricing": {
+    "schedule": "nightly 02:00 UTC",
+    "region_defaults": {
+      "IN": {
+        "unit": "INR",
+        "min": 9,
+        "max": 99,
+        "base": 19,
+        "snap_points": [
+          9,
+          19,
+          29,
+          49,
+          79,
+          99
+        ],
+        "launch_price": 9
+      },
+      "T1": {
+        "unit": "credits",
+        "min": 1,
+        "max": 5,
+        "base": 2,
+        "snap_points": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "launch_price": 1
+      },
+      "T2": {
+        "unit": "credits",
+        "min": 1,
+        "max": 4,
+        "base": 2,
+        "snap_points": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "launch_price": 1
+      },
+      "T3": {
+        "unit": "credits",
+        "min": 1,
+        "max": 3,
+        "base": 1,
+        "snap_points": [
+          1,
+          2,
+          3
+        ],
+        "launch_price": 1
+      }
+    },
+    "credit_pack_defaults": {
+      "GBP": [
+        {
+          "credits": 10,
+          "price": 2.99
+        },
+        {
+          "credits": 30,
+          "price": 6.99
+        },
+        {
+          "credits": 80,
+          "price": 14.99
+        }
+      ],
+      "USD": [
+        {
+          "credits": 10,
+          "price": 3.99
+        },
+        {
+          "credits": 30,
+          "price": 8.99
+        },
+        {
+          "credits": 80,
+          "price": 18.99
+        }
+      ],
+      "EUR": [
+        {
+          "credits": 10,
+          "price": 3.49
+        },
+        {
+          "credits": 30,
+          "price": 7.99
+        },
+        {
+          "credits": 80,
+          "price": 16.99
+        }
+      ]
+    },
+    "algorithm": [
+      "Skip if rule.frozen or within cooldown_hours of last change or within launch_hours of launch_at (use launch_price).",
+      "demand = (paid_downloads_7d + 0.3 * free_downloads_7d) / category_median_of_same_metric (guard divide-by-zero; require >= 30 detail_views_7d before acting).",
+      "conversion = paid_downloads_7d / detail_views_7d.",
+      "If demand > 1.5 AND conversion >= category_median_conversion → move UP one snap point (bounded by max_step_pct).",
+      "If demand < 0.5 OR conversion < 0.5 * category_median_conversion for 2 consecutive runs → move DOWN one snap point.",
+      "Clamp to [min,max]; write prices + price_history with reason and metrics jsonb.",
+      "Most specific rule wins: wallpaper > category > global."
+    ],
+    "admin_controls": [
+      "edit rules per region/category/wallpaper",
+      "global freeze toggle",
+      "manual override with reason",
+      "price history chart",
+      "simulate next run (dry-run diff)"
+    ]
+  },
+  "automation_jobs": [
+    {
+      "name": "generate_batch",
+      "phase": 2,
+      "trigger": "admin button or nightly",
+      "steps": [
+        "pick active prompts (niche/festival calendar)",
+        "generate N candidates via IMAGE_PROVIDER",
+        "auto-filter: min resolution, NSFW, near-duplicate pHash",
+        "Claude vision quality score 1-10 with reasons; drop < 7",
+        "upscale survivors",
+        "derive variants (phone/desktop/tablet/ultrawide crops with smart subject-aware cropping)",
+        "Claude generates title, tags, alt text, description, SEO slug, suggested is_free",
+        "set status awaiting_review"
+      ]
+    },
+    {
+      "name": "publish_approved",
+      "phase": 2,
+      "trigger": "on admin approve",
+      "steps": [
+        "upload originals to private bucket",
+        "create previews + crop + free variants",
+        "write rows",
+        "revalidate pages + sitemap",
+        "create social_posts drafts"
+      ]
+    },
+    {
+      "name": "social_scheduler",
+      "phase": 2,
+      "trigger": "every 30 min",
+      "steps": [
+        "post due items: Instagram 2-3/day at configured local times (IST + UK evening), Pinterest 5-10/day",
+        "media = phone mockup image or 5-8s slow-zoom reel made with ffmpeg",
+        "caption + hashtags + link-in-bio / pin link with UTM",
+        "respect API publishing limit via /content_publishing_limit",
+        "log external_id or error, retry with backoff"
+      ]
+    },
+    {
+      "name": "dynamic_pricing",
+      "phase": 2,
+      "trigger": "nightly",
+      "steps": [
+        "see dynamic_pricing.algorithm"
+      ]
+    },
+    {
+      "name": "weekly_report",
+      "phase": 2,
+      "trigger": "Mondays 08:00 Europe/London",
+      "steps": [
+        "email owner: revenue, top 10 sellers, conversion by region, price changes, social performance, job failures"
+      ]
+    }
+  ],
+  "pages": {
+    "public": [
+      "/ (home)",
+      "/explore (filters: device, category, free/paid, colour, sort)",
+      "/w/[slug] (detail)",
+      "/collections/[slug]",
+      "/sets/[slug]",
+      "/free",
+      "/search",
+      "/pricing (credit packs)",
+      "/licence",
+      "/terms",
+      "/privacy",
+      "/refunds",
+      "/contact-takedown"
+    ],
+    "auth": [
+      "/login",
+      "/library",
+      "/account",
+      "/checkout",
+      "/checkout/success"
+    ],
+    "admin": [
+      "/admin",
+      "/admin/review-queue",
+      "/admin/catalogue",
+      "/admin/upload",
+      "/admin/prompts",
+      "/admin/pricing",
+      "/admin/social",
+      "/admin/orders",
+      "/admin/takedowns",
+      "/admin/settings"
+    ],
+    "creator_phase3": [
+      "/creator",
+      "/creator/upload",
+      "/creator/earnings",
+      "/creator/payouts"
+    ]
+  },
+  "seo": [
+    "server-rendered detail pages with unique title/description",
+    "JSON-LD ImageObject + Product",
+    "dynamic OG images (watermarked preview on device mockup)",
+    "sitemap.xml + image sitemap regenerated on publish",
+    "clean slugs like /w/mahadev-cosmic-trishul-4k",
+    "fast LCP: preview images via CDN, next/image"
+  ],
+  "phases": [
+    {
+      "id": 1,
+      "name": "MVP",
+      "duration": "3 weeks",
+      "scope": [
+        "Next.js app, Tailwind, shadcn/ui, Supabase project + SQL migrations for Phase 1 tables (profiles, categories, wallpapers, wallpaper_sets, wallpaper_assets, regions, price_rules, prices, price_history, price_quotes, credit_packs, credit_ledger, orders, order_items, entitlements, downloads, events, takedown_reports) with RLS",
+        "Seed script: regions, default price rules, credit packs, categories, 20 sample wallpapers from /seed folder",
+        "Admin upload: drag-drop original → sharp creates all variants, previews, crop, free variants → stores in correct buckets",
+        "Public pages: home, explore with filters, detail, collections, sets, free, search",
+        "Geo region detection (Vercel headers) + currency/credit display + manual region switcher",
+        "India purchase via Razorpay (per item + sets); international credit packs via Razorpay International; spend credits to unlock",
+        "Secure download flow per security_requirements",
+        "My Library with download counters",
+        "Legal pages with placeholder text clearly marked for review",
+        "Event tracking into events table",
+        "SEO basics per seo list",
+        "Playwright tests for critical flows"
+      ],
+      "acceptance_criteria": [
+        "No original-resolution file is reachable without a valid 60-second signed URL (test by scanning HTML/network for private keys).",
+        "Paying via Razorpay test mode (INR UPI and international card) creates entitlements only after verified webhooks.",
+        "A 6th download attempt on one entitlement is refused.",
+        "Indian visitor sees ₹ prices; UK visitor sees credit costs and GBP packs; mismatched billing country is charged the higher tier.",
+        "Lighthouse performance ≥ 90 on home and detail pages (mobile).",
+        "lint, typecheck, unit and e2e tests all pass."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Automation",
+      "duration": "3 weeks",
+      "scope": [
+        "prompt_library, generation_jobs, social_posts, jobs_log tables",
+        "generate_batch, publish_approved, social_scheduler, dynamic_pricing, weekly_report jobs",
+        "admin review queue, prompts, pricing and social calendar pages",
+        "forensic watermark worker + integration",
+        "pHash duplicate detection",
+        "commercial licence SKU"
+      ],
+      "acceptance_criteria": [
+        "One button generates a batch that lands in the review queue with metadata",
+        "Approved wallpaper appears on site and in social calendar automatically",
+        "Pricing dry-run shows diff; live run writes price_history with reasons",
+        "Leaked test file can be decoded back to its order_id"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Creator marketplace",
+      "gate": "Start only after owner confirms Phase 2 sales metrics are met",
+      "scope": [
+        "creator onboarding + KYC via Razorpay Route (India) / PayPal Payouts (international)",
+        "creator upload with automated checks (resolution, NSFW, pHash duplicate, IP/brand screening via Claude vision) + manual review",
+        "commission engine (default 30%) and monthly payouts",
+        "creator earnings dashboard",
+        "creator agreement acceptance"
+      ]
+    }
+  ],
+  "constraints_and_rules_for_claude_code": [
+    "Build one phase at a time; do not start the next phase without explicit owner approval.",
+    "Ask before adding any paid third-party service not listed here.",
+    "Keep provider integrations behind adapters so image/upscale/payment providers can be swapped.",
+    "Never generate or accept wallpapers containing trademarked characters, brand logos, real celebrities or NSFW content; enforce in prompts and moderation.",
+    "Mark every wallpaper is_ai_generated and show an 'AI-generated' label on detail pages.",
+    "Legal page text is placeholder only — flag clearly that a lawyer/accountant must review.",
+    "Write CLAUDE.md and keep it updated with commands, structure and decisions.",
+    "Business entity is Indian: all prices stored in minor units with currency; GST-ready invoices for Indian buyers (GSTIN field on profile optional); keep tax logic configurable and flagged for CA review."
+  ]
+}
