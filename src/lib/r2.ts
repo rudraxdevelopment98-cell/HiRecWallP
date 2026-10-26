@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import type { Readable } from 'node:stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { serverEnv } from '@/lib/env';
 
@@ -42,6 +43,17 @@ export async function presignedGetUrl(
 ): Promise<string> {
   const command = new GetObjectCommand({ Bucket: bucketName(bucket), Key: key });
   return getSignedUrl(r2(), command, { expiresIn: Math.min(Math.max(expiresIn, 1), 600) });
+}
+
+/** Fetch an object's bytes from a bucket (server-side pipelines only). */
+export async function getObject(bucket: R2Bucket, key: string): Promise<Buffer> {
+  const res = await r2().send(new GetObjectCommand({ Bucket: bucketName(bucket), Key: key }));
+  const stream = res.Body as Readable;
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : (chunk as Buffer));
+  }
+  return Buffer.concat(chunks);
 }
 
 /** Upload an object to a bucket (used by the admin publish flow). */
