@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { publicEnv } from '@/lib/env';
 import { DEFAULT_REGION, isRegionCode, type RegionCode } from '@/lib/geo';
+import { DEMO_CATEGORIES, demoWallpaperBySlug, demoWallpapers } from '@/lib/demo';
 import type {
   Category,
   ExploreFilters,
@@ -9,6 +10,20 @@ import type {
   WallpaperCard,
   WallpaperSet,
 } from '@/types/catalogue';
+
+/** Apply explore filters to an in-memory list (demo-fallback path). */
+function filterDemo(items: WallpaperCard[], filters: ExploreFilters, limit: number): WallpaperCard[] {
+  let out = items;
+  if (filters.free !== undefined) out = out.filter((w) => w.is_free === filters.free);
+  if (filters.category) out = out.filter((w) => w.category_id === `cat-${filters.category}`);
+  if (filters.q) {
+    const q = filters.q.toLowerCase();
+    out = out.filter(
+      (w) => w.title.toLowerCase().includes(q) || w.tags.some((t) => t.includes(q)),
+    );
+  }
+  return out.slice(0, limit);
+}
 
 /** Whether Supabase is configured. When false, data helpers return empty sets. */
 function dbConfigured(): boolean {
@@ -60,7 +75,7 @@ export async function listPublishedWallpapers(
   region: RegionCode,
   limit = 48,
 ): Promise<WallpaperCard[]> {
-  if (!dbConfigured()) return [];
+  if (!dbConfigured()) return filterDemo(demoWallpapers(region), filters, limit);
   try {
     const supabase = createClient();
     let query = supabase
@@ -94,7 +109,7 @@ export async function getWallpaperBySlug(
   slug: string,
   region: RegionCode,
 ): Promise<WallpaperCard | null> {
-  if (!dbConfigured()) return null;
+  if (!dbConfigured()) return demoWallpaperBySlug(slug, region);
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -111,7 +126,7 @@ export async function getWallpaperBySlug(
 }
 
 export async function listCategories(): Promise<Category[]> {
-  if (!dbConfigured()) return [];
+  if (!dbConfigured()) return DEMO_CATEGORIES;
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -126,7 +141,7 @@ export async function listCategories(): Promise<Category[]> {
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  if (!dbConfigured()) return null;
+  if (!dbConfigured()) return DEMO_CATEGORIES.find((c) => c.slug === slug) ?? null;
   try {
     const supabase = createClient();
     const { data, error } = await supabase

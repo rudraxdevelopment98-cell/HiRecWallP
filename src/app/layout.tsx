@@ -1,7 +1,16 @@
 import type { Metadata } from 'next';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+
+const sans = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
+const display = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-display',
+  display: 'swap',
+});
 
 const brand = process.env.BRAND_NAME ?? 'HirecWallp';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
@@ -26,7 +35,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={`${sans.variable} ${display.variable}`}>
       <head>
         {/* Mark JS active before paint so scroll-reveals hide without a flash
             and content stays visible when JS is unavailable. */}
