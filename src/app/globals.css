@@ -87,34 +87,78 @@
     color: transparent;
   }
 
-  /* --- Device mockup (hero) ------------------------------------------------ */
+  /* --- Device cluster (hero): desktop monitor + phone ---------------------- */
   .device-stage {
-    perspective: 1200px;
+    perspective: 1400px;
   }
-  .device-phone {
+  .device-cluster {
     position: relative;
-    width: 300px;
-    max-width: 78vw;
-    aspect-ratio: 9 / 19.5;
-    border-radius: 2.75rem;
-    padding: 10px;
-    background: linear-gradient(160deg, #26231f, #0b0a09 60%);
-    border: 1px solid hsl(30 8% 100% / 0.08);
-    box-shadow:
-      0 40px 80px -30px hsl(var(--glow) / 0.35),
-      0 0 0 1px hsl(30 8% 100% / 0.04),
-      inset 0 1px 1px hsl(30 8% 100% / 0.14);
+    width: min(100%, 620px);
     transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     transform-style: preserve-3d;
     transition: transform 0.25s ease;
   }
+
+  /* Desktop monitor */
+  .device-monitor {
+    position: relative;
+    width: 86%;
+    margin-inline: auto;
+  }
+  .monitor-screen {
+    aspect-ratio: 16 / 10;
+    border-radius: 1rem;
+    padding: 12px;
+    background: linear-gradient(160deg, #26231f, #0b0a09 60%);
+    border: 1px solid hsl(30 8% 100% / 0.1);
+    box-shadow:
+      0 50px 90px -40px hsl(var(--glow) / 0.4),
+      0 0 0 1px hsl(30 8% 100% / 0.04),
+      inset 0 1px 1px hsl(30 8% 100% / 0.14);
+  }
+  .monitor-neck {
+    width: 16%;
+    height: 26px;
+    margin: 0 auto;
+    background: linear-gradient(#211e1a, #141210);
+    border-left: 1px solid hsl(30 8% 100% / 0.05);
+    border-right: 1px solid hsl(30 8% 100% / 0.05);
+  }
+  .monitor-base {
+    width: 34%;
+    height: 10px;
+    margin: 0 auto;
+    border-radius: 0 0 10px 10px;
+    background: linear-gradient(#26231f, #0b0a09);
+    box-shadow: 0 16px 30px -12px hsl(0 0% 0% / 0.6);
+  }
+
+  /* Phone overlapping the monitor, front-right */
+  .device-phone-sm {
+    position: absolute;
+    right: 0;
+    bottom: -6%;
+    width: 27%;
+    aspect-ratio: 9 / 19.5;
+    border-radius: 1.5rem;
+    padding: 7px;
+    background: linear-gradient(160deg, #2b2824, #0b0a09 60%);
+    border: 1px solid hsl(30 8% 100% / 0.1);
+    box-shadow:
+      0 30px 60px -20px hsl(0 0% 0% / 0.7),
+      inset 0 1px 1px hsl(30 8% 100% / 0.16);
+    transform: translateZ(60px);
+  }
+  .device-phone-sm .device-screen {
+    border-radius: 1.1rem;
+  }
   .device-notch {
     position: absolute;
-    top: 14px;
+    top: 9px;
     left: 50%;
     transform: translateX(-50%);
-    width: 36%;
-    height: 22px;
+    width: 34%;
+    height: 12px;
     border-radius: 999px;
     background: #050403;
     z-index: 3;
@@ -124,7 +168,7 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    border-radius: 2.1rem;
+    border-radius: 0.6rem;
     background: #050403;
   }
   .device-gloss {
@@ -132,6 +176,7 @@
     inset: 0;
     background: linear-gradient(130deg, hsl(0 0% 100% / 0.14), transparent 35%);
     pointer-events: none;
+    z-index: 2;
   }
 
   /* --- Marquee ------------------------------------------------------------- */
