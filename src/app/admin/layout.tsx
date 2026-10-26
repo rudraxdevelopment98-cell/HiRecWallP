@@ -4,8 +4,12 @@ import { isAdminUser } from '@/lib/auth';
 
 const NAV = [
   { href: '/admin', label: 'Overview' },
+  { href: '/admin/review-queue', label: 'Review queue' },
+  { href: '/admin/prompts', label: 'Prompts' },
   { href: '/admin/upload', label: 'Upload' },
   { href: '/admin/catalogue', label: 'Catalogue' },
+  { href: '/admin/pricing', label: 'Pricing' },
+  { href: '/admin/social', label: 'Social' },
 ];
 
 /**
@@ -25,9 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             {item.label}
           </Link>
         ))}
-        <p className="mt-4 text-xs text-muted-foreground">
-          Prompts · Pricing · Social · Orders · Takedowns (Phase 2)
-        </p>
+        <p className="mt-4 text-xs text-muted-foreground">Orders · Takedowns (soon)</p>
       </aside>
       <section>{children}</section>
     </div>
