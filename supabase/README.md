@@ -8,7 +8,9 @@ Phase 1 schema, Row Level Security and seed data for HirecWallp.
 |---|---|
 | `migrations/0001_phase1_init.sql` | Extensions, enums, tables, indexes, functions, triggers |
 | `migrations/0002_phase1_rls.sql` | `enable row level security` + policies on every table |
-| `seed/seed.sql` | Regions, global price rules, credit packs, launch categories |
+| `migrations/0003_phase1_payments_fns.sql` | Atomic payment/credit functions + rate-limit helpers |
+| `migrations/0004_phase2_automation.sql` | Phase 2: prompt_library, generation_jobs, social_posts, jobs_log (+ RLS), commercial-licence multiplier |
+| `seed/seed.sql` | Regions, global price rules, credit packs, launch categories, sample prompts |
 
 ## Applying
 
@@ -19,6 +21,8 @@ supabase db reset            # applies migrations/ in order, then seed
 # or apply individually:
 psql "$DATABASE_URL" -f supabase/migrations/0001_phase1_init.sql
 psql "$DATABASE_URL" -f supabase/migrations/0002_phase1_rls.sql
+psql "$DATABASE_URL" -f supabase/migrations/0003_phase1_payments_fns.sql
+psql "$DATABASE_URL" -f supabase/migrations/0004_phase2_automation.sql
 psql "$DATABASE_URL" -f supabase/seed/seed.sql
 ```
 

@@ -71,3 +71,14 @@ insert into categories (slug, name, sort_order) values
   ('nature',       'Nature',                      40),
   ('abstract',     'Abstract',                    50)
 on conflict (slug) do nothing;
+
+-- --- Prompt library (Phase 2) -----------------------------------------------
+-- Launch niches: Indian devotional/culture + dark AMOLED minimal. No
+-- trademarked characters, brand logos, real people or NSFW (enforced in
+-- generation + moderation).
+insert into prompt_library (niche, festival, prompt, negative_prompt, aspect, style_notes, active) values
+  ('devotional', 'diwali', 'Cinematic cosmic depiction of Lord Shiva''s trishul against a nebula, sacred geometry, volumetric light, ultra detailed, 8k', 'text, watermark, logo, brand, celebrity, nsfw, extra limbs', 'phone', 'Deep indigo + amber palette, reverent mood', true),
+  ('devotional', null, 'Golden silhouette of Ganesha with intricate mandala background, divine glow, temple ambience, ultra detailed', 'text, watermark, logo, brand, celebrity, nsfw', 'phone', 'Gold + warm black, festival feel', true),
+  ('amoled-minimal', null, 'Pure black AMOLED minimal wallpaper with a single thin neon arc, negative space, premium', 'noise, clutter, text, watermark, busy', 'phone', 'True black for AMOLED power saving', true),
+  ('amoled-minimal', null, 'Dark stone textured minimal gradient, soft fog, muted warm highlight, premium abstract', 'text, watermark, logo, oversaturated', 'desktop', 'Warm greys, understated', true)
+on conflict do nothing;

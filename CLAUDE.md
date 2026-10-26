@@ -15,7 +15,11 @@ country-based dynamic pricing; secure delivery; automated social marketing
 - Machine-readable spec (source of truth for scope): [`docs/project-spec.json`](docs/project-spec.json)
 
 **Build one phase at a time. Do not start the next phase without explicit owner approval.**
-We are currently building **Phase 1 (MVP)** — `phases[0]` in the spec.
+Phase 1 (MVP) is complete and on `main`. We are now building **Phase 2 (Automation)**
+— `phases[1]`: generation→review→publish pipeline, social scheduler, dynamic
+pricing, forensic watermark worker, pHash dedup, commercial-licence SKU.
+AI/image/upscale/social providers stay behind adapters with built-in **mock**
+providers so the pipeline runs without paid keys; real providers slot in via env.
 
 ## Tech stack
 
