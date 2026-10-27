@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
-import { presignedGetUrl, type R2Bucket } from '@/lib/r2';
+import { getObject, objectExists, presignedGetUrl, putObject, type R2Bucket } from '@/lib/r2';
 import { clientIp, hashIp } from '@/lib/request';
 import { isSameOrigin } from '@/lib/http';
+import { embedWatermark, isWatermarkConfigured } from '@/lib/watermark';
 
 export const runtime = 'nodejs';
 
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
 
     const { data: entitlement } = await supabase
       .from('entitlements')
-      .select('id')
+      .select('id, order_id, licence')
       .eq('user_id', user.id)
       .eq('wallpaper_id', wallpaperId)
       .maybeSingle();
@@ -131,14 +132,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Download limit reached' }, { status: 403 });
     }
 
-    const url = await presignedGetUrl(
-      asset.storage_bucket as R2Bucket,
-      asset.storage_key,
-      SIGNED_URL_TTL_SECONDS,
-    );
+    // Forensic watermark: on the first paid download of each variant, embed the
+    // order id and cache the result per entitlement+variant. Subsequent
+    // downloads reuse the cached copy. Falls back to the original when the
+    // worker isn't configured or embedding fails.
+    let deliverBucket = asset.storage_bucket as R2Bucket;
+    let deliverKey = asset.storage_key;
+    if (isWatermarkConfigured() && entitlement.order_id) {
+      const cachedKey = `wm/${entitlement.id}/${variant}.jpg`;
+      if (await objectExists('private', cachedKey)) {
+        deliverBucket = 'private';
+        deliverKey = cachedKey;
+      } else {
+        try {
+          const original = await getObject(asset.storage_bucket as R2Bucket, asset.storage_key);
+          const marked = await embedWatermark(original, {
+            orderId: entitlement.order_id,
+            licence: entitlement.licence ?? 'personal',
+          });
+          if (marked) {
+            await putObject('private', cachedKey, marked, 'image/jpeg');
+            deliverBucket = 'private';
+            deliverKey = cachedKey;
+          }
+        } catch {
+          // Keep the original on any watermarking error.
+        }
+      }
+    }
 
-    // Record the grant. watermark_payload is the reference the Phase 2 forensic
-    // worker embeds per buyer; captured here for traceability.
+    const url = await presignedGetUrl(deliverBucket, deliverKey, SIGNED_URL_TTL_SECONDS);
+
+    // Record the grant. watermark_payload captures the order reference embedded
+    // per buyer for traceability.
     await supabase.from('downloads').insert({
       user_id: user.id,
       wallpaper_id: wallpaperId,
@@ -146,7 +172,7 @@ export async function POST(request: Request) {
       entitlement_id: entitlement.id,
       ip_hash: ipHash,
       user_agent: userAgent,
-      watermark_payload: `${entitlement.id}:${Date.now()}`,
+      watermark_payload: `order:${entitlement.order_id ?? entitlement.id}`,
     });
 
     return NextResponse.json({ url, expiresIn: SIGNED_URL_TTL_SECONDS, downloadsUsed: used });

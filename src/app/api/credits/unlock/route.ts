@@ -9,7 +9,10 @@ import { isSameOrigin } from '@/lib/http';
 
 export const runtime = 'nodejs';
 
-const schema = z.object({ wallpaperId: z.string().uuid() });
+const schema = z.object({
+  wallpaperId: z.string().uuid(),
+  licence: z.enum(['personal', 'commercial']).optional(),
+});
 
 /**
  * Spend credits to unlock a wallpaper (international regions). Atomic and
@@ -42,14 +45,27 @@ export async function POST(request: Request) {
   }
 
   try {
-    const cost = await getRegionPrice(parsed.data.wallpaperId, region);
-    if (cost == null) return NextResponse.json({ error: 'Price unavailable' }, { status: 400 });
+    const basePrice = await getRegionPrice(parsed.data.wallpaperId, region);
+    if (basePrice == null) return NextResponse.json({ error: 'Price unavailable' }, { status: 400 });
 
     const supabase = createServiceClient();
+    const licence = parsed.data.licence ?? 'personal';
+
+    let cost = basePrice;
+    if (licence === 'commercial') {
+      const { data: regionRow } = await supabase
+        .from('regions')
+        .select('commercial_multiplier')
+        .eq('code', region)
+        .maybeSingle();
+      cost = basePrice * (regionRow?.commercial_multiplier != null ? Number(regionRow.commercial_multiplier) : 5);
+    }
+
     const { data: entitlementId, error } = await supabase.rpc('spend_credits_and_entitle', {
       p_user: user.id,
       p_wallpaper: parsed.data.wallpaperId,
       p_cost: Math.round(cost),
+      p_licence: licence,
     });
     if (error) throw error;
     if (!entitlementId) {

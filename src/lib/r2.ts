@@ -1,6 +1,11 @@
 import 'server-only';
 
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import type { Readable } from 'node:stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { serverEnv } from '@/lib/env';
@@ -43,6 +48,16 @@ export async function presignedGetUrl(
 ): Promise<string> {
   const command = new GetObjectCommand({ Bucket: bucketName(bucket), Key: key });
   return getSignedUrl(r2(), command, { expiresIn: Math.min(Math.max(expiresIn, 1), 600) });
+}
+
+/** True if an object exists in the bucket (HEAD). */
+export async function objectExists(bucket: R2Bucket, key: string): Promise<boolean> {
+  try {
+    await r2().send(new HeadObjectCommand({ Bucket: bucketName(bucket), Key: key }));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Fetch an object's bytes from a bucket (server-side pipelines only). */

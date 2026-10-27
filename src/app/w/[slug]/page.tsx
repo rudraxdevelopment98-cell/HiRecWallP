@@ -9,6 +9,9 @@ import { formatRegionPrice } from '@/lib/format';
 import { publicEnv } from '@/lib/env';
 import { TrackEvent } from '@/components/track-event';
 
+// Display-only default; the actual charge uses regions.commercial_multiplier.
+const COMMERCIAL_MULTIPLIER = 5;
+
 export async function generateMetadata({
   params,
 }: {
@@ -114,9 +117,18 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
               Licence
             </Link>
           </div>
+          {!w.is_free && w.price != null && (
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 p-3 text-sm">
+              <div>
+                <p className="font-medium">Commercial licence</p>
+                <p className="text-xs text-muted-foreground">Use in products, ads &amp; client work.</p>
+              </div>
+              <span className="font-medium">{formatRegionPrice(w.price * COMMERCIAL_MULTIPLIER, region)}</span>
+            </div>
+          )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Personal-use licence. Originals are delivered via a secure, expiring link after
-            purchase.
+            Personal-use licence by default. Originals are delivered via a secure, expiring link
+            after purchase, each carrying an invisible per-buyer watermark.
           </p>
         </div>
       </div>

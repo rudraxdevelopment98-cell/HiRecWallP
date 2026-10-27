@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
   const { data: items } = await supabase
     .from('order_items')
-    .select('wallpaper_id, set_id, credit_pack_id')
+    .select('wallpaper_id, set_id, credit_pack_id, licence')
     .eq('order_id', order.id);
 
   for (const item of items ?? []) {
@@ -62,6 +62,7 @@ export async function POST(request: Request) {
         p_user: order.user_id,
         p_wallpaper: item.wallpaper_id,
         p_order: order.id,
+        p_licence: item.licence ?? 'personal',
       });
     } else if (item.set_id) {
       // Expand the set into its wallpapers and grant each.

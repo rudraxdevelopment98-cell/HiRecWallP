@@ -11,9 +11,25 @@ import { isSameOrigin } from '@/lib/http';
 export const runtime = 'nodejs';
 
 const schema = z.union([
-  z.object({ type: z.literal('wallpaper'), wallpaperId: z.string().uuid() }),
+  z.object({
+    type: z.literal('wallpaper'),
+    wallpaperId: z.string().uuid(),
+    licence: z.enum(['personal', 'commercial']).optional(),
+  }),
   z.object({ type: z.literal('credit_pack'), creditPackId: z.string().uuid() }),
 ]);
+
+async function commercialMultiplier(
+  supabase: ReturnType<typeof createServiceClient>,
+  region: string,
+): Promise<number> {
+  const { data } = await supabase
+    .from('regions')
+    .select('commercial_multiplier')
+    .eq('code', region)
+    .maybeSingle();
+  return data?.commercial_multiplier != null ? Number(data.commercial_multiplier) : 5;
+}
 
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) {
@@ -47,7 +63,12 @@ export async function POST(request: Request) {
       const price = await getRegionPrice(parsed.data.wallpaperId, region);
       if (price == null) return NextResponse.json({ error: 'Price unavailable' }, { status: 400 });
 
-      const amountMinor = toMinorUnits(price, region);
+      const licence = parsed.data.licence ?? 'personal';
+      const effectivePrice =
+        licence === 'commercial'
+          ? Math.round(price * (await commercialMultiplier(supabase, region)))
+          : price;
+      const amountMinor = toMinorUnits(effectivePrice, region);
       const currency = 'INR';
 
       const { data: order, error: orderErr } = await supabase
@@ -66,7 +87,8 @@ export async function POST(request: Request) {
       await supabase.from('order_items').insert({
         order_id: order.id,
         wallpaper_id: parsed.data.wallpaperId,
-        unit_price: price,
+        unit_price: effectivePrice,
+        licence,
       });
 
       // 15-minute price lock.
