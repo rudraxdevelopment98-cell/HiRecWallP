@@ -72,12 +72,36 @@ Legend: 🔑 secret/env · 🌐 account · ⚙️ config step
 1. Register/confirm **hirecwallp.com** and point it at Vercel.
 2. Add the R2 public CDN hostname (`R2_PUBLIC_BASE_URL`) as a CNAME.
 
-## 8. Phase 2 placeholders (not needed to launch Phase 1)
+## 8. Phase 2 — Automation (built; wiring is optional)
 
-Leave empty for now: `IMAGE_PROVIDER(_API_KEY)`, `UPSCALE_PROVIDER(_API_KEY)`,
-`ANTHROPIC_API_KEY`, `IG_BUSINESS_ACCOUNT_ID`, `IG_ACCESS_TOKEN`,
-`PINTEREST_ACCESS_TOKEN`, `PINTEREST_BOARD_IDS`, `WATERMARK_WORKER_URL`,
-`WATERMARK_WORKER_SECRET`.
+Phase 2 runs end-to-end on **mock** providers with no extra keys. To make it
+real, set these (each is optional and degrades gracefully):
+
+- **Image generation / upscaling** 🌐🔑 — pick a provider whose terms allow
+  commercial resale, then set `IMAGE_PROVIDER` + `IMAGE_PROVIDER_API_KEY` and
+  `UPSCALE_PROVIDER` + `UPSCALE_PROVIDER_API_KEY`. (Register the concrete
+  adapter in `src/lib/ai/index.ts`.) Ask me before committing to a paid one.
+- **Claude vision metadata/review** 🔑 — `ANTHROPIC_API_KEY`.
+- **Social** 🌐🔑 — Instagram Professional (`IG_BUSINESS_ACCOUNT_ID`,
+  `IG_ACCESS_TOKEN`) and Pinterest (`PINTEREST_ACCESS_TOKEN`,
+  `PINTEREST_BOARD_IDS`). (Wire the real calls in `src/lib/social/index.ts`.)
+- **Forensic watermark worker** 🌐🔑 — deploy `worker/` (see `worker/README.md`)
+  and set `WATERMARK_WORKER_URL` + `WATERMARK_WORKER_SECRET`. Without it, paid
+  downloads simply aren't watermarked.
+- **Weekly report** 🔑 — `OWNER_EMAIL` (uses `RESEND_API_KEY` from Phase 1).
+- **Cron** ⚙️ — `vercel.json` schedules dynamic pricing (02:00 UTC daily),
+  social scheduler (every 30 min) and the weekly report (Mon 08:00 UTC).
+  Vercel injects `Authorization: Bearer $CRON_SECRET`; set `CRON_SECRET`.
+
+### Phase 2 acceptance — status
+- ✅ One button (admin → Review queue → **Generate batch**) creates a batch that
+  lands in the review queue with AI metadata.
+- ✅ Approving a candidate publishes the wallpaper and auto-creates Instagram +
+  Pinterest drafts in the social calendar.
+- ✅ Pricing **dry-run** shows the diff; a live run writes `price_history` with
+  reasons + metrics.
+- ✅ A leaked test file decodes back to its `order_id` (worker `/decode`, or
+  admin `/api/admin/watermark/decode`) — requires the worker deployed.
 
 ---
 

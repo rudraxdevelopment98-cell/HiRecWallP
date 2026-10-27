@@ -130,6 +130,22 @@ seed/                     # Local sample wallpaper source assets (gitignored ori
 10. [x] My Library with download counters
 11. [x] Event tracking, SEO basics (sitemap/robots/JSON-LD), Playwright critical-flow tests
 
+## Phase 2 build order (checklist)
+
+1. [x] Migration 0004 (prompt_library, generation_jobs, social_posts, jobs_log) + RLS + commercial multiplier
+2. [x] AI adapters (image/upscale/vision) with built-in mock providers; pHash dedup
+3. [x] Jobs: generate_batch, publish_approved, social_scheduler, dynamic_pricing, weekly_report
+4. [x] Admin pages: review queue, prompts, pricing (dry-run + apply), social calendar
+5. [x] Forensic watermark worker (worker/) + download integration + admin decode
+6. [x] Commercial-licence SKU (migration 0005; checkout/unlock/webhook/detail)
+
+Key Phase 2 decisions:
+- Providers default to **mock** (offline/CI-safe); real IMAGE_PROVIDER / UPSCALE_PROVIDER /
+  ANTHROPIC_API_KEY / IG / Pinterest slot in via env without code changes.
+- Jobs run via `/api/jobs/*` (Vercel Cron GET + admin POST), authorized by CRON_SECRET
+  or admin role; every run is logged to `jobs_log`.
+- Watermarked paid downloads are cached at `wm/<entitlement>/<variant>.jpg`.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International
