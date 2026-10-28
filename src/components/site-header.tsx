@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Heart, Mountain, Search, ShoppingBag, User } from 'lucide-react';
+import { Heart, Mountain, Search, User } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
 import { getDisplayRegion } from '@/lib/catalogue';
 import { RegionSwitcher } from '@/components/region-switcher';
+import { CartCount } from '@/components/cart-count';
 
 const NAV = [
   { href: '/', label: 'Home' },
@@ -57,9 +58,7 @@ export function SiteHeader() {
           <Link href="/library" aria-label="Saved" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
             <Heart className="h-4 w-4" />
           </Link>
-          <Link href="/pricing" aria-label="Cart" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <ShoppingBag className="h-4 w-4" />
-          </Link>
+          <CartCount />
         </div>
       </div>
     </header>

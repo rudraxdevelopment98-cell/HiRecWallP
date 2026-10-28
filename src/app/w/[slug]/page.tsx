@@ -6,6 +6,7 @@ import { Check, Download, ShieldCheck, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { ResolutionSelector } from '@/components/resolution-selector';
+import { AddToCart } from '@/components/add-to-cart';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { Reveal } from '@/components/reveal';
 import { TrackEvent } from '@/components/track-event';
@@ -107,9 +108,24 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
           <ResolutionSelector />
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Link href="/login" className={buttonVariants({ size: 'lg', className: 'flex-1' })}>
-              <Download className="mr-1 h-4 w-4" /> {w.is_free ? 'Download Free' : 'Add to Cart'}
-            </Link>
+            {w.is_free ? (
+              <Link href="/login" className={buttonVariants({ size: 'lg', className: 'flex-1' })}>
+                <Download className="mr-1 h-4 w-4" /> Download Free
+              </Link>
+            ) : (
+              <AddToCart
+                item={{
+                  id: w.id,
+                  slug: w.slug,
+                  title: w.title,
+                  image: w.previewUrl,
+                  price: w.price,
+                  priceLabel: w.price != null ? formatRegionPrice(w.price, region) : 'Free',
+                  licence: 'personal',
+                  resolution: w.resolution,
+                }}
+              />
+            )}
             <Link href="/licence" className={buttonVariants({ size: 'lg', variant: 'outline' })}>
               Licence
             </Link>

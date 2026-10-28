@@ -79,6 +79,20 @@
     color: transparent;
   }
 
+  /* Shared form input */
+  .input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+    padding: 0.625rem 0.9rem;
+    font-size: 0.875rem;
+    outline: none;
+  }
+  .input:focus {
+    border-color: hsl(var(--ring));
+  }
+
   /* --- Device cluster (hero): desktop monitor + phone ---------------------- */
   .device-stage {
     perspective: 1400px;
