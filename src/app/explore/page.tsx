@@ -63,7 +63,7 @@ function FilterLink({ label, href, active }: { label: string; href: string; acti
     <Link
       href={href}
       className={`rounded-full border px-3 py-1 ${
-        active ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+        active ? 'bg-primary text-primary-foreground' : 'bg-card hover:bg-secondary'
       }`}
     >
       {label}

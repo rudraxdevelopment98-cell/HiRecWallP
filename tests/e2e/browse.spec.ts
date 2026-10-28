@@ -5,9 +5,9 @@ import { expect, test } from '@playwright/test';
 
 test('home page renders the hero and a browse CTA', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('every screen');
-  // Hero CTA is visible on every viewport (nav links collapse on mobile).
-  await expect(page.getByRole('link', { name: 'Browse the collection' }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Any Screen');
+  // Hero CTA is visible on every viewport.
+  await expect(page.getByRole('link', { name: 'Explore Wallpapers' }).first()).toBeVisible();
 });
 
 test('explore page renders with filters', async ({ page }) => {

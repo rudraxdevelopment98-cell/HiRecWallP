@@ -8,6 +8,10 @@ export interface Category {
   name: string;
   parent_id: string | null;
   sort_order: number;
+  /** Optional count for display in the category row. */
+  count?: number;
+  /** Optional thumbnail (demo/display). */
+  thumbUrl?: string;
 }
 
 export interface WallpaperSet {
@@ -38,6 +42,11 @@ export interface WallpaperCard extends Wallpaper {
   previewUrl: string | null;
   price: number | null;
   region: RegionCode;
+  /** Optional display metadata (ratings, resolution badge, category label). */
+  rating?: number;
+  reviews?: number;
+  resolution?: '4K' | '5K' | '8K';
+  categoryName?: string;
 }
 
 export interface ExploreFilters {

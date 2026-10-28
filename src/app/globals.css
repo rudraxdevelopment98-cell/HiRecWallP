@@ -3,39 +3,36 @@
 @tailwind utilities;
 
 /* =============================================================================
-   HirecWallp — "Obsidian Stone" theme
-   Warm, near-black stone neutrals (not cold blue-black), monochrome premium
-   accents, glassmorphism and motion. Dark by default.
+   HirecWallp — light "Craft" theme
+   Bright, premium marketplace look: white canvas, soft shadows, rounded cards,
+   ink-black primary CTAs, blue/purple accents. Light by default.
    ========================================================================== */
 
 @layer base {
   :root {
-    /* Warm stone neutrals */
-    --background: 24 10% 4%; /* ~#0b0a09 warm obsidian */
-    --foreground: 30 8% 92%;
-    --card: 24 9% 7%;
-    --card-foreground: 30 8% 92%;
-    --popover: 24 9% 6%;
-    --popover-foreground: 30 8% 92%;
+    --background: 210 22% 98%; /* soft cool white */
+    --foreground: 222 24% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 24% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 24% 12%;
 
-    /* Monochrome stone primary (crisp near-white CTA on dark) */
-    --primary: 30 8% 90%;
-    --primary-foreground: 24 12% 7%;
+    --primary: 222 24% 11%; /* near-black ink */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 24 7% 13%;
-    --secondary-foreground: 30 8% 90%;
-    --muted: 24 6% 12%;
-    --muted-foreground: 30 6% 60%;
-    --accent: 28 10% 16%;
-    --accent-foreground: 30 8% 92%;
+    --secondary: 220 16% 96%;
+    --secondary-foreground: 222 24% 12%;
+    --muted: 220 16% 95%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 221 83% 53%; /* blue */
+    --accent-foreground: 0 0% 100%;
 
-    --border: 30 6% 15%;
-    --input: 30 6% 15%;
-    --ring: 30 10% 70%;
-    --radius: 0.9rem;
+    --border: 220 14% 90%;
+    --input: 220 14% 90%;
+    --ring: 221 83% 53%;
+    --radius: 1rem;
 
-    /* Warm glow used by aurora + hover halos */
-    --glow: 32 45% 55%;
+    --glow: 221 83% 62%;
   }
 }
 
@@ -44,44 +41,39 @@
     @apply border-border;
   }
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     @apply bg-background text-foreground;
-    background-image:
-      radial-gradient(60rem 60rem at 110% -10%, hsl(var(--glow) / 0.08), transparent 60%),
-      radial-gradient(50rem 50rem at -10% 10%, hsl(30 8% 40% / 0.06), transparent 55%);
-    background-attachment: fixed;
   }
   ::selection {
-    background: hsl(var(--glow) / 0.3);
+    background: hsl(var(--accent) / 0.18);
   }
 }
 
 @layer components {
-  /* Frosted stone surface */
+  /* Clean white surface with a soft shadow (default card). */
   .glass {
-    background: hsl(24 9% 8% / 0.6);
-    backdrop-filter: blur(14px);
-    border: 1px solid hsl(30 8% 100% / 0.06);
+    background: hsl(0 0% 100% / 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 2px hsl(222 24% 12% / 0.04), 0 8px 24px -12px hsl(222 24% 12% / 0.08);
   }
 
-  /* Animated aurora backdrop for the hero */
+  /* Subtle pastel wash for decorative hero/section backgrounds. */
   .aurora {
     position: absolute;
     inset: -20% -10% auto -10%;
     height: 120%;
     pointer-events: none;
     background:
-      radial-gradient(35rem 22rem at 20% 20%, hsl(var(--glow) / 0.16), transparent 60%),
-      radial-gradient(32rem 22rem at 80% 10%, hsl(20 20% 55% / 0.12), transparent 60%),
-      radial-gradient(40rem 26rem at 50% 80%, hsl(30 10% 50% / 0.1), transparent 60%);
-    filter: blur(14px);
-    animation: aurora-drift 18s ease-in-out infinite alternate;
+      radial-gradient(40rem 26rem at 18% 15%, hsl(221 90% 60% / 0.1), transparent 60%),
+      radial-gradient(38rem 24rem at 85% 10%, hsl(270 80% 65% / 0.1), transparent 60%);
+    filter: blur(8px);
   }
 
   .text-gradient {
-    background: linear-gradient(180deg, hsl(30 10% 98%), hsl(30 8% 62%));
+    background: linear-gradient(180deg, hsl(222 24% 14%), hsl(222 16% 34%));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -98,8 +90,6 @@
     transform-style: preserve-3d;
     transition: transform 0.25s ease;
   }
-
-  /* Desktop monitor */
   .device-monitor {
     position: relative;
     width: 86%;
@@ -107,60 +97,51 @@
   }
   .monitor-screen {
     aspect-ratio: 16 / 10;
-    border-radius: 1rem;
-    padding: 12px;
-    background: linear-gradient(160deg, #26231f, #0b0a09 60%);
-    border: 1px solid hsl(30 8% 100% / 0.1);
-    box-shadow:
-      0 50px 90px -40px hsl(var(--glow) / 0.4),
-      0 0 0 1px hsl(30 8% 100% / 0.04),
-      inset 0 1px 1px hsl(30 8% 100% / 0.14);
+    border-radius: 0.9rem;
+    padding: 10px;
+    background: linear-gradient(160deg, #1f2430, #0b0e14 60%);
+    border: 1px solid hsl(222 24% 12% / 0.1);
+    box-shadow: 0 40px 70px -34px hsl(222 24% 12% / 0.4), inset 0 1px 1px hsl(0 0% 100% / 0.12);
   }
   .monitor-neck {
     width: 16%;
-    height: 26px;
+    height: 24px;
     margin: 0 auto;
-    background: linear-gradient(#211e1a, #141210);
-    border-left: 1px solid hsl(30 8% 100% / 0.05);
-    border-right: 1px solid hsl(30 8% 100% / 0.05);
+    background: linear-gradient(#2a303c, #1a1f28);
   }
   .monitor-base {
-    width: 34%;
+    width: 32%;
     height: 10px;
     margin: 0 auto;
     border-radius: 0 0 10px 10px;
-    background: linear-gradient(#26231f, #0b0a09);
-    box-shadow: 0 16px 30px -12px hsl(0 0% 0% / 0.6);
+    background: linear-gradient(#2a303c, #10141b);
+    box-shadow: 0 16px 26px -14px hsl(222 24% 12% / 0.4);
   }
-
-  /* Phone overlapping the monitor, front-right */
   .device-phone-sm {
     position: absolute;
     right: 0;
     bottom: -6%;
     width: 27%;
     aspect-ratio: 9 / 19.5;
-    border-radius: 1.5rem;
-    padding: 7px;
-    background: linear-gradient(160deg, #2b2824, #0b0a09 60%);
-    border: 1px solid hsl(30 8% 100% / 0.1);
-    box-shadow:
-      0 30px 60px -20px hsl(0 0% 0% / 0.7),
-      inset 0 1px 1px hsl(30 8% 100% / 0.16);
+    border-radius: 1.4rem;
+    padding: 6px;
+    background: linear-gradient(160deg, #242a36, #0b0e14 60%);
+    border: 1px solid hsl(222 24% 12% / 0.12);
+    box-shadow: 0 26px 50px -22px hsl(222 24% 12% / 0.45), inset 0 1px 1px hsl(0 0% 100% / 0.14);
     transform: translateZ(60px);
   }
   .device-phone-sm .device-screen {
-    border-radius: 1.1rem;
+    border-radius: 1rem;
   }
   .device-notch {
     position: absolute;
-    top: 9px;
+    top: 8px;
     left: 50%;
     transform: translateX(-50%);
     width: 34%;
-    height: 12px;
+    height: 10px;
     border-radius: 999px;
-    background: #050403;
+    background: #05070a;
     z-index: 3;
   }
   .device-screen {
@@ -168,13 +149,13 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    border-radius: 0.6rem;
-    background: #050403;
+    border-radius: 0.55rem;
+    background: #05070a;
   }
   .device-gloss {
     position: absolute;
     inset: 0;
-    background: linear-gradient(130deg, hsl(0 0% 100% / 0.14), transparent 35%);
+    background: linear-gradient(130deg, hsl(0 0% 100% / 0.12), transparent 35%);
     pointer-events: none;
     z-index: 2;
   }
@@ -198,75 +179,46 @@
     animation-play-state: paused;
   }
 
-  /* --- Spotlight card ------------------------------------------------------ */
+  /* --- Spotlight / soft card ---------------------------------------------- */
   .spotlight-card {
     position: relative;
-    border-radius: 1.25rem;
-    border: 1px solid hsl(30 8% 100% / 0.07);
-    background: hsl(24 9% 7%);
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
     overflow: hidden;
-    transition: border-color 0.3s ease;
+    box-shadow: 0 1px 2px hsl(222 24% 12% / 0.04), 0 10px 30px -16px hsl(222 24% 12% / 0.1);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
   }
   .spotlight-card::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-      22rem 22rem at var(--mx, 50%) var(--my, 0%),
-      hsl(var(--glow) / 0.12),
-      transparent 60%
-    );
+    background: radial-gradient(22rem 22rem at var(--mx, 50%) var(--my, 0%), hsl(var(--glow) / 0.08), transparent 60%);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
   }
   .spotlight-card:hover {
-    border-color: hsl(30 8% 100% / 0.16);
+    box-shadow: 0 2px 4px hsl(222 24% 12% / 0.06), 0 18px 44px -18px hsl(222 24% 12% / 0.16);
   }
   .spotlight-card:hover::before {
     opacity: 1;
   }
-
-  /* Fine grain texture over the whole page */
-  .grain::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-}
-
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
-  }
 }
 
 @layer utilities {
-  /* Hover lift + warm halo */
   .hover-lift {
-    transition:
-      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.35s ease,
-      border-color 0.35s ease;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
   }
   .hover-lift:hover {
     transform: translateY(-4px);
-    box-shadow:
-      0 18px 40px -20px hsl(var(--glow) / 0.35),
-      0 0 0 1px hsl(30 8% 100% / 0.08);
+    box-shadow: 0 2px 4px hsl(222 24% 12% / 0.05), 0 22px 48px -22px hsl(222 24% 12% / 0.22);
   }
 
-  /* Scroll-reveal: hidden only when JS is active (so no-JS stays visible) */
   .js .reveal {
     opacity: 0;
     transform: translateY(18px);
-    transition:
-      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: opacity, transform;
   }
   .js .reveal.in-view {
@@ -278,26 +230,28 @@
     animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   .shimmer {
-    background: linear-gradient(
-      100deg,
-      hsl(24 6% 12%) 30%,
-      hsl(24 6% 18%) 50%,
-      hsl(24 6% 12%) 70%
-    );
+    background: linear-gradient(100deg, hsl(220 16% 94%) 30%, hsl(220 16% 97%) 50%, hsl(220 16% 94%) 70%);
     background-size: 200% 100%;
     animation: shimmer 1.6s linear infinite;
   }
+  /* no-op on light theme (kept so existing markup is harmless) */
+  .grain::after {
+    content: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
-@keyframes aurora-drift {
-  0% {
-    transform: translate3d(-2%, -1%, 0) scale(1);
-  }
-  100% {
-    transform: translate3d(2%, 2%, 0) scale(1.08);
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
   }
 }
-
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -308,14 +262,12 @@
     transform: none;
   }
 }
-
 @keyframes shimmer {
   to {
     background-position: -200% 0;
   }
 }
 
-/* Respect reduced-motion: no transforms/animations, everything visible */
 @media (prefers-reduced-motion: reduce) {
   .aurora,
   .animate-fade-up,

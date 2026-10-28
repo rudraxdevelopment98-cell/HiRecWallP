@@ -62,7 +62,7 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
       />
       <TrackEvent type="detail_view" wallpaperId={w.id} />
 
-      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-card">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border bg-card">
         <div className="aurora opacity-60" aria-hidden />
         {w.previewUrl ? (
           <Image
@@ -118,7 +118,7 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
             </Link>
           </div>
           {!w.is_free && w.price != null && (
-            <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 p-3 text-sm">
+            <div className="mt-4 flex items-center justify-between rounded-xl border p-3 text-sm">
               <div>
                 <p className="font-medium">Commercial licence</p>
                 <p className="text-xs text-muted-foreground">Use in products, ads &amp; client work.</p>

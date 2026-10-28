@@ -22,7 +22,7 @@ export function Marquee({
           <Link
             key={`${w.id}-${i}`}
             href={`/w/${w.slug}`}
-            className="relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-xl border border-white/10 sm:w-36"
+            className="relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-xl border sm:w-36"
             aria-hidden={i >= items.length}
             tabIndex={i >= items.length ? -1 : 0}
           >

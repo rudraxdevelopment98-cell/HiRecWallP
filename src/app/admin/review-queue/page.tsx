@@ -88,7 +88,7 @@ export default async function ReviewQueuePage() {
                   <div
                     key={c.idx}
                     className={`relative h-40 w-28 overflow-hidden rounded-lg border ${
-                      c.best ? 'border-foreground/60 ring-2 ring-[hsl(var(--glow)/0.5)]' : 'border-white/10'
+                      c.best ? 'border-foreground/60 ring-2 ring-[hsl(var(--glow)/0.5)]' : 'border'
                     } ${c.dropped ? 'opacity-40' : ''}`}
                   >
                     {c.publicUrl ? (

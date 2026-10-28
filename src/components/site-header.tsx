@@ -1,40 +1,64 @@
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Heart, Mountain, Search, ShoppingBag, User } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
 import { getDisplayRegion } from '@/lib/catalogue';
 import { RegionSwitcher } from '@/components/region-switcher';
-import { buttonVariants } from '@/components/ui/button';
 
 const NAV = [
+  { href: '/', label: 'Home' },
   { href: '/explore', label: 'Explore' },
-  { href: '/collections/devotional', label: 'Collections' },
-  { href: '/free', label: 'Free' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/collections/nature', label: 'Collections' },
+  { href: '/pricing', label: 'Bundles' },
+  { href: '/pricing', label: 'Membership' },
 ];
 
 export function SiteHeader() {
   const region = getDisplayRegion();
   return (
-    <header className="glass sticky top-0 z-40 w-full border-x-0 border-t-0">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/85 backdrop-blur">
       <div className="container flex h-16 items-center gap-4">
-        <Link href="/" className="group flex items-center gap-2 font-semibold tracking-tight">
-          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[hsl(var(--glow))] shadow-[0_0_12px_2px_hsl(var(--glow)/0.6)] transition-transform group-hover:scale-125" />
-          {publicEnv.NEXT_PUBLIC_BRAND_NAME}
+        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+          <Mountain className="h-5 w-5" />
+          <span>{publicEnv.NEXT_PUBLIC_BRAND_NAME}</span>
         </Link>
-        <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
-          {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="hover:text-foreground">
+
+        <nav className="ml-2 hidden items-center gap-1 text-sm lg:flex">
+          {NAV.map((item, i) => (
+            <Link
+              key={`${item.href}-${i}`}
+              href={item.href}
+              className="rounded-full px-3 py-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <Link href="/search" aria-label="Search" className="p-2 text-muted-foreground hover:text-foreground">
+
+        <form action="/search" method="get" className="relative ml-auto hidden max-w-sm flex-1 md:block">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            name="q"
+            placeholder="Search wallpapers, categories…"
+            className="w-full rounded-full border bg-secondary/60 py-2 pl-9 pr-4 text-sm outline-none transition focus:border-ring focus:bg-card"
+          />
+        </form>
+
+        <div className="ml-auto flex items-center gap-1 md:ml-0">
+          <Link href="/search" aria-label="Search" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground md:hidden">
             <Search className="h-4 w-4" />
           </Link>
-          <RegionSwitcher current={region} />
-          <Link href="/login" className={buttonVariants({ size: 'sm', variant: 'outline' })}>
-            Login
+          <div className="mr-1 hidden sm:block">
+            <RegionSwitcher current={region} />
+          </div>
+          <Link href="/account" aria-label="Account" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <User className="h-4 w-4" />
+          </Link>
+          <Link href="/library" aria-label="Saved" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <Heart className="h-4 w-4" />
+          </Link>
+          <Link href="/pricing" aria-label="Cart" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
+            <ShoppingBag className="h-4 w-4" />
           </Link>
         </div>
       </div>

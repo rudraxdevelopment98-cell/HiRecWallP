@@ -1,164 +1,170 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { Download, ShieldCheck, Sparkles, Wand2 } from 'lucide-react';
+import { Crown, MonitorSmartphone } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { WallpaperCard } from '@/components/wallpaper-card';
-import { Reveal } from '@/components/reveal';
 import { HeroShowcase } from '@/components/hero-showcase';
-import { Marquee } from '@/components/marquee';
-import { Spotlight } from '@/components/spotlight';
+import { CategoryRow } from '@/components/category-row';
+import { NewsletterCard } from '@/components/newsletter-card';
+import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listCategories, listPublishedWallpapers } from '@/lib/catalogue';
+import { REGION_PRICING_UNIT } from '@/lib/geo';
+import { formatRegionPrice } from '@/lib/format';
 
 export default async function HomePage() {
   const region = getDisplayRegion();
-  const [featured, newest, categories] = await Promise.all([
-    listPublishedWallpapers({ sort: 'popular' }, region, 12),
-    listPublishedWallpapers({ sort: 'newest' }, region, 10),
+  const [featured, categories] = await Promise.all([
+    listPublishedWallpapers({ sort: 'popular' }, region, 8),
     listCategories(),
   ]);
-
-  const half = Math.ceil(featured.length / 2);
+  const money = REGION_PRICING_UNIT[region] === 'money';
+  const bundlePrice = money ? formatRegionPrice(149, region) : '8 credits';
+  const bundleWas = money ? formatRegionPrice(299, region) : '16 credits';
 
   return (
-    <main className="grain space-y-24 pb-28">
+    <main>
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="aurora" aria-hidden />
-        <div className="container relative py-16 sm:py-24">
+        <div className="container relative py-14 sm:py-20">
           <HeroShowcase items={featured} />
         </div>
       </section>
 
-      {/* Marquee strip */}
-      {featured.length > 0 && (
-        <section className="space-y-3">
-          <Marquee items={featured.slice(0, half)} />
-          <Marquee items={featured.slice(half)} reverse />
-        </section>
-      )}
-
-      {/* Category chips */}
-      {categories.length > 0 && (
-        <section className="container">
-          <Reveal className="flex flex-wrap gap-2">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                href={`/collections/${c.slug}`}
-                className="glass rounded-full px-4 py-2 text-sm transition-colors hover:text-foreground"
-              >
-                {c.name}
-              </Link>
-            ))}
-          </Reveal>
-        </section>
-      )}
-
-      {/* Bento: why */}
-      <section className="container">
-        <Reveal className="mb-6">
-          <h2 className="font-display text-2xl font-semibold tracking-tight">Built like a premium store</h2>
-          <p className="text-sm text-muted-foreground">Not another free-for-all gallery.</p>
+      {/* Browse by category */}
+      <section className="container py-8">
+        <SectionHead title="Browse by Category" subtitle="Find the perfect vibe for your screen." href="/explore" />
+        <Reveal>
+          <CategoryRow categories={categories} />
         </Reveal>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Feature
-            icon={<Sparkles className="h-5 w-5" />}
-            title="Ultra-HD, curated"
-            body="4K–5K originals, hand-approved. ~300 strong pieces beats 5,000 mediocre ones."
-          />
-          <Feature
-            icon={<ShieldCheck className="h-5 w-5" />}
-            title="Secure delivery"
-            body="Originals never public. Every download is a 60-second signed link, rate-limited and traceable."
-          />
-          <Feature
-            icon={<Download className="h-5 w-5" />}
-            title="Priced for you"
-            body="₹ per item in India, credit packs abroad — fair, country-aware pricing."
-          />
+      </section>
+
+      {/* Featured + premium promo */}
+      <section className="container py-8">
+        <SectionHead title="Featured Wallpapers" subtitle="Handpicked just for you." href="/explore" />
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+            {featured.map((w, i) => (
+              <Reveal key={w.id} delay={(i % 4) * 60}>
+                <WallpaperCard wallpaper={w} />
+              </Reveal>
+            ))}
+          </div>
+          <Reveal>
+            <PremiumPromo bg={featured[5]?.previewUrl ?? '/demo/ember-ridge.jpg'} />
+          </Reveal>
         </div>
       </section>
 
-      {/* Featured grid */}
-      <GridSection title="Trending" href="/explore" items={featured} />
-      <GridSection title="New today" href="/explore?sort=newest" items={newest} />
-
-      {/* CTA */}
-      <section className="container">
-        <Spotlight className="overflow-hidden p-10 text-center sm:p-16">
-          <div className="aurora opacity-50" aria-hidden />
-          <div className="relative space-y-4">
-            <Wand2 className="mx-auto h-6 w-6 text-[hsl(var(--glow))]" />
-            <h2 className="font-display text-3xl font-semibold tracking-tight">
-              Find the one for your screen
-            </h2>
-            <p className="mx-auto max-w-md text-sm text-muted-foreground">
-              Thousands of pixels, one perfect fit. Start with the free picks — upgrade when one
-              earns a place on your home screen.
-            </p>
-            <div className="flex justify-center gap-3 pt-2">
-              <Link href="/explore" className={buttonVariants({ size: 'lg' })}>
-                Browse the collection
+      {/* Device finder · bundles · newsletter */}
+      <section className="container grid gap-5 py-8 lg:grid-cols-3">
+        <Reveal>
+          <div className="flex h-full flex-col justify-between rounded-2xl border bg-gradient-to-br from-sky-50 to-blue-50 p-6">
+            <div>
+              <h3 className="text-lg font-semibold">Find the Perfect Wallpaper for Your Device</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Pick your device or enter your resolution and we’ll show the best matches.
+              </p>
+            </div>
+            <div className="mt-6 flex items-center justify-between">
+              <Link href="/explore" className={buttonVariants()}>
+                Find My Wallpaper →
               </Link>
+              <MonitorSmartphone className="h-10 w-10 text-sky-400" />
             </div>
           </div>
-        </Spotlight>
+        </Reveal>
+
+        <Reveal>
+          <div className="flex h-full flex-col rounded-2xl border bg-card p-6">
+            <SectionHead title="Wallpaper Bundles" subtitle="Save more with curated collections." href="/pricing" compact />
+            <div className="mb-4 flex gap-2">
+              {featured.slice(0, 5).map((w) => (
+                <div key={w.id} className="relative h-12 w-12 overflow-hidden rounded-lg border">
+                  <Image src={w.previewUrl ?? '/demo/aurora-veil.jpg'} alt="" fill sizes="48px" className="object-cover" />
+                </div>
+              ))}
+            </div>
+            <div className="mt-auto">
+              <p className="font-semibold">Nature Lovers Bundle</p>
+              <p className="text-xs text-muted-foreground">10 Wallpapers · 4K &amp; 8K · All Devices</p>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-lg font-semibold">{bundlePrice}</span>
+                <span className="text-sm text-muted-foreground line-through">{bundleWas}</span>
+                <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">50% OFF</span>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <NewsletterCard />
+        </Reveal>
       </section>
     </main>
   );
 }
 
-function Feature({
-  icon,
+function SectionHead({
   title,
-  body,
+  subtitle,
+  href,
+  compact,
 }: {
-  icon: React.ReactNode;
   title: string;
-  body: string;
+  subtitle?: string;
+  href?: string;
+  compact?: boolean;
 }) {
   return (
-    <Reveal>
-      <Spotlight className="h-full p-6">
-        <div className="relative space-y-3">
-          <div className="inline-flex rounded-xl bg-foreground/5 p-2.5 text-foreground">{icon}</div>
-          <h3 className="font-display text-lg font-semibold">{title}</h3>
-          <p className="text-sm text-muted-foreground">{body}</p>
-        </div>
-      </Spotlight>
-    </Reveal>
+    <div className={`flex items-end justify-between ${compact ? 'mb-3' : 'mb-5'}`}>
+      <div>
+        <h2 className={`font-display font-semibold tracking-tight ${compact ? 'text-base' : 'text-2xl'}`}>{title}</h2>
+        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+      </div>
+      {href && (
+        <Link href={href} className="whitespace-nowrap text-sm text-muted-foreground hover:text-foreground">
+          View All →
+        </Link>
+      )}
+    </div>
   );
 }
 
-function GridSection({
-  title,
-  href,
-  items,
-}: {
-  title: string;
-  href: string;
-  items: Awaited<ReturnType<typeof listPublishedWallpapers>>;
-}) {
+function PremiumPromo({ bg }: { bg: string }) {
   return (
-    <section className="container space-y-6">
-      <Reveal className="flex items-center justify-between">
-        <h2 className="font-display text-2xl font-semibold tracking-tight">{title}</h2>
-        <Link href={href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-          See all →
+    <div className="relative flex h-full min-h-[420px] flex-col justify-between overflow-hidden rounded-2xl p-7 text-white">
+      <Image src={bg} alt="" fill sizes="400px" className="object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/55 to-black/80" />
+      <div className="relative">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
+          <Crown className="h-3.5 w-3.5 text-amber-300" /> Premium Collection
+        </span>
+        <h3 className="mt-4 font-display text-2xl font-semibold leading-tight">
+          Exclusive Wallpapers.
+          <br /> For True Enthusiasts.
+        </h3>
+        <p className="mt-2 max-w-xs text-sm text-white/80">
+          Get access to handpicked 8K collections, creator exclusives and more.
+        </p>
+        <Link href="/pricing" className="mt-5 inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white/90">
+          Join Now →
         </Link>
-      </Reveal>
-      {items.length === 0 ? (
-        <Reveal className="glass rounded-2xl p-12 text-center text-sm text-muted-foreground">
-          No wallpapers yet — publish some from the admin upload to see them here.
-        </Reveal>
-      ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {items.map((w, i) => (
-            <Reveal key={w.id} delay={(i % 5) * 60}>
-              <WallpaperCard wallpaper={w} />
-            </Reveal>
-          ))}
-        </div>
-      )}
-    </section>
+      </div>
+      <div className="relative mt-8 grid grid-cols-3 gap-3 border-t border-white/15 pt-5 text-center">
+        <Stat value="50+" label="Exclusive Collections" />
+        <Stat value="8K" label="Ultra HD" />
+        <Stat value="100%" label="Original Content" />
+      </div>
+    </div>
+  );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <p className="font-display text-xl font-semibold">{value}</p>
+      <p className="text-[11px] text-white/70">{label}</p>
+    </div>
   );
 }

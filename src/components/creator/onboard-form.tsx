@@ -60,7 +60,7 @@ export function OnboardForm() {
         <input id="payoutAccountId" name="payoutAccountId" required className="w-full rounded-md border bg-background px-3 py-2 text-sm" />
       </div>
 
-      <div className="rounded-xl border border-white/10 p-4 text-sm text-muted-foreground">
+      <div className="rounded-xl border p-4 text-sm text-muted-foreground">
         <p className="mb-2 font-medium text-foreground">Creator agreement (summary)</p>
         <ul className="list-disc space-y-1 pl-5">
           <li>You warrant you hold all rights to what you upload and grant {`HirecWallp`} a licence to sell it.</li>
