@@ -10,6 +10,8 @@ Phase 1 schema, Row Level Security and seed data for HirecWallp.
 | `migrations/0002_phase1_rls.sql` | `enable row level security` + policies on every table |
 | `migrations/0003_phase1_payments_fns.sql` | Atomic payment/credit functions + rate-limit helpers |
 | `migrations/0004_phase2_automation.sql` | Phase 2: prompt_library, generation_jobs, social_posts, jobs_log (+ RLS), commercial-licence multiplier |
+| `migrations/0005_phase2_commercial.sql` | Phase 2: order_items.licence (commercial SKU) |
+| `migrations/0006_phase3_marketplace.sql` | Phase 3: creators, creator_payouts (+ RLS), is_creator() |
 | `seed/seed.sql` | Regions, global price rules, credit packs, launch categories, sample prompts |
 
 ## Applying
@@ -23,6 +25,8 @@ psql "$DATABASE_URL" -f supabase/migrations/0001_phase1_init.sql
 psql "$DATABASE_URL" -f supabase/migrations/0002_phase1_rls.sql
 psql "$DATABASE_URL" -f supabase/migrations/0003_phase1_payments_fns.sql
 psql "$DATABASE_URL" -f supabase/migrations/0004_phase2_automation.sql
+psql "$DATABASE_URL" -f supabase/migrations/0005_phase2_commercial.sql
+psql "$DATABASE_URL" -f supabase/migrations/0006_phase3_marketplace.sql
 psql "$DATABASE_URL" -f supabase/seed/seed.sql
 ```
 
