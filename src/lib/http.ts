@@ -1,6 +1,17 @@
 import { publicEnv } from '@/lib/env';
 
 /**
+ * Sanitise a post-login `next` target to a same-site relative path, so the
+ * sign-in flow can't be abused as an open redirect.
+ */
+export function safeNextPath(next: string | null | undefined, fallback = '/library'): string {
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) {
+    return fallback;
+  }
+  return next;
+}
+
+/**
  * Minimal same-origin check for mutating route handlers (CSRF defense-in-depth).
  * Allows requests whose Origin matches the configured site URL, or same-host.
  */

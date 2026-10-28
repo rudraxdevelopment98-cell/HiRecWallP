@@ -11,7 +11,7 @@ const NAV = [
 
 export default async function CreatorLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/login?next=/creator');
 
   return (
     <div className="container grid gap-8 py-10 md:grid-cols-[180px_1fr]">

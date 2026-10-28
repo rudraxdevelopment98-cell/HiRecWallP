@@ -20,11 +20,24 @@ Legend: 🔑 secret/env · 🌐 account · ⚙️ config step
    psql "$DATABASE_URL" -f supabase/migrations/0001_phase1_init.sql
    psql "$DATABASE_URL" -f supabase/migrations/0002_phase1_rls.sql
    psql "$DATABASE_URL" -f supabase/migrations/0003_phase1_payments_fns.sql
+   psql "$DATABASE_URL" -f supabase/migrations/0004_phase2_automation.sql
+   psql "$DATABASE_URL" -f supabase/migrations/0005_phase2_commercial.sql
+   psql "$DATABASE_URL" -f supabase/migrations/0006_phase3_marketplace.sql
+   psql "$DATABASE_URL" -f supabase/migrations/0007_security_hardening.sql   # REQUIRED
    psql "$DATABASE_URL" -f supabase/seed/seed.sql
    ```
-4. Auth → enable **Email OTP** and **Google** providers; set the Site URL and
-   redirect URLs to your domain.
-5. ⚙️ **Make yourself admin** (after first login creates your profile):
+   ⚠️ **0007 is mandatory before going live.** Without it any signed-in user
+   could call the payment RPCs directly (grant themselves wallpapers/credits)
+   or set their own `profiles.role` to `admin`.
+4. Auth → **Providers**: enable **Email** (keep "Confirm email" on) and
+   **Google** (needs a Google Cloud OAuth client; paste its client id/secret).
+5. Auth → **URL Configuration**: Site URL = `https://<your-domain>`; add
+   redirect URLs `https://<your-domain>/auth/callback` (and
+   `http://localhost:3000/auth/callback` for dev, plus your
+   `*.vercel.app` URL if you test there).
+6. Auth → **Email Templates → Magic Link**: include `{{ .Token }}` so the
+   email carries the 6-digit code the sign-in page asks for (the link works too).
+7. ⚙️ **Make yourself admin** (after first login creates your profile):
    ```sql
    update profiles set role = 'admin' where id = '<your-auth-user-id>';
    ```
@@ -48,8 +61,18 @@ Legend: 🔑 secret/env · 🌐 account · ⚙️ config step
 4. ⚙️ Create a **webhook** pointing at `https://<your-domain>/api/webhooks/razorpay`
    for `payment.captured` and `order.paid`; copy the signing secret into
    `RAZORPAY_WEBHOOK_SECRET`.
-5. Test in **test mode**: INR UPI and an international test card. Entitlements/
-   credits should appear only after the webhook fires (not on redirect).
+5. Test in **test mode** (use `rzp_test_…` keys first):
+   - Region India, billing country India → cart → pay with UPI/card →
+     success page shows "Confirming…" then "Payment confirmed" once the
+     webhook lands; the wallpaper appears in **My Library**.
+   - Billing country e.g. United Kingdom → checkout switches to **credits** →
+     "Not enough credits" shows Tier-1 packs → pay with an international test
+     card → credits arrive via webhook → cart unlocks automatically.
+   - An INR order paid with a foreign card is **auto-refunded** by the webhook
+     and nothing is granted (stops VPN users buying at Indian prices).
+6. Checkout switches from the demo flow to real Razorpay automatically as soon
+   as `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` **and** the Supabase env are set
+   (see `GET /api/checkout/status`).
 
 ## 4. Download signing 🔑
 
@@ -90,7 +113,7 @@ real, set these (each is optional and degrades gracefully):
   downloads simply aren't watermarked.
 - **Weekly report** 🔑 — `OWNER_EMAIL` (uses `RESEND_API_KEY` from Phase 1).
 - **Cron** ⚙️ — `vercel.json` schedules dynamic pricing (02:00 UTC daily),
-  social scheduler (every 30 min) and the weekly report (Mon 08:00 UTC).
+  social scheduler (daily 03:00 UTC — Vercel Hobby allows daily crons only) and the weekly report (Mon 08:00 UTC).
   Vercel injects `Authorization: Bearer $CRON_SECRET`; set `CRON_SECRET`.
 
 ## 9. Phase 3 — Creator Marketplace (built; wiring is optional)

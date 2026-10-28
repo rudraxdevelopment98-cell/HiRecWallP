@@ -65,3 +65,15 @@ export function resolveChargeRegion(
   const b = priceComparable[billingRegion] ?? -Infinity;
   return b > a ? billingRegion : displayRegion;
 }
+
+/**
+ * Relative effective per-wallpaper price of each region tier, cheapest first:
+ * India's per-item rupee prices (₹9–₹99) undercut a T3 credit, which undercuts
+ * T2, which undercuts T1. Used to pick the higher-priced tier on mismatch.
+ */
+export const REGION_RANK: Record<RegionCode, number> = { IN: 0, T3: 1, T2: 2, T1: 3 };
+
+/** The higher-priced of two regions (the one a mismatched buyer is charged). */
+export function chargeRegionFor(display: RegionCode, billing: RegionCode): RegionCode {
+  return resolveChargeRegion(display, billing, REGION_RANK);
+}

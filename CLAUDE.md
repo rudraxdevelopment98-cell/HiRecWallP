@@ -163,6 +163,26 @@ Key Phase 3 decisions:
   valuation into payouts is a flagged follow-up.
 - KYC/payout/moderation default to **mock**; real providers slot in via env.
 
+## Real payments + auth (post-redesign)
+
+- Checkout (`/checkout`) asks `GET /api/checkout/status`; when Razorpay + Supabase env
+  are set it runs real Razorpay Standard Checkout, otherwise the **demo** flow.
+- India/INR: `create-order {type:'cart'}` → Razorpay → success page polls
+  `/api/orders/[id]` until the webhook marks it paid. Elsewhere: `/api/credits/unlock-cart`
+  → 402 shows packs (`/api/credits/packs?billingCountry=`) → buy pack → poll
+  `/api/credits/balance` → auto-unlock.
+- Charged region = higher-priced of display vs billing country (`chargeRegionFor`);
+  credits are spent at the highest tier the user bought them in (`resolveCreditRegion`).
+- Webhook: claims `created → paid` atomically; INR orders paid with an international
+  card are refunded + marked `refunded`, nothing granted; on processing error the
+  idempotency key is released so Razorpay retries.
+- Auth: `/login` (email OTP code or magic link + Google), `/auth/callback`
+  (open-redirect-safe `next`), `POST /auth/signout`; middleware refreshes the session.
+- **2026-10-28 security fixes (migration 0007):** SECURITY DEFINER payment/credit
+  RPCs were executable by `authenticated` (self-grant entitlements/credits) and
+  `profiles` allowed self-update of `role` (self-promote to admin). Both locked down;
+  browser-safe `my_credit_balance()` added.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

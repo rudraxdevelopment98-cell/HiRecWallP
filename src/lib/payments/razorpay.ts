@@ -81,6 +81,8 @@ export class RazorpayProvider implements PaymentProvider {
       eventType: null,
       providerOrderId: null,
       paid: false,
+      paymentId: null,
+      international: false,
     };
 
     if (!secret || !signature) return fail;
@@ -109,15 +111,30 @@ export class RazorpayProvider implements PaymentProvider {
     // payment entity id (still stable per event for our purposes).
     const providerEventId =
       headers['x-razorpay-event-id'] ?? payload.payload?.payment?.entity?.id ?? null;
+    const paymentId = payload.payload?.payment?.entity?.id ?? null;
+    const international = payload.payload?.payment?.entity?.international === true;
 
-    return { verified: true, providerEventId, eventType, providerOrderId, paid };
+    return { verified: true, providerEventId, eventType, providerOrderId, paid, paymentId, international };
+  }
+
+  async refundPayment(paymentId: string, reason: string): Promise<void> {
+    const { keyId, keySecret } = this.credentials();
+    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const res = await fetch(`${RAZORPAY_API}/payments/${encodeURIComponent(paymentId)}/refund`, {
+      method: 'POST',
+      headers: { authorization: `Basic ${auth}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ speed: 'normal', notes: { reason } }),
+    });
+    if (!res.ok) {
+      throw new Error(`Razorpay refund failed (${res.status}): ${await res.text()}`);
+    }
   }
 }
 
 interface RazorpayWebhookBody {
   event?: string;
   payload?: {
-    payment?: { entity?: { id?: string; order_id?: string } };
+    payment?: { entity?: { id?: string; order_id?: string; international?: boolean } };
     order?: { entity?: { id?: string } };
   };
 }

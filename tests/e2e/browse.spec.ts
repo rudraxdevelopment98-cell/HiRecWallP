@@ -28,7 +28,8 @@ test('pricing page renders', async ({ page }) => {
 
 test('region switcher changes the pricing cookie', async ({ page, context }) => {
   await page.goto('/');
-  await page.getByLabel('Change region').selectOption('IN');
+  // Header on desktop, footer on mobile — exactly one is visible.
+  await page.locator('select[aria-label="Change region"]:visible').selectOption('IN');
   const cookies = await context.cookies();
   expect(cookies.find((c) => c.name === 'region')?.value).toBe('IN');
 });

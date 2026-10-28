@@ -21,7 +21,7 @@ interface EntitlementRow {
 
 export default async function LibraryPage() {
   const user = await getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/login?next=/library');
 
   const supabase = createClient();
   const [{ data: entitlements }, { data: balance }] = await Promise.all([
@@ -30,7 +30,7 @@ export default async function LibraryPage() {
       .select('id, wallpaper_id, max_downloads, downloads_used, created_at, wallpapers(slug, title)')
       .order('created_at', { ascending: false })
       .returns<EntitlementRow[]>(),
-    supabase.rpc('credit_balance', { p_user: user.id }),
+    supabase.rpc('my_credit_balance'),
   ]);
 
   const items = entitlements ?? [];

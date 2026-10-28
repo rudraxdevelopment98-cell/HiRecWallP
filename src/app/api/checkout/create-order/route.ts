@@ -4,33 +4,40 @@ import { getUser } from '@/lib/auth';
 import { getDisplayRegion } from '@/lib/catalogue';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getProvider } from '@/lib/payments';
-import { getRegionPrice, toMinorUnits } from '@/lib/pricing';
-import { REGION_PRICING_UNIT } from '@/lib/geo';
+import { loadSellable, priceItems, toMinorUnits } from '@/lib/pricing';
+import {
+  REGION_PRICING_UNIT,
+  REGION_RANK,
+  chargeRegionFor,
+  isRegionCode,
+  regionForCountry,
+  type RegionCode,
+} from '@/lib/geo';
 import { isSameOrigin } from '@/lib/http';
 
 export const runtime = 'nodejs';
 
-const schema = z.union([
-  z.object({
-    type: z.literal('wallpaper'),
-    wallpaperId: z.string().uuid(),
-    licence: z.enum(['personal', 'commercial']).optional(),
-  }),
-  z.object({ type: z.literal('credit_pack'), creditPackId: z.string().uuid() }),
+const licence = z.enum(['personal', 'commercial']).default('personal');
+const country = z
+  .string()
+  .regex(/^[A-Za-z]{2}$/)
+  .transform((s) => s.toUpperCase())
+  .optional();
+const item = z.object({ wallpaperId: z.string().uuid(), licence });
+
+const schema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('wallpaper'), wallpaperId: z.string().uuid(), licence, billingCountry: country }),
+  z.object({ type: z.literal('cart'), items: z.array(item).min(1).max(20), billingCountry: country }),
+  z.object({ type: z.literal('credit_pack'), creditPackId: z.string().uuid(), billingCountry: country }),
 ]);
 
-async function commercialMultiplier(
-  supabase: ReturnType<typeof createServiceClient>,
-  region: string,
-): Promise<number> {
-  const { data } = await supabase
-    .from('regions')
-    .select('commercial_multiplier')
-    .eq('code', region)
-    .maybeSingle();
-  return data?.commercial_multiplier != null ? Number(data.commercial_multiplier) : 5;
-}
-
+/**
+ * Create a provider order. Prices are always recomputed server-side; the client
+ * total is never trusted. Display region comes from the geo cookie, but the
+ * CHARGED region is the higher-priced of display vs billing country, so a VPN
+ * can't buy at a cheaper tier. Entitlements/credits are granted only later, by
+ * the verified webhook.
+ */
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
@@ -39,121 +46,122 @@ export async function POST(request: Request) {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-  }
+  const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
 
-  const region = getDisplayRegion();
+  const displayRegion = getDisplayRegion();
+  const billingCountry = parsed.data.billingCountry ?? null;
+  const chargeRegion = billingCountry
+    ? chargeRegionFor(displayRegion, regionForCountry(billingCountry))
+    : displayRegion;
   const supabase = createServiceClient();
 
   try {
-    if (parsed.data.type === 'wallpaper') {
-      // Per-item money purchase (India). Credit regions use /api/credits/unlock.
-      if (REGION_PRICING_UNIT[region] !== 'money') {
+    // --- Credit pack (international) -------------------------------------
+    if (parsed.data.type === 'credit_pack') {
+      const { data: pack } = await supabase
+        .from('credit_packs')
+        .select('*')
+        .eq('id', parsed.data.creditPackId)
+        .eq('active', true)
+        .maybeSingle();
+      if (!pack || !isRegionCode(pack.region_code)) {
+        return NextResponse.json({ error: 'Pack not found' }, { status: 400 });
+      }
+      if (REGION_RANK[pack.region_code as RegionCode] < REGION_RANK[chargeRegion]) {
         return NextResponse.json(
-          { error: 'This region buys wallpapers with credits; use credit unlock.' },
-          { status: 400 },
+          { error: 'Please choose a credit pack for your billing region.', code: 'region_mismatch', chargeRegion },
+          { status: 409 },
         );
       }
-      const price = await getRegionPrice(parsed.data.wallpaperId, region);
-      if (price == null) return NextResponse.json({ error: 'Price unavailable' }, { status: 400 });
-
-      const licence = parsed.data.licence ?? 'personal';
-      const effectivePrice =
-        licence === 'commercial'
-          ? Math.round(price * (await commercialMultiplier(supabase, region)))
-          : price;
-      const amountMinor = toMinorUnits(effectivePrice, region);
-      const currency = 'INR';
 
       const { data: order, error: orderErr } = await supabase
         .from('orders')
         .insert({
           user_id: user.id,
-          provider: 'razorpay',
+          provider: 'razorpay_intl',
           status: 'created',
-          currency,
-          amount_minor: amountMinor,
+          currency: pack.currency,
+          amount_minor: pack.amount_minor,
+          billing_country: billingCountry,
         })
         .select('id')
         .single();
       if (orderErr || !order) throw orderErr ?? new Error('order insert failed');
 
-      await supabase.from('order_items').insert({
-        order_id: order.id,
-        wallpaper_id: parsed.data.wallpaperId,
-        unit_price: effectivePrice,
-        licence,
-      });
+      await supabase.from('order_items').insert({ order_id: order.id, credit_pack_id: pack.id });
 
-      // 15-minute price lock.
-      await supabase.from('price_quotes').insert({
-        user_id: user.id,
-        wallpaper_id: parsed.data.wallpaperId,
-        region_code: region,
-        price,
-      });
-
-      const providerOrder = await getProvider('razorpay').createOrder({
-        amountMinor,
-        currency,
+      const providerOrder = await getProvider('razorpay_intl').createOrder({
+        amountMinor: pack.amount_minor,
+        currency: pack.currency,
         receipt: order.id,
-        notes: { orderId: order.id, userId: user.id },
+        notes: { orderId: order.id, userId: user.id, credits: String(pack.credits) },
       });
+      await supabase.from('orders').update({ provider_order_id: providerOrder.providerOrderId }).eq('id', order.id);
 
-      await supabase
-        .from('orders')
-        .update({ provider_order_id: providerOrder.providerOrderId })
-        .eq('id', order.id);
-
-      return NextResponse.json({ orderId: order.id, checkout: providerOrder.checkout });
+      return NextResponse.json({ orderId: order.id, checkout: providerOrder.checkout, credits: pack.credits });
     }
 
-    // Credit pack purchase (international) via Razorpay International cards.
-    const { data: pack, error: packErr } = await supabase
-      .from('credit_packs')
-      .select('*')
-      .eq('id', parsed.data.creditPackId)
-      .eq('active', true)
-      .maybeSingle();
-    if (packErr || !pack) return NextResponse.json({ error: 'Pack not found' }, { status: 400 });
+    // --- Per-item wallpaper purchase (India, INR) ------------------------
+    const requested =
+      parsed.data.type === 'wallpaper'
+        ? [{ wallpaperId: parsed.data.wallpaperId, licence: parsed.data.licence }]
+        : parsed.data.items;
+
+    if (REGION_PRICING_UNIT[chargeRegion] !== 'money') {
+      return NextResponse.json(
+        {
+          error: 'International pricing applies to your billing country — unlock with credits instead.',
+          code: 'use_credits',
+          chargeRegion,
+        },
+        { status: 409 },
+      );
+    }
+
+    const unique = [...new Map(requested.map((i) => [`${i.wallpaperId}:${i.licence}`, i])).values()];
+    const sellable = await loadSellable(unique.map((i) => i.wallpaperId));
+    if (unique.some((i) => !sellable.has(i.wallpaperId))) {
+      return NextResponse.json({ error: 'One or more items are no longer available.' }, { status: 400 });
+    }
+
+    const priced = await priceItems(unique, chargeRegion);
+    if (!priced) return NextResponse.json({ error: 'Price unavailable' }, { status: 400 });
+    const amountMinor = priced.reduce((s, i) => s + toMinorUnits(i.price, chargeRegion), 0);
+    const currency = 'INR';
 
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .insert({
         user_id: user.id,
-        provider: 'razorpay_intl',
+        provider: 'razorpay',
         status: 'created',
-        currency: pack.currency,
-        amount_minor: pack.amount_minor,
+        currency,
+        amount_minor: amountMinor,
+        billing_country: billingCountry,
       })
       .select('id')
       .single();
     if (orderErr || !order) throw orderErr ?? new Error('order insert failed');
 
-    await supabase.from('order_items').insert({
-      order_id: order.id,
-      credit_pack_id: pack.id,
-    });
+    await supabase.from('order_items').insert(
+      priced.map((i) => ({ order_id: order.id, wallpaper_id: i.wallpaperId, unit_price: i.price, licence: i.licence })),
+    );
+    // 15-minute price lock per item.
+    await supabase.from('price_quotes').insert(
+      priced.map((i) => ({ user_id: user.id, wallpaper_id: i.wallpaperId, region_code: chargeRegion, price: i.price })),
+    );
 
-    const providerOrder = await getProvider('razorpay_intl').createOrder({
-      amountMinor: pack.amount_minor,
-      currency: pack.currency,
+    const providerOrder = await getProvider('razorpay').createOrder({
+      amountMinor,
+      currency,
       receipt: order.id,
-      notes: { orderId: order.id, userId: user.id, credits: String(pack.credits) },
+      notes: { orderId: order.id, userId: user.id, items: String(priced.length) },
     });
+    await supabase.from('orders').update({ provider_order_id: providerOrder.providerOrderId }).eq('id', order.id);
 
-    await supabase
-      .from('orders')
-      .update({ provider_order_id: providerOrder.providerOrderId })
-      .eq('id', order.id);
-
-    return NextResponse.json({ orderId: order.id, checkout: providerOrder.checkout });
+    return NextResponse.json({ orderId: order.id, checkout: providerOrder.checkout, amountMinor, currency });
   } catch {
     return NextResponse.json({ error: 'Checkout unavailable' }, { status: 503 });
   }

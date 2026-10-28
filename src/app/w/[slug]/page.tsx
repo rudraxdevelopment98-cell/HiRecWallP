@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { ResolutionSelector } from '@/components/resolution-selector';
 import { AddToCart } from '@/components/add-to-cart';
+import { DownloadButton } from '@/components/download-button';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { Reveal } from '@/components/reveal';
 import { TrackEvent } from '@/components/track-event';
@@ -15,6 +16,7 @@ import { formatRegionPrice } from '@/lib/format';
 import { publicEnv } from '@/lib/env';
 
 const COMMERCIAL_MULTIPLIER = 5;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const region = getDisplayRegion();
@@ -109,9 +111,20 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
 
           <div className="flex flex-col gap-2 sm:flex-row">
             {w.is_free ? (
-              <Link href="/login" className={buttonVariants({ size: 'lg', className: 'flex-1' })}>
-                <Download className="mr-1 h-4 w-4" /> Download Free
-              </Link>
+              w.id.startsWith('demo-') || !UUID.test(w.id) ? (
+                <a
+                  href={w.previewUrl ?? '#'}
+                  download={`${w.slug}.jpg`}
+                  className={buttonVariants({ size: 'lg', className: 'flex-1' })}
+                >
+                  <Download className="mr-1 h-4 w-4" /> Download Free
+                </a>
+              ) : (
+                <div className="flex flex-1 flex-wrap items-start gap-2">
+                  <DownloadButton wallpaperId={w.id} variant="free_phone" label="Free · Phone" />
+                  <DownloadButton wallpaperId={w.id} variant="free_desktop" label="Free · Desktop" />
+                </div>
+              )
             ) : (
               <AddToCart
                 item={{

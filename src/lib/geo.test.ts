@@ -1,10 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_REGION,
+  chargeRegionFor,
   isRegionCode,
   regionForCountry,
   resolveChargeRegion,
 } from './geo';
+
+describe('chargeRegionFor (billing mismatch → higher-priced tier)', () => {
+  it('keeps the region when display and billing agree', () => {
+    expect(chargeRegionFor('IN', 'IN')).toBe('IN');
+  });
+  it('charges international pricing when an Indian display region bills abroad', () => {
+    expect(chargeRegionFor('IN', 'T1')).toBe('T1');
+  });
+  it('never lets billing lower the tier', () => {
+    expect(chargeRegionFor('T1', 'T3')).toBe('T1');
+    expect(chargeRegionFor('T1', 'IN')).toBe('T1');
+  });
+  it('raises a cheap display region to the billing tier', () => {
+    expect(chargeRegionFor('T3', 'T2')).toBe('T2');
+  });
+});
 
 describe('regionForCountry', () => {
   it('maps India to IN', () => {

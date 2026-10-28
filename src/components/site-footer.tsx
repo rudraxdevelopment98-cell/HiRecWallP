@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { Facebook, Heart, Instagram, Mountain, Twitter, Youtube } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
+import { getDisplayRegion } from '@/lib/catalogue';
+import { RegionSwitcher } from '@/components/region-switcher';
 
 const LINKS = [
   { href: '/about', label: 'About Us' },
@@ -53,6 +55,10 @@ export function SiteFooter() {
       </div>
       <div className="border-t">
         <div className="container flex flex-col items-center justify-between gap-2 py-4 text-xs text-muted-foreground sm:flex-row">
+          {/* The header switcher is hidden on small screens; offer it here instead. */}
+          <div className="sm:hidden">
+            <RegionSwitcher current={getDisplayRegion()} />
+          </div>
           <p>
             © {new Date().getFullYear()} {publicEnv.NEXT_PUBLIC_BRAND_NAME}. AI-generated wallpapers.
           </p>

@@ -28,7 +28,7 @@ const NAV = [
  */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   if (!(await isAdminUser())) {
-    redirect('/login');
+    redirect('/login?next=/admin');
   }
   return (
     <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[220px_1fr]">

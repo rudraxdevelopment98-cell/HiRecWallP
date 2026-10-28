@@ -2,21 +2,47 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { CheckCircle2 } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
+import { OrderStatus } from '@/components/checkout/order-status';
 
 export const metadata: Metadata = { title: 'Payment successful' };
 
-export default function PaymentSuccessPage({ searchParams }: { searchParams: { order?: string } }) {
-  const order = searchParams.order ?? 'WPC-000000';
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export default function PaymentSuccessPage({
+  searchParams,
+}: {
+  searchParams: { order?: string; credits?: string };
+}) {
+  const order = searchParams.order ?? null;
+  const real = order != null && UUID.test(order);
+  const credits = searchParams.credits === '1';
+
   return (
     <main className="container flex max-w-md flex-col items-center gap-4 py-24 text-center">
       <div className="grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
         <CheckCircle2 className="h-8 w-8" />
       </div>
-      <h1 className="font-display text-2xl font-semibold">Payment Successful!</h1>
-      <p className="text-sm text-muted-foreground">
-        Your order has been confirmed. Order <strong>{order}</strong>. You can download your
-        wallpapers any time from your library.
-      </p>
+      <h1 className="font-display text-2xl font-semibold">
+        {credits ? 'Unlocked!' : 'Payment Successful!'}
+      </h1>
+      {credits ? (
+        <p className="text-sm text-muted-foreground">
+          Credits were applied and your wallpapers are unlocked. Download them any time from your
+          library.
+        </p>
+      ) : real ? (
+        <>
+          <p className="text-sm text-muted-foreground">
+            Order <strong className="font-mono text-xs">{order.slice(0, 8).toUpperCase()}</strong>
+          </p>
+          <OrderStatus orderId={order} />
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Your order has been confirmed. Order <strong>{order ?? 'WPC-000000'}</strong>. You can
+          download your wallpapers any time from your library.
+        </p>
+      )}
       <div className="mt-2 flex gap-3">
         <Link href="/library" className={buttonVariants()}>
           View My Downloads

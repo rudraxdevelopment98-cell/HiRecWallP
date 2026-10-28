@@ -41,6 +41,10 @@ export interface WebhookVerificationResult {
   providerOrderId: string | null;
   /** Whether this event represents a successful payment. */
   paid: boolean;
+  /** The provider payment id (for refunds), when present. */
+  paymentId: string | null;
+  /** True when the card used was issued outside the business's country. */
+  international: boolean;
 }
 
 export interface PaymentProvider {
@@ -54,4 +58,7 @@ export interface PaymentProvider {
    * for Razorpay) against the raw request body before trusting any field.
    */
   verifyWebhook(rawBody: string, headers: Record<string, string>): WebhookVerificationResult;
+
+  /** Fully refund a captured payment. */
+  refundPayment(paymentId: string, reason: string): Promise<void>;
 }
