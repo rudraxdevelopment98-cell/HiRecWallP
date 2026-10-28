@@ -22,7 +22,9 @@ export function SiteFooter() {
               {l.label}
             </Link>
           ))}
-          <span className="opacity-60">Creators (soon)</span>
+          <Link href="/creator" className="hover:text-foreground">
+            Creators
+          </Link>
         </nav>
       </div>
     </footer>

@@ -46,10 +46,20 @@ export interface SuggestedMetadata {
   suggestedFree: boolean;
 }
 
+export interface Moderation {
+  allowed: boolean;
+  reasons: string;
+}
+
 export interface VisionProvider {
   readonly id: string;
   /** Score composition/quality 1–10 (drop < 7). */
   score(image: Buffer): Promise<QualityReview>;
   /** Title, tags, alt text, description, SEO slug, suggested free/paid. */
   describe(image: Buffer, context: { prompt: string; niche: string }): Promise<SuggestedMetadata>;
+  /**
+   * Content screening for creator uploads: rejects NSFW, trademarked
+   * characters/brand logos, and real people/celebrities.
+   */
+  moderate(image: Buffer, context: { title?: string }): Promise<Moderation>;
 }

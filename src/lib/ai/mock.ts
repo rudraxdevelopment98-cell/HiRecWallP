@@ -7,6 +7,7 @@ import type {
   GeneratedImage,
   ImageGenInput,
   ImageProvider,
+  Moderation,
   QualityReview,
   SuggestedMetadata,
   UpscaleProvider,
@@ -113,6 +114,19 @@ export const mockVisionProvider: VisionProvider = {
       altText: `${title} ${context.niche} wallpaper`,
       tags,
       suggestedFree: h[2]! % 3 === 0,
+    };
+  },
+  async moderate(image: Buffer): Promise<Moderation> {
+    // Mock screening: allow most, flag a small deterministic fraction so the
+    // review/rejection path is exercised. A real provider screens NSFW,
+    // trademarked characters/logos and real people via vision.
+    const h = crypto.createHash('sha256').update(image).digest();
+    const flagged = h[3]! % 20 === 0;
+    return {
+      allowed: !flagged,
+      reasons: flagged
+        ? 'Mock screening flagged possible trademarked/NSFW content — manual review required.'
+        : 'Mock screening: no NSFW, trademark, logo or real-person match detected.',
     };
   },
 };
