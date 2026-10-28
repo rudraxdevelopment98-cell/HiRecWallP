@@ -4,12 +4,14 @@ import type { Category, WallpaperCard } from '@/types/catalogue';
 /**
  * Built-in demo catalogue. Used as a graceful fallback when Supabase isn't
  * configured, so the site renders fully populated for previews/design review.
- * Images live in /public/demo. Real data replaces this once the DB is wired.
+ * Photos are license-free scenics in /public/demo. Real data replaces this
+ * once the DB is wired.
  */
 
 interface DemoDef {
   slug: string;
   title: string;
+  img: string;
   category: string;
   tags: string[];
   free: boolean;
@@ -21,30 +23,30 @@ interface DemoDef {
 }
 
 const DEFS: DemoDef[] = [
-  { slug: 'mahadev-cosmic-trishul', title: 'Cosmic Trishul', category: 'space', tags: ['cosmic', 'nebula', '4k'], free: false, inr: 49, credits: 3, resolution: '8K', rating: 4.9, reviews: 124 },
-  { slug: 'amoled-void', title: 'AMOLED Void', category: 'dark', tags: ['amoled', 'dark', 'minimal'], free: true, inr: 0, credits: 0, resolution: '4K', rating: 4.7, reviews: 96 },
-  { slug: 'nebula-drift', title: 'Nebula Drift', category: 'space', tags: ['space', 'nebula'], free: false, inr: 29, credits: 2, resolution: '5K', rating: 4.8, reviews: 76 },
-  { slug: 'aurora-veil', title: 'Aurora Veil', category: 'nature', tags: ['aurora', 'green'], free: true, inr: 0, credits: 0, resolution: '4K', rating: 4.6, reviews: 63 },
-  { slug: 'krishna-peacock', title: 'Peacock Dusk', category: 'abstract', tags: ['peacock', 'colour'], free: false, inr: 29, credits: 2, resolution: '5K', rating: 4.8, reviews: 88 },
-  { slug: 'ember-ridge', title: 'Ember Ridge', category: 'nature', tags: ['sunset', 'mountain'], free: false, inr: 19, credits: 1, resolution: '4K', rating: 4.5, reviews: 112 },
-  { slug: 'minimal-slate', title: 'Minimal Slate', category: 'minimal', tags: ['minimal', 'stone'], free: true, inr: 0, credits: 0, resolution: '4K', rating: 4.4, reviews: 51 },
-  { slug: 'ganesha-gold', title: 'Golden Ganesha', category: 'abstract', tags: ['gold', 'festival'], free: false, inr: 49, credits: 3, resolution: '8K', rating: 4.9, reviews: 143 },
-  { slug: 'midnight-wave', title: 'Midnight Wave', category: 'abstract', tags: ['wave', 'blue'], free: false, inr: 29, credits: 2, resolution: '5K', rating: 4.7, reviews: 69 },
-  { slug: 'rose-obsidian', title: 'Rose Obsidian', category: 'dark', tags: ['rose', 'dark'], free: false, inr: 29, credits: 2, resolution: '4K', rating: 4.6, reviews: 87 },
-  { slug: 'diwali-bloom', title: 'Diwali Bloom', category: 'abstract', tags: ['diwali', 'gold'], free: true, inr: 0, credits: 0, resolution: '4K', rating: 4.8, reviews: 94 },
-  { slug: 'quartz-fog', title: 'Quartz Fog', category: 'minimal', tags: ['fog', 'grey'], free: false, inr: 19, credits: 1, resolution: '5K', rating: 4.5, reviews: 58 },
+  { slug: 'alpine-serenity', title: 'Alpine Serenity', img: 'scene-1016', category: 'mountains', tags: ['mountain', 'lake', 'calm'], free: false, inr: 49, credits: 3, resolution: '8K', rating: 4.9, reviews: 124 },
+  { slug: 'misty-highlands', title: 'Misty Highlands', img: 'scene-1018', category: 'mountains', tags: ['highland', 'fog', 'green'], free: false, inr: 29, credits: 2, resolution: '5K', rating: 4.8, reviews: 98 },
+  { slug: 'canyon-river', title: 'Canyon River', img: 'scene-1015', category: 'nature', tags: ['canyon', 'river'], free: false, inr: 29, credits: 2, resolution: '5K', rating: 4.7, reviews: 76 },
+  { slug: 'forest-path', title: 'Forest Path', img: 'scene-1019', category: 'forest', tags: ['forest', 'trees'], free: true, inr: 0, credits: 0, resolution: '4K', rating: 4.6, reviews: 63 },
+  { slug: 'open-waters', title: 'Open Waters', img: 'scene-1036', category: 'ocean', tags: ['ocean', 'sea'], free: false, inr: 19, credits: 1, resolution: '4K', rating: 4.5, reviews: 112 },
+  { slug: 'hidden-falls', title: 'Hidden Falls', img: 'scene-1039', category: 'nature', tags: ['waterfall', 'green'], free: true, inr: 0, credits: 0, resolution: '8K', rating: 4.9, reviews: 143 },
+  { slug: 'coastal-light', title: 'Coastal Light', img: 'scene-1057', category: 'ocean', tags: ['coast', 'light'], free: false, inr: 29, credits: 2, resolution: '5K', rating: 4.7, reviews: 69 },
+  { slug: 'mountain-pass', title: 'Mountain Pass', img: 'scene-1058', category: 'mountains', tags: ['road', 'mountain'], free: false, inr: 19, credits: 1, resolution: '4K', rating: 4.6, reviews: 87 },
+  { slug: 'blue-horizon', title: 'Blue Horizon', img: 'scene-1061', category: 'ocean', tags: ['waves', 'blue'], free: true, inr: 0, credits: 0, resolution: '4K', rating: 4.8, reviews: 94 },
+  { slug: 'summit-view', title: 'Summit View', img: 'scene-1062', category: 'mountains', tags: ['summit', 'view'], free: false, inr: 49, credits: 3, resolution: '8K', rating: 4.9, reviews: 120 },
+  { slug: 'golden-ridge', title: 'Golden Ridge', img: 'scene-1022', category: 'sunset', tags: ['sunset', 'ridge'], free: false, inr: 29, credits: 2, resolution: '5K', rating: 4.7, reviews: 58 },
+  { slug: 'quiet-valley', title: 'Quiet Valley', img: 'scene-1047', category: 'minimal', tags: ['valley', 'minimal'], free: true, inr: 0, credits: 0, resolution: '4K', rating: 4.5, reviews: 51 },
 ];
 
-// Category row (display). Counts are illustrative; a thumbnail reuses a demo image.
+// Category row (display). Thumbnails reuse demo photos.
 export const DEMO_CATEGORIES: Category[] = [
-  { id: 'cat-nature', slug: 'nature', name: 'Nature', parent_id: null, sort_order: 10, count: 1240, thumbUrl: '/demo/aurora-veil.jpg' },
-  { id: 'cat-space', slug: 'space', name: 'Space', parent_id: null, sort_order: 20, count: 860, thumbUrl: '/demo/nebula-drift.jpg' },
-  { id: 'cat-abstract', slug: 'abstract', name: 'Abstract', parent_id: null, sort_order: 30, count: 1420, thumbUrl: '/demo/midnight-wave.jpg' },
-  { id: 'cat-dark', slug: 'dark', name: 'Black & Dark', parent_id: null, sort_order: 40, count: 780, thumbUrl: '/demo/amoled-void.jpg' },
-  { id: 'cat-minimal', slug: 'minimal', name: 'Minimal', parent_id: null, sort_order: 50, count: 420, thumbUrl: '/demo/minimal-slate.jpg' },
-  { id: 'cat-devotional', slug: 'devotional', name: 'Devotional', parent_id: null, sort_order: 60, count: 540, thumbUrl: '/demo/ganesha-gold.jpg' },
-  { id: 'cat-festival', slug: 'festival', name: 'Festival', parent_id: null, sort_order: 70, count: 310, thumbUrl: '/demo/diwali-bloom.jpg' },
-  { id: 'cat-gradient', slug: 'gradient', name: 'Gradient', parent_id: null, sort_order: 80, count: 650, thumbUrl: '/demo/rose-obsidian.jpg' },
+  { id: 'cat-nature', slug: 'nature', name: 'Nature', parent_id: null, sort_order: 10, count: 1240, thumbUrl: '/demo/scene-1039.jpg' },
+  { id: 'cat-mountains', slug: 'mountains', name: 'Mountains', parent_id: null, sort_order: 20, count: 980, thumbUrl: '/demo/scene-1018.jpg' },
+  { id: 'cat-ocean', slug: 'ocean', name: 'Ocean', parent_id: null, sort_order: 30, count: 760, thumbUrl: '/demo/scene-1061.jpg' },
+  { id: 'cat-forest', slug: 'forest', name: 'Forest', parent_id: null, sort_order: 40, count: 640, thumbUrl: '/demo/scene-1019.jpg' },
+  { id: 'cat-sunset', slug: 'sunset', name: 'Sunset', parent_id: null, sort_order: 50, count: 520, thumbUrl: '/demo/scene-1022.jpg' },
+  { id: 'cat-minimal', slug: 'minimal', name: 'Minimal', parent_id: null, sort_order: 60, count: 420, thumbUrl: '/demo/scene-1047.jpg' },
+  { id: 'cat-sky', slug: 'sky', name: 'Sky', parent_id: null, sort_order: 70, count: 390, thumbUrl: '/demo/scene-1043.jpg' },
+  { id: 'cat-desert', slug: 'desert', name: 'Desert', parent_id: null, sort_order: 80, count: 310, thumbUrl: '/demo/scene-1084.jpg' },
 ];
 
 function priceFor(def: DemoDef, region: RegionCode): number | null {
@@ -59,17 +61,17 @@ function toCard(def: DemoDef, i: number, region: RegionCode): WallpaperCard {
     id: `demo-${i}`,
     slug: def.slug,
     title: def.title,
-    description: `${def.title} — an ultra-HD, AI-crafted wallpaper tuned for phone, desktop and tablet.`,
+    description: `${def.title} — an ultra-HD wallpaper tuned for phone, desktop, tablet and ultrawide screens.`,
     alt_text: def.title,
     category_id: `cat-${def.category}`,
     tags: def.tags,
     is_free: def.free,
     status: 'published',
-    is_ai_generated: true,
+    is_ai_generated: false,
     human_edited: false,
     set_id: null,
     created_at: new Date(Date.now() - i * 86_400_000).toISOString(),
-    previewUrl: `/demo/${def.slug}.jpg`,
+    previewUrl: `/demo/${def.img}.jpg`,
     price: priceFor(def, region),
     region,
     rating: def.rating,

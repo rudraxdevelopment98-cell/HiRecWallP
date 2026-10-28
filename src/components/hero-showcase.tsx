@@ -24,7 +24,7 @@ export function HeroShowcase({ items }: { items: WallpaperCard[] }) {
   const [active, setActive] = useState(0);
   const clusterRef = useRef<HTMLDivElement | null>(null);
   const current = items[active];
-  const src = (w: WallpaperCard) => w.previewUrl ?? '/demo/amoled-void.jpg';
+  const src = (w: WallpaperCard) => w.previewUrl ?? '/demo/hero.jpg';
 
   function onMove(e: React.PointerEvent) {
     const el = clusterRef.current;

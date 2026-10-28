@@ -27,7 +27,7 @@ export function Marquee({
             tabIndex={i >= items.length ? -1 : 0}
           >
             <Image
-              src={w.previewUrl ?? '/demo/amoled-void.jpg'}
+              src={w.previewUrl ?? '/demo/hero.jpg'}
               alt={w.title}
               fill
               sizes="144px"

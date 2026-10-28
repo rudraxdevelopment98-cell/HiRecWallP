@@ -25,7 +25,7 @@ export default function AboutPage() {
         </Reveal>
         <Reveal delay={80}>
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border">
-            <Image src="/demo/ember-ridge.jpg" alt="" fill sizes="(max-width:768px) 100vw, 50vw" className="object-cover" />
+            <Image src="/demo/scene-1016.jpg" alt="" fill sizes="(max-width:768px) 100vw, 50vw" className="object-cover" />
           </div>
         </Reveal>
       </section>

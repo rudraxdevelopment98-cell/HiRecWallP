@@ -15,7 +15,7 @@ const DEVICES = [
 ];
 const MOODS = ['Calm', 'Energetic', 'Dark', 'Dreamy'];
 const COLOURS = ['#111827', '#2563eb', '#059669', '#d97706', '#db2777', '#7c3aed'];
-const PREVIEWS = ['/demo/nebula-drift.jpg', '/demo/aurora-veil.jpg', '/demo/amoled-void.jpg', '/demo/midnight-wave.jpg'];
+const PREVIEWS = ['/demo/scene-1061.jpg', '/demo/scene-1039.jpg', '/demo/scene-1018.jpg', '/demo/scene-1022.jpg'];
 
 export function StudioFinder() {
   const router = useRouter();

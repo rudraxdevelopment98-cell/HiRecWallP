@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Crown, MonitorSmartphone } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { WallpaperCard } from '@/components/wallpaper-card';
-import { HeroShowcase } from '@/components/hero-showcase';
+import { Hero } from '@/components/hero';
 import { CategoryRow } from '@/components/category-row';
 import { NewsletterCard } from '@/components/newsletter-card';
 import { Reveal } from '@/components/reveal';
@@ -24,12 +24,7 @@ export default async function HomePage() {
   return (
     <main>
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="aurora" aria-hidden />
-        <div className="container relative py-14 sm:py-20">
-          <HeroShowcase items={featured} />
-        </div>
-      </section>
+      <Hero />
 
       {/* Browse by category */}
       <section className="container py-8">
@@ -51,7 +46,7 @@ export default async function HomePage() {
             ))}
           </div>
           <Reveal>
-            <PremiumPromo bg={featured[5]?.previewUrl ?? '/demo/ember-ridge.jpg'} />
+            <PremiumPromo bg={featured[5]?.previewUrl ?? '/demo/hero.jpg'} />
           </Reveal>
         </div>
       </section>
@@ -81,7 +76,7 @@ export default async function HomePage() {
             <div className="mb-4 flex gap-2">
               {featured.slice(0, 5).map((w) => (
                 <div key={w.id} className="relative h-12 w-12 overflow-hidden rounded-lg border">
-                  <Image src={w.previewUrl ?? '/demo/aurora-veil.jpg'} alt="" fill sizes="48px" className="object-cover" />
+                  <Image src={w.previewUrl ?? '/demo/hero.jpg'} alt="" fill sizes="48px" className="object-cover" />
                 </div>
               ))}
             </div>

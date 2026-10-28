@@ -22,7 +22,7 @@ export default async function CollectionPage({ params }: { params: { slug: strin
 
   if (!cat && items.length === 0 && process.env.NEXT_PUBLIC_SUPABASE_URL) notFound();
   const name = cat?.name ?? params.slug;
-  const banner = cat?.thumbUrl ?? items[0]?.previewUrl ?? '/demo/ember-ridge.jpg';
+  const banner = cat?.thumbUrl ?? items[0]?.previewUrl ?? '/demo/hero.jpg';
 
   return (
     <main>
