@@ -93,6 +93,24 @@ real, set these (each is optional and degrades gracefully):
   social scheduler (every 30 min) and the weekly report (Mon 08:00 UTC).
   Vercel injects `Authorization: Bearer $CRON_SECRET`; set `CRON_SECRET`.
 
+## 9. Phase 3 — Creator Marketplace (built; wiring is optional)
+
+Runs on mock KYC/payout/moderation with no extra keys. To go real:
+
+- **KYC + payouts** 🌐🔑 — Razorpay Route (India) reuses `RAZORPAY_*`; PayPal
+  Payouts (international) needs `PAYPAL_CLIENT_ID` + `PAYPAL_CLIENT_SECRET`.
+  Wire the real calls in `src/lib/payouts/index.ts`.
+- **Moderation** 🔑 — the real NSFW/trademark/real-person screening uses the
+  Claude vision provider (`ANTHROPIC_API_KEY`); wire it in `src/lib/ai`.
+- **Cron** ⚙️ — `vercel.json` runs creator payouts on the 1st at 06:00 UTC.
+- ⚖️ Creator agreement text is **placeholder** — lawyer review; marketplace
+  **TDS/TCS** obligations (India) — CA sign-off.
+
+Flow: a buyer becomes a creator at `/creator` (agreement + payout + KYC) →
+uploads at `/creator/upload` (auto checks: ≥4K, pHash dup, moderation) →
+submission lands in admin **Catalogue** as `pending_review` → admin publishes →
+monthly `creator_payouts` job pays the creator (default 30% commission).
+
 ### Phase 2 acceptance — status
 - ✅ One button (admin → Review queue → **Generate batch**) creates a batch that
   lands in the review queue with AI metadata.

@@ -148,6 +148,21 @@ Key Phase 2 decisions:
   or admin role; every run is logged to `jobs_log`.
 - Watermarked paid downloads are cached at `wm/<entitlement>/<variant>.jpg`.
 
+## Phase 3 build order (checklist)
+
+1. [x] Migration 0006 (creators, creator_payouts) + RLS + is_creator()
+2. [x] Adapters: payouts/KYC (Razorpay Route / PayPal Payouts) + vision moderation (mock-first)
+3. [x] Creator onboarding (/api/creator/onboard) + upload with moderation (/api/creator/upload)
+4. [x] Commission engine + monthly payouts job (/api/jobs/creator-payouts; vercel cron 1st)
+5. [x] Creator pages: dashboard/onboard, upload, earnings, payouts (+ admin payouts trigger)
+
+Key Phase 3 decisions:
+- Creator uploads land as `pending_review` with `creator_id`; admins approve via the
+  existing Catalogue publish flow (reused).
+- Payouts computed from paid **INR (money)** sales; credit-based international sales
+  valuation into payouts is a flagged follow-up.
+- KYC/payout/moderation default to **mock**; real providers slot in via env.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International
