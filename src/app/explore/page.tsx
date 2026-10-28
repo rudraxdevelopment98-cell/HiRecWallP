@@ -1,25 +1,20 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
-import { WallpaperGrid } from '@/components/wallpaper-grid';
+import { WallpaperCard } from '@/components/wallpaper-card';
+import { FilterSidebar } from '@/components/filter-sidebar';
+import { Pagination } from '@/components/pagination';
+import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listCategories, listPublishedWallpapers } from '@/lib/catalogue';
 import type { ExploreFilters } from '@/types/catalogue';
 
 export const metadata: Metadata = {
   title: 'Explore wallpapers',
-  description: 'Browse ultra-HD AI wallpapers by device, category, free or paid.',
+  description: 'Browse thousands of stunning 4K & 8K wallpapers for every device.',
 };
 
 type SearchParams = { [key: string]: string | string[] | undefined };
+const str = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-function str(v: string | string[] | undefined): string | undefined {
-  return Array.isArray(v) ? v[0] : v;
-}
-
-export default async function ExplorePage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function ExplorePage({ searchParams }: { searchParams: SearchParams }) {
   const region = getDisplayRegion();
   const freeParam = str(searchParams.free);
   const filters: ExploreFilters = {
@@ -35,38 +30,45 @@ export default async function ExplorePage({
   ]);
 
   return (
-    <main className="container space-y-6 py-10">
-      <h1 className="text-2xl font-semibold">Explore</h1>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-2 text-sm">
-        <FilterLink label="All" href="/explore" active={!filters.category && filters.free === undefined} />
-        <FilterLink label="Free" href="/explore?free=1" active={filters.free === true} />
-        <FilterLink label="Paid" href="/explore?free=0" active={filters.free === false} />
-        {categories.map((c) => (
-          <FilterLink
-            key={c.id}
-            label={c.name}
-            href={`/explore?category=${c.slug}`}
-            active={filters.category === c.slug}
-          />
-        ))}
+    <main className="container py-10">
+      <div className="mb-8">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Explore Wallpapers</h1>
+        <p className="text-sm text-muted-foreground">
+          Discover thousands of stunning wallpapers for every device.
+        </p>
       </div>
 
-      <WallpaperGrid items={items} emptyMessage="No wallpapers match these filters yet." />
-    </main>
-  );
-}
+      <div className="grid gap-8 lg:grid-cols-[230px_1fr]">
+        <aside className="lg:sticky lg:top-20 lg:self-start">
+          <FilterSidebar categories={categories} filters={filters} />
+        </aside>
 
-function FilterLink({ label, href, active }: { label: string; href: string; active: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`rounded-full border px-3 py-1 ${
-        active ? 'bg-primary text-primary-foreground' : 'bg-card hover:bg-secondary'
-      }`}
-    >
-      {label}
-    </Link>
+        <div>
+          <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
+            <span>
+              {items.length} wallpaper{items.length === 1 ? '' : 's'}
+              {filters.category ? ` in ${filters.category}` : ''}
+            </span>
+            <span>Sorted by {filters.sort === 'newest' ? 'Newest' : 'Popular'}</span>
+          </div>
+
+          {items.length === 0 ? (
+            <p className="glass rounded-2xl p-10 text-center text-sm text-muted-foreground">
+              No wallpapers match these filters yet.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+              {items.map((w, i) => (
+                <Reveal key={w.id} delay={(i % 4) * 50}>
+                  <WallpaperCard wallpaper={w} />
+                </Reveal>
+              ))}
+            </div>
+          )}
+
+          <Pagination page={1} totalPages={1} basePath="/explore" />
+        </div>
+      </div>
+    </main>
   );
 }

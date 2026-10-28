@@ -7,8 +7,8 @@ import { RegionSwitcher } from '@/components/region-switcher';
 const NAV = [
   { href: '/', label: 'Home' },
   { href: '/explore', label: 'Explore' },
-  { href: '/collections/nature', label: 'Collections' },
-  { href: '/pricing', label: 'Bundles' },
+  { href: '/collections', label: 'Collections' },
+  { href: '/studio', label: 'Studio' },
   { href: '/pricing', label: 'Membership' },
 ];
 

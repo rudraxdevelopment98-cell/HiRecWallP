@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
+import { Download, Heart, ShoppingBag } from 'lucide-react';
 import { getUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { AccountSidebar } from '@/components/account-sidebar';
 import { DownloadButton } from '@/components/download-button';
 import { buttonVariants } from '@/components/ui/button';
 
@@ -13,6 +15,7 @@ interface EntitlementRow {
   wallpaper_id: string;
   max_downloads: number;
   downloads_used: number;
+  created_at: string;
   wallpapers: { slug: string; title: string } | null;
 }
 
@@ -24,56 +27,78 @@ export default async function LibraryPage() {
   const [{ data: entitlements }, { data: balance }] = await Promise.all([
     supabase
       .from('entitlements')
-      .select('id, wallpaper_id, max_downloads, downloads_used, wallpapers(slug, title)')
+      .select('id, wallpaper_id, max_downloads, downloads_used, created_at, wallpapers(slug, title)')
       .order('created_at', { ascending: false })
       .returns<EntitlementRow[]>(),
     supabase.rpc('credit_balance', { p_user: user.id }),
   ]);
 
   const items = entitlements ?? [];
+  const totalDownloads = items.reduce((s, e) => s + e.downloads_used, 0);
+  const thisYear = items.filter((e) => new Date(e.created_at).getFullYear() === new Date().getFullYear()).length;
+  const name = user.email?.split('@')[0] ?? 'there';
 
   return (
-    <main className="container space-y-6 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">My Library</h1>
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-muted-foreground">Credits: {balance ?? 0}</span>
+    <main className="container grid gap-8 py-10 lg:grid-cols-[210px_1fr]">
+      <AccountSidebar />
+
+      <div className="space-y-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="font-display text-2xl font-semibold">Welcome back, {name}</h1>
+            <p className="text-sm text-muted-foreground">Here’s what’s happening with your account.</p>
+          </div>
           <Link href="/pricing" className={buttonVariants({ size: 'sm', variant: 'outline' })}>
-            Buy credits
+            Credits: {balance ?? 0} · Buy more
           </Link>
         </div>
-      </div>
 
-      {items.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          Nothing here yet. Browse the <Link href="/explore" className="underline">catalogue</Link>{' '}
-          to get started.
-        </p>
-      ) : (
-        <ul className="divide-y rounded-lg border">
-          {items.map((e) => {
-            const remaining = e.max_downloads - e.downloads_used;
-            return (
-              <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div>
-                  <p className="font-medium">{e.wallpapers?.title ?? 'Wallpaper'}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {remaining} of {e.max_downloads} downloads left
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DownloadButton wallpaperId={e.wallpaper_id} variant="phone" label="Phone" />
-                  <DownloadButton
-                    wallpaperId={e.wallpaper_id}
-                    variant="desktop_4k"
-                    label="Desktop"
-                  />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Stat icon={<ShoppingBag className="h-5 w-5" />} label="Purchases" value={items.length} />
+          <Stat icon={<Download className="h-5 w-5" />} label="Downloads" value={totalDownloads} />
+          <Stat icon={<Heart className="h-5 w-5" />} label="This year" value={thisYear} />
+        </div>
+
+        <div>
+          <h2 className="mb-3 font-display text-lg font-semibold">My library</h2>
+          {items.length === 0 ? (
+            <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
+              Nothing here yet. Browse the{' '}
+              <Link href="/explore" className="underline">
+                catalogue
+              </Link>{' '}
+              to get started.
+            </p>
+          ) : (
+            <ul className="divide-y rounded-2xl border bg-card">
+              {items.map((e) => (
+                <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div>
+                    <p className="font-medium">{e.wallpapers?.title ?? 'Wallpaper'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {e.max_downloads - e.downloads_used} of {e.max_downloads} downloads left
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DownloadButton wallpaperId={e.wallpaper_id} variant="phone" label="Phone" />
+                    <DownloadButton wallpaperId={e.wallpaper_id} variant="desktop_4k" label="Desktop" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </main>
+  );
+}
+
+function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border bg-card p-5">
+      <div className="mb-2 inline-flex rounded-xl bg-secondary p-2 text-foreground">{icon}</div>
+      <p className="text-2xl font-semibold">{value}</p>
+      <p className="text-sm text-muted-foreground">{label}</p>
+    </div>
   );
 }

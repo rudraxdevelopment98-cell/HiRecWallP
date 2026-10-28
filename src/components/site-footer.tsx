@@ -3,12 +3,12 @@ import { Facebook, Heart, Instagram, Mountain, Twitter, Youtube } from 'lucide-r
 import { publicEnv } from '@/lib/env';
 
 const LINKS = [
-  { href: '/', label: 'About Us' },
-  { href: '/contact-takedown', label: 'Contact' },
-  { href: '/licence', label: 'Licence' },
+  { href: '/about', label: 'About Us' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/faq', label: 'FAQ' },
   { href: '/terms', label: 'Terms & Conditions' },
   { href: '/privacy', label: 'Privacy Policy' },
-  { href: '/refunds', label: 'Refunds' },
+  { href: '/licence', label: 'Licence' },
 ];
 
 const SOCIAL = [

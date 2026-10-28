@@ -12,9 +12,8 @@ test('home page renders the hero and a browse CTA', async ({ page }) => {
 
 test('explore page renders with filters', async ({ page }) => {
   await page.goto('/explore');
-  await expect(page.getByRole('heading', { name: 'Explore' })).toBeVisible();
-  // "Paid" only appears as a filter chip, so it's unambiguous.
-  await expect(page.getByRole('link', { name: 'Paid' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Explore Wallpapers' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Apply Filters' })).toBeVisible();
 });
 
 test('free page renders', async ({ page }) => {
@@ -24,7 +23,7 @@ test('free page renders', async ({ page }) => {
 
 test('pricing page renders', async ({ page }) => {
   await page.goto('/pricing');
-  await expect(page.getByRole('heading', { name: 'Pricing' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Unlimited beautiful screens' })).toBeVisible();
 });
 
 test('region switcher changes the pricing cookie', async ({ page, context }) => {
