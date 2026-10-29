@@ -1,7 +1,6 @@
 import 'server-only';
 
 import crypto from 'node:crypto';
-import { serverEnv } from '@/lib/env';
 import type {
   CreateOrderInput,
   CreatedOrder,
@@ -24,12 +23,15 @@ export class RazorpayProvider implements PaymentProvider {
     this.id = id;
   }
 
+  // Reads only the Razorpay vars (not the full serverEnv), so payments don't
+  // depend on storage being configured.
   private credentials() {
-    const env = serverEnv();
-    if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
       throw new Error('Razorpay not configured (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET).');
     }
-    return { keyId: env.RAZORPAY_KEY_ID, keySecret: env.RAZORPAY_KEY_SECRET };
+    return { keyId, keySecret };
   }
 
   async createOrder(input: CreateOrderInput): Promise<CreatedOrder> {
@@ -71,8 +73,7 @@ export class RazorpayProvider implements PaymentProvider {
   }
 
   verifyWebhook(rawBody: string, headers: Record<string, string>): WebhookVerificationResult {
-    const env = serverEnv();
-    const secret = env.RAZORPAY_WEBHOOK_SECRET;
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const signature = headers['x-razorpay-signature'];
 
     const fail: WebhookVerificationResult = {
