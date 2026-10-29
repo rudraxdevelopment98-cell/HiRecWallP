@@ -35,8 +35,9 @@ Legend: 🔑 secret/env · 🌐 account · ⚙️ config step
    redirect URLs `https://<your-domain>/auth/callback` (and
    `http://localhost:3000/auth/callback` for dev, plus your
    `*.vercel.app` URL if you test there).
-6. Auth → **Email Templates → Magic Link**: include `{{ .Token }}` so the
-   email carries the 6-digit code the sign-in page asks for (the link works too).
+6. *(Optional)* Auth → **Email Templates → Magic Link**: add `{{ .Token }}` if
+   you also want a 6-digit code in the email. The default template's
+   **Log In** link already works with `/auth/callback`.
 7. ⚙️ **Make yourself admin** (after first login creates your profile):
    ```sql
    update profiles set role = 'admin' where id = '<your-auth-user-id>';

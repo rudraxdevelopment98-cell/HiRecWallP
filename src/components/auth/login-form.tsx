@@ -6,7 +6,10 @@ import { Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 
-/** Email one-time code (or magic link) + Google sign-in via Supabase Auth. */
+/**
+ * Email magic link (works with Supabase's default template) with an optional
+ * 6-digit code when the template includes {{ .Token }}, plus Google sign-in.
+ */
 export function LoginForm({ next }: { next: string }) {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -69,31 +72,40 @@ export function LoginForm({ next }: { next: string }) {
             className="input"
           />
           <Button type="submit" className="w-full" disabled={busy}>
-            <Mail className="h-4 w-4" /> {busy ? 'Sending…' : 'Email me a sign-in code'}
+            <Mail className="h-4 w-4" /> {busy ? 'Sending…' : 'Email me a sign-in link'}
           </Button>
         </form>
       ) : (
-        <form onSubmit={verify} className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            We sent a code to <span className="font-medium text-foreground">{email}</span>. Enter it
-            below, or click the link in the email.
-          </p>
-          <input
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            required
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="6-digit code"
-            className="input tracking-widest"
-          />
-          <Button type="submit" className="w-full" disabled={busy}>
-            {busy ? 'Verifying…' : 'Verify & sign in'}
-          </Button>
+        <div className="space-y-3">
+          <div className="rounded-xl border bg-secondary p-4 text-sm">
+            <p className="font-medium">Check your inbox</p>
+            <p className="mt-1 text-muted-foreground">
+              We emailed a sign-in link to{' '}
+              <span className="font-medium text-foreground">{email}</span>. Open it on this device
+              and click <strong>Log In</strong> — you&rsquo;ll come straight back here, signed in.
+            </p>
+          </div>
+          <details className="text-sm">
+            <summary className="cursor-pointer text-muted-foreground">Got a 6-digit code instead?</summary>
+            <form onSubmit={verify} className="mt-3 space-y-3">
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="6-digit code"
+                className="input tracking-widest"
+              />
+              <Button type="submit" className="w-full" disabled={busy}>
+                {busy ? 'Verifying…' : 'Verify & sign in'}
+              </Button>
+            </form>
+          </details>
           <button type="button" className="text-xs underline" onClick={() => setStage('email')}>
             Use a different email
           </button>
-        </form>
+        </div>
       )}
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
