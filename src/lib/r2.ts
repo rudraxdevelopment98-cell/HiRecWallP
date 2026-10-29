@@ -1,8 +1,11 @@
 import 'server-only';
 
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  PutBucketCorsCommand,
+  PutBucketLifecycleConfigurationCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -84,6 +87,86 @@ export async function putObject(
       Key: key,
       Body: body,
       ContentType: contentType,
+      // Public objects are immutable per key (previews are regenerated under
+      // the same wallpaper id only on re-upload), so let the CDN cache them.
+      CacheControl: bucket === 'public' ? 'public, max-age=31536000, immutable' : undefined,
+    }),
+  );
+}
+
+/** Delete an object (missing keys are not an error). */
+export async function deleteObject(bucket: R2Bucket, key: string): Promise<void> {
+  await r2().send(new DeleteObjectCommand({ Bucket: bucketName(bucket), Key: key }));
+}
+
+/**
+ * Presigned PUT for a browser to upload straight to the PRIVATE bucket,
+ * bypassing the ~4.5 MB serverless request limit. The signature pins the
+ * content type and exact byte length; keys live under `incoming/` and are
+ * auto-deleted after a day by the lifecycle rule below.
+ */
+export async function presignedPutUrl(
+  key: string,
+  contentType: string,
+  contentLength: number,
+  expiresIn = 600,
+): Promise<string> {
+  const command = new PutObjectCommand({
+    Bucket: bucketName('private'),
+    Key: key,
+    ContentType: contentType,
+    ContentLength: contentLength,
+  });
+  return getSignedUrl(r2(), command, { expiresIn });
+}
+
+/**
+ * Apply bucket housekeeping (idempotent):
+ *   - CORS on the private bucket so the site can PUT uploads directly
+ *   - lifecycle rules that delete temporary objects:
+ *       incoming/    1 day   (raw uploads, deleted after processing anyway)
+ *       wm/          7 days  (per-buyer watermarked copies; rebuilt on demand)
+ *       generation/  45 days (AI batch candidates awaiting/after review)
+ */
+export async function applyStorageRules(allowedOrigins: string[]): Promise<void> {
+  await r2().send(
+    new PutBucketCorsCommand({
+      Bucket: bucketName('private'),
+      CORSConfiguration: {
+        CORSRules: [
+          {
+            AllowedOrigins: allowedOrigins,
+            AllowedMethods: ['PUT'],
+            AllowedHeaders: ['content-type'],
+            MaxAgeSeconds: 3600,
+          },
+        ],
+      },
+    }),
+  );
+
+  const expire = (id: string, prefix: string, days: number) => ({
+    ID: id,
+    Status: 'Enabled' as const,
+    Filter: { Prefix: prefix },
+    Expiration: { Days: days },
+  });
+  await r2().send(
+    new PutBucketLifecycleConfigurationCommand({
+      Bucket: bucketName('private'),
+      LifecycleConfiguration: {
+        Rules: [
+          expire('incoming-1d', 'incoming/', 1),
+          expire('wm-cache-7d', 'wm/', 7),
+          expire('generation-45d', 'generation/', 45),
+        ],
+      },
+    }),
+  );
+  await r2().send(
+    new PutBucketLifecycleConfigurationCommand({
+      Bucket: bucketName('public'),
+      LifecycleConfiguration: { Rules: [expire('generation-45d', 'generation/', 45)] },
     }),
   );
 }

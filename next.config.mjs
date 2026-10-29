@@ -17,7 +17,10 @@ const nextConfig = {
   poweredByHeader: false,
   images: {
     remotePatterns,
-    formats: ['image/avif', 'image/webp'],
+    // Previews are already sized/compressed at upload (≤720px, ~60 KB), so
+    // skip Vercel's optimizer: its Hobby quota (5K transformations/month)
+    // would otherwise break catalogue images as the library grows.
+    unoptimized: true,
   },
 };
 

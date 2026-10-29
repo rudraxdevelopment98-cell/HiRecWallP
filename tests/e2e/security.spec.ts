@@ -59,3 +59,20 @@ test('takedown report validates and accepts a same-origin submission', async ({
   });
   expect(bad.status()).toBe(400);
 });
+
+test('upload signing requires same origin and authentication', async ({ request, baseURL }) => {
+  const body = { contentType: 'image/png', size: 1024 };
+  expect((await request.post('/api/uploads/sign', { data: body })).status()).toBe(403);
+  const res = await request.post('/api/uploads/sign', {
+    headers: { origin: baseURL ?? 'http://127.0.0.1:3000' },
+    data: body,
+  });
+  expect(res.status()).toBe(401);
+});
+
+test('storage rules endpoint is admin-only', async ({ request, baseURL }) => {
+  const res = await request.post('/api/admin/storage/setup', {
+    headers: { origin: baseURL ?? 'http://127.0.0.1:3000' },
+  });
+  expect(res.status()).toBe(403);
+});

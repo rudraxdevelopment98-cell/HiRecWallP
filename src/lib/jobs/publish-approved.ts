@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase/service';
 import { serverEnv } from '@/lib/env';
 import { generateVariants } from '@/lib/imaging';
-import { getObject, putObject } from '@/lib/r2';
+import { getObject } from '@/lib/r2';
+import { persistWallpaperAssets } from '@/lib/wallpaper-assets';
 import { dHash } from '@/lib/phash';
 
 interface Candidate {
@@ -84,26 +85,12 @@ export async function runPublishApproved(jobId: string): Promise<Record<string, 
     .single();
   if (wErr || !wallpaper) throw new Error('could not create wallpaper (slug taken?)');
 
-  await putObject('private', `wallpapers/${wallpaper.id}/original`, original, 'image/jpeg');
-
-  let previewPublicUrl: string | null = null;
-  for (const v of variants) {
-    const key = `wallpapers/${wallpaper.id}/${v.variant}.${v.ext}`;
-    await putObject(v.bucket, key, v.buffer, v.contentType);
-    await supabase.from('wallpaper_assets').insert({
-      wallpaper_id: wallpaper.id,
-      variant: v.variant,
-      width: v.width,
-      height: v.height,
-      bytes: v.buffer.byteLength,
-      storage_bucket: v.bucket,
-      storage_key: key,
-      phash: v.variant === 'preview' ? await dHash(v.buffer) : null,
-    });
-    if (v.variant === 'preview' && process.env.R2_PUBLIC_BASE_URL) {
-      previewPublicUrl = `${process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, '')}/${key}`;
-    }
-  }
+  await persistWallpaperAssets(supabase, wallpaper.id, original, variants, async (v) =>
+    v.variant === 'preview' ? dHash(v.buffer) : null,
+  );
+  const previewPublicUrl = process.env.R2_PUBLIC_BASE_URL
+    ? `${process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, '')}/wallpapers/${wallpaper.id}/preview.jpg`
+    : null;
 
   // Seed a price per region from the global rule (launch price).
   const { data: rules } = await supabase

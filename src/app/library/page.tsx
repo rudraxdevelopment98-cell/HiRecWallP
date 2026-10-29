@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { AccountSidebar } from '@/components/account-sidebar';
 import { DownloadButton } from '@/components/download-button';
 import { buttonVariants } from '@/components/ui/button';
+import { PAID_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
 
 export const metadata: Metadata = { title: 'My Library' };
 
@@ -34,6 +35,7 @@ export default async function LibraryPage() {
   ]);
 
   const items = entitlements ?? [];
+  const variants = await downloadableVariants([...new Set(items.map((e) => e.wallpaper_id))]);
   const totalDownloads = items.reduce((s, e) => s + e.downloads_used, 0);
   const thisYear = items.filter((e) => new Date(e.created_at).getFullYear() === new Date().getFullYear()).length;
   const name = user.email?.split('@')[0] ?? 'there';
@@ -79,9 +81,17 @@ export default async function LibraryPage() {
                       {e.max_downloads - e.downloads_used} of {e.max_downloads} downloads left
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <DownloadButton wallpaperId={e.wallpaper_id} variant="phone" label="Phone" />
-                    <DownloadButton wallpaperId={e.wallpaper_id} variant="desktop_4k" label="Desktop" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(variants.get(e.wallpaper_id) ?? ['phone', 'desktop_4k'])
+                      .filter((v) => v in PAID_VARIANT_LABELS)
+                      .map((v) => (
+                        <DownloadButton
+                          key={v}
+                          wallpaperId={e.wallpaper_id}
+                          variant={v as 'phone'}
+                          label={PAID_VARIANT_LABELS[v] ?? v}
+                        />
+                      ))}
                   </div>
                 </li>
               ))}

@@ -8,6 +8,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { ResolutionSelector } from '@/components/resolution-selector';
 import { AddToCart } from '@/components/add-to-cart';
 import { DownloadButton } from '@/components/download-button';
+import { FREE_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { Reveal } from '@/components/reveal';
 import { TrackEvent } from '@/components/track-event';
@@ -36,6 +37,10 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
 
   const related = (await listPublishedWallpapers({ sort: 'popular' }, region, 8)).filter((r) => r.id !== w.id).slice(0, 4);
   const wasPrice = !w.is_free && w.price != null ? w.price * 2 : null;
+  const freeVariants =
+    w.is_free && UUID.test(w.id)
+      ? ((await downloadableVariants([w.id])).get(w.id) ?? ['free_phone', 'free_desktop']).filter((v) => v in FREE_VARIANT_LABELS)
+      : [];
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -121,8 +126,9 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
                 </a>
               ) : (
                 <div className="flex flex-1 flex-wrap items-start gap-2">
-                  <DownloadButton wallpaperId={w.id} variant="free_phone" label="Free · Phone" />
-                  <DownloadButton wallpaperId={w.id} variant="free_desktop" label="Free · Desktop" />
+                  {freeVariants.map((v) => (
+                    <DownloadButton key={v} wallpaperId={w.id} variant={v as 'free_phone'} label={FREE_VARIANT_LABELS[v] ?? v} />
+                  ))}
                 </div>
               )
             ) : (

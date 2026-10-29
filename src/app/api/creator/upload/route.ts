@@ -3,8 +3,9 @@ import { getUser } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/http';
 import { createServiceClient } from '@/lib/supabase/service';
 import { serverEnv } from '@/lib/env';
-import { generateVariants } from '@/lib/imaging';
-import { putObject } from '@/lib/r2';
+import { ImageTooSmallError, generateVariants } from '@/lib/imaging';
+import { readUpload } from '@/lib/uploads';
+import { persistWallpaperAssets } from '@/lib/wallpaper-assets';
 import { dHash, isNearDuplicate } from '@/lib/phash';
 import { getVisionProvider } from '@/lib/ai';
 import sharp from 'sharp';
@@ -49,14 +50,15 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: 'Expected multipart form data' }, { status: 400 });
   }
-  const file = form.get('file');
   const title = String(form.get('title') ?? '').trim();
-  if (!(file instanceof File) || !title) {
-    return NextResponse.json({ error: 'file and title are required' }, { status: 400 });
-  }
+  if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 });
 
+  let cleanup = async () => {};
   try {
-    const original = Buffer.from(await file.arrayBuffer());
+    const upload = await readUpload(form, user.id);
+    if (!upload) return NextResponse.json({ error: 'An image file is required' }, { status: 400 });
+    cleanup = upload.cleanup;
+    const original = upload.buffer;
 
     // 1) Resolution check.
     const meta = await sharp(original).metadata();
@@ -115,24 +117,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Could not create submission (slug taken?)' }, { status: 400 });
     }
 
-    await putObject('private', `wallpapers/${wallpaper.id}/original`, original, file.type || 'image/jpeg');
-    for (const v of variants) {
-      const key = `wallpapers/${wallpaper.id}/${v.variant}.${v.ext}`;
-      await putObject(v.bucket, key, v.buffer, v.contentType);
-      await supabase.from('wallpaper_assets').insert({
-        wallpaper_id: wallpaper.id,
-        variant: v.variant,
-        width: v.width,
-        height: v.height,
-        bytes: v.buffer.byteLength,
-        storage_bucket: v.bucket,
-        storage_key: key,
-        phash: v.variant === 'preview' ? await dHash(v.buffer) : null,
-      });
-    }
+    await persistWallpaperAssets(supabase, wallpaper.id, original, variants, async (v) =>
+      v.variant === 'preview' ? dHash(v.buffer) : null,
+    );
 
     return NextResponse.json({ ok: true, wallpaperId: wallpaper.id, status: 'pending_review' });
-  } catch {
+  } catch (err) {
+    if (err instanceof ImageTooSmallError) {
+      return NextResponse.json({ error: err.message }, { status: 422 });
+    }
     return NextResponse.json({ error: 'Upload failed (R2 configured?)' }, { status: 503 });
+  } finally {
+    await cleanup();
   }
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { formWithStagedFile } from '@/lib/upload-client';
 
 type Status = 'idle' | 'uploading' | 'ok' | 'error';
 
@@ -15,7 +16,9 @@ export function CreatorUploadForm() {
     setStatus('uploading');
     setMessage('');
     try {
-      const res = await fetch('/api/creator/upload', { method: 'POST', body: new FormData(event.currentTarget) });
+      const body = await formWithStagedFile(event.currentTarget, (pct) => setMessage(`Uploading… ${pct}%`));
+      setMessage('Checking & processing…');
+      const res = await fetch('/api/creator/upload', { method: 'POST', body });
       const json = (await res.json()) as { status?: string; error?: string; reasons?: string };
       if (!res.ok) throw new Error([json.error, json.reasons].filter(Boolean).join(' — ') || 'Upload failed');
       setStatus('ok');
@@ -36,7 +39,7 @@ export function CreatorUploadForm() {
       </div>
       <div className="space-y-1">
         <label htmlFor="file" className="text-sm font-medium">Original (≥ 4K long edge)</label>
-        <input id="file" name="file" type="file" accept="image/*" required className="block w-full text-sm" />
+        <input id="file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/tiff" required className="block w-full text-sm" />
       </div>
       <p className="text-xs text-muted-foreground">
         Automated checks run on upload: resolution, duplicate detection, and screening for NSFW /

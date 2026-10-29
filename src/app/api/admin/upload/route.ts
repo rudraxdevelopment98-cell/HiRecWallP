@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { isAdminUser } from '@/lib/auth';
+import { getUser, isAdminUser } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
-import { generateVariants } from '@/lib/imaging';
-import { putObject } from '@/lib/r2';
+import { ImageTooSmallError, generateVariants } from '@/lib/imaging';
+import { readUpload } from '@/lib/uploads';
+import { persistWallpaperAssets } from '@/lib/wallpaper-assets';
 import { isSameOrigin } from '@/lib/http';
 import { serverEnv } from '@/lib/env';
 
@@ -22,7 +23,8 @@ export async function POST(request: Request) {
   if (!isSameOrigin(request)) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
-  if (!(await isAdminUser())) {
+  const user = await getUser();
+  if (!user || !(await isAdminUser())) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -33,11 +35,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Expected multipart form data' }, { status: 400 });
   }
 
-  const file = form.get('file');
   const title = String(form.get('title') ?? '').trim();
-  if (!(file instanceof File) || !title) {
-    return NextResponse.json({ error: 'file and title are required' }, { status: 400 });
-  }
+  if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 });
 
   const slug = slugify(String(form.get('slug') ?? '') || title);
   const description = (form.get('description') as string | null) || null;
@@ -49,9 +48,13 @@ export async function POST(request: Request) {
     .map((t) => t.trim())
     .filter(Boolean);
 
+  let cleanup = async () => {};
   try {
+    const upload = await readUpload(form, user.id);
+    if (!upload) return NextResponse.json({ error: 'An image file is required' }, { status: 400 });
+    cleanup = upload.cleanup;
     const brand = serverEnv().BRAND_NAME;
-    const original = Buffer.from(await file.arrayBuffer());
+    const original = upload.buffer;
     const variants = await generateVariants(original, brand);
 
     const supabase = createServiceClient();
@@ -74,25 +77,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Could not create wallpaper (slug taken?)' }, { status: 400 });
     }
 
-    // Keep the untouched original in the private bucket for safekeeping.
-    await putObject('private', `wallpapers/${wallpaper.id}/original`, original, file.type || 'image/jpeg');
+    await persistWallpaperAssets(supabase, wallpaper.id, original, variants);
 
-    for (const v of variants) {
-      const key = `wallpapers/${wallpaper.id}/${v.variant}.${v.ext}`;
-      await putObject(v.bucket, key, v.buffer, v.contentType);
-      await supabase.from('wallpaper_assets').insert({
-        wallpaper_id: wallpaper.id,
-        variant: v.variant,
-        width: v.width,
-        height: v.height,
-        bytes: v.buffer.byteLength,
-        storage_bucket: v.bucket,
-        storage_key: key,
-      });
+    return NextResponse.json({ ok: true, wallpaperId: wallpaper.id, slug, variants: variants.map((v) => v.variant) });
+  } catch (err) {
+    if (err instanceof ImageTooSmallError) {
+      return NextResponse.json({ error: `${err.message}. Use at least 3840px on the long edge.` }, { status: 422 });
     }
-
-    return NextResponse.json({ ok: true, wallpaperId: wallpaper.id, slug });
-  } catch {
     return NextResponse.json({ error: 'Upload/processing failed (R2 configured?)' }, { status: 503 });
+  } finally {
+    await cleanup();
   }
 }

@@ -64,7 +64,8 @@ export async function middleware(request: NextRequest) {
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' data: blob: ${razorpay} ${publicBase}`.trim(),
     `font-src 'self' data:`,
-    `connect-src 'self' ${razorpay} ${supabaseUrl}`.trim(),
+    // R2 S3 endpoint: browsers PUT large originals via presigned URLs.
+    `connect-src 'self' ${razorpay} https://*.r2.cloudflarestorage.com ${supabaseUrl}`.trim(),
     `frame-src ${razorpay}`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,

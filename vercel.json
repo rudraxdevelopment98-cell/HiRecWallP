@@ -4,6 +4,7 @@
     { "path": "/api/jobs/dynamic-pricing", "schedule": "0 2 * * *" },
     { "path": "/api/jobs/social-scheduler", "schedule": "0 3 * * *" },
     { "path": "/api/jobs/weekly-report", "schedule": "0 8 * * 1" },
-    { "path": "/api/jobs/creator-payouts", "schedule": "0 6 1 * *" }
+    { "path": "/api/jobs/creator-payouts", "schedule": "0 6 1 * *" },
+    { "path": "/api/jobs/housekeeping", "schedule": "0 4 * * *" }
   ]
 }

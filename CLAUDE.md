@@ -183,6 +183,18 @@ Key Phase 3 decisions:
   `profiles` allowed self-update of `role` (self-promote to admin). Both locked down;
   browser-safe `my_credit_balance()` added.
 
+## Storage strategy (2026-10-29) — see docs/STORAGE_STRATEGY.md
+
+- Variants are orientation-aware and never upscaled >15% (`plannedSizes`); masters stored
+  as JPEG (PNG→q95 4:4:4) at `wallpapers/<id>/master.jpg`. ≈8–13 MB/wallpaper (was ≈71 MB).
+- Large uploads: browser → presigned PUT (`/api/uploads/sign`, `incoming/<uid>/`) → upload
+  route reads via `readUpload`. Bypasses Vercel's 4.5 MB body limit.
+- R2 lifecycle (admin "Apply storage rules"): incoming/ 1d, wm/ 7d, generation/ 45d.
+- `images.unoptimized` (Vercel Hobby 5K transforms/mo); public objects cached immutable.
+- Migration 0008: `events_daily` + `housekeeping()` daily cron keeps 30 days of raw events.
+- Owner decisions pending: Vercel Pro before taking payments (Hobby is non-commercial),
+  Supabase Pro at launch (free pauses after 7 days idle), R2 custom domain for previews.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International
