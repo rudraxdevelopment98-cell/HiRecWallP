@@ -6,6 +6,10 @@ import { Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
 
+// The 6-digit code needs {{ .Token }} in the Supabase email templates, which
+// requires custom SMTP. Turn on with NEXT_PUBLIC_AUTH_EMAIL_CODE=1 once set up.
+const EMAIL_CODE_ENABLED = process.env.NEXT_PUBLIC_AUTH_EMAIL_CODE === '1';
+
 /**
  * Email magic link (works with Supabase's default template) with an optional
  * 6-digit code when the template includes {{ .Token }}, plus Google sign-in.
@@ -38,7 +42,11 @@ export function LoginForm({ next }: { next: string }) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await createClient().auth.verifyOtp({ email, token: code.trim(), type: 'email' });
+    const { error } = await createClient().auth.verifyOtp({
+      email,
+      token: code.trim(),
+      type: 'email',
+    });
     setBusy(false);
     if (error) setError(error.message);
     else {
@@ -60,7 +68,9 @@ export function LoginForm({ next }: { next: string }) {
     <div className="w-full space-y-4 text-left">
       {stage === 'email' ? (
         <form onSubmit={sendCode} className="space-y-3">
-          <label className="block text-sm font-medium" htmlFor="email">Email address</label>
+          <label className="block text-sm font-medium" htmlFor="email">
+            Email address
+          </label>
           <input
             id="email"
             type="email"
@@ -85,23 +95,27 @@ export function LoginForm({ next }: { next: string }) {
               and click <strong>Log In</strong> — you&rsquo;ll come straight back here, signed in.
             </p>
           </div>
-          <details className="text-sm">
-            <summary className="cursor-pointer text-muted-foreground">Got a 6-digit code instead?</summary>
-            <form onSubmit={verify} className="mt-3 space-y-3">
-              <input
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="6-digit code"
-                className="input tracking-widest"
-              />
-              <Button type="submit" className="w-full" disabled={busy}>
-                {busy ? 'Verifying…' : 'Verify & sign in'}
-              </Button>
-            </form>
-          </details>
+          {EMAIL_CODE_ENABLED && (
+            <details className="text-sm">
+              <summary className="cursor-pointer text-muted-foreground">
+                Got a 6-digit code instead?
+              </summary>
+              <form onSubmit={verify} className="mt-3 space-y-3">
+                <input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="6-digit code"
+                  className="input tracking-widest"
+                />
+                <Button type="submit" className="w-full" disabled={busy}>
+                  {busy ? 'Verifying…' : 'Verify & sign in'}
+                </Button>
+              </form>
+            </details>
+          )}
           <button type="button" className="text-xs underline" onClick={() => setStage('email')}>
             Use a different email
           </button>
@@ -114,7 +128,11 @@ export function LoginForm({ next }: { next: string }) {
       <Button type="button" variant="outline" className="w-full" onClick={google}>
         Continue with Google
       </Button>
-      {error && <p className="text-sm text-rose-600" role="alert">{error}</p>}
+      {error && (
+        <p className="text-sm text-rose-600" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

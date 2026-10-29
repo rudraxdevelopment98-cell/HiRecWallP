@@ -35,9 +35,12 @@ Legend: 🔑 secret/env · 🌐 account · ⚙️ config step
    redirect URLs `https://<your-domain>/auth/callback` (and
    `http://localhost:3000/auth/callback` for dev, plus your
    `*.vercel.app` URL if you test there).
-6. *(Optional)* Auth → **Email Templates → Magic Link**: add `{{ .Token }}` if
-   you also want a 6-digit code in the email. The default template's
-   **Log In** link already works with `/auth/callback`.
+6. *(Later, with the domain)* Supabase only allows template edits with custom
+   SMTP. Once hirecwallp.com is verified in **Resend**, set it as SMTP under
+   Auth → **SMTP Settings** (also lifts the low built-in email rate limit), add
+   `{{ .Token }}` to the **Confirm signup** and **Magic Link** templates, and set
+   `NEXT_PUBLIC_AUTH_EMAIL_CODE=1` in Vercel to show the code box on /login.
+   Until then the default email's **Log In** link works with `/auth/callback`.
 7. ⚙️ **Make yourself admin** (after first login creates your profile):
    ```sql
    update profiles set role = 'admin' where id = '<your-auth-user-id>';
