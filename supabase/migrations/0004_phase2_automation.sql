@@ -95,6 +95,7 @@ create policy "jobs_log: admin read"        on jobs_log        for select using 
 create or replace function public.touch_generation_job()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();

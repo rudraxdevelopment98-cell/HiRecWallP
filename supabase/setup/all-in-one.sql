@@ -753,6 +753,7 @@ create policy "jobs_log: admin read"        on jobs_log        for select using 
 create or replace function public.touch_generation_job()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -909,6 +910,9 @@ grant execute on function public.my_credit_balance() to authenticated, service_r
 -- --- 2. Profiles: no self-service role changes -------------------------------
 revoke insert, update, delete on table public.profiles from anon, authenticated;
 grant update (display_name, country_code, gstin) on table public.profiles to authenticated;
+
+-- Trigger-only function; never callable over the API.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
 
 -- ================================================================

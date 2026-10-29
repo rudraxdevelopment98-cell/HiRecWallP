@@ -30,6 +30,29 @@ function dbConfigured(): boolean {
   return Boolean(publicEnv.NEXT_PUBLIC_SUPABASE_URL && publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
+let liveCheck: { at: number; live: boolean } | null = null;
+
+/**
+ * True when the catalogue should come from the database: Supabase is
+ * configured AND at least one wallpaper is published. Until the first real
+ * upload, the demo catalogue keeps the storefront populated (demo items can't
+ * be bought). Cached for a minute per server instance.
+ */
+async function catalogueLive(): Promise<boolean> {
+  if (!dbConfigured()) return false;
+  if (liveCheck && Date.now() - liveCheck.at < 60_000) return liveCheck.live;
+  try {
+    const { count } = await createClient()
+      .from('wallpapers')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published');
+    liveCheck = { at: Date.now(), live: (count ?? 0) > 0 };
+  } catch {
+    liveCheck = { at: Date.now(), live: false };
+  }
+  return liveCheck.live;
+}
+
 /** The visitor's current display region (cookie, seeded by middleware). */
 export function getDisplayRegion(): RegionCode {
   const value = cookies().get('region')?.value;
@@ -75,7 +98,7 @@ export async function listPublishedWallpapers(
   region: RegionCode,
   limit = 48,
 ): Promise<WallpaperCard[]> {
-  if (!dbConfigured()) return filterDemo(demoWallpapers(region), filters, limit);
+  if (!(await catalogueLive())) return filterDemo(demoWallpapers(region), filters, limit);
   try {
     const supabase = createClient();
     let query = supabase
@@ -109,7 +132,7 @@ export async function getWallpaperBySlug(
   slug: string,
   region: RegionCode,
 ): Promise<WallpaperCard | null> {
-  if (!dbConfigured()) return demoWallpaperBySlug(slug, region);
+  if (!(await catalogueLive())) return demoWallpaperBySlug(slug, region);
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -126,7 +149,7 @@ export async function getWallpaperBySlug(
 }
 
 export async function listCategories(): Promise<Category[]> {
-  if (!dbConfigured()) return DEMO_CATEGORIES;
+  if (!(await catalogueLive())) return DEMO_CATEGORIES;
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -141,7 +164,7 @@ export async function listCategories(): Promise<Category[]> {
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
-  if (!dbConfigured()) return DEMO_CATEGORIES.find((c) => c.slug === slug) ?? null;
+  if (!(await catalogueLive())) return DEMO_CATEGORIES.find((c) => c.slug === slug) ?? null;
   try {
     const supabase = createClient();
     const { data, error } = await supabase
