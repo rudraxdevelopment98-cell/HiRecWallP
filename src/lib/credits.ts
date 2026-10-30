@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { REGION_PRICING_UNIT, type RegionCode } from '@/lib/geo';
 import { loadSellable, priceItems, resolveCreditRegion, type Licence } from '@/lib/pricing';
+import { getSettings } from '@/lib/settings';
 
 export interface UnlockItem {
   wallpaperId: string;
@@ -21,6 +22,10 @@ export async function unlockWithCredits(
   requested: UnlockItem[],
   displayRegion: RegionCode,
 ): Promise<NextResponse> {
+  const settings = await getSettings();
+  if (!settings.store_open) {
+    return NextResponse.json({ error: 'The store is temporarily closed. Please try again soon.', code: 'store_closed' }, { status: 503 });
+  }
   const creditRegion = await resolveCreditRegion(userId, displayRegion);
   if (REGION_PRICING_UNIT[creditRegion] === 'money') {
     return NextResponse.json(
@@ -64,6 +69,7 @@ export async function unlockWithCredits(
       p_wallpaper: i.wallpaperId,
       p_cost: i.price,
       p_licence: i.licence,
+      p_max_downloads: settings.downloads_per_purchase,
     });
     if (error) throw error;
     if (!entitlementId) {

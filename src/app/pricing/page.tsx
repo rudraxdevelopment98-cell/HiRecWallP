@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Check, Coins, IndianRupee } from 'lucide-react';
+import { Check, Coins, Crown, IndianRupee } from 'lucide-react';
 import { REGION_PRICING_UNIT } from '@/lib/geo';
 import { formatMoneyMinor } from '@/lib/format';
 import { buttonVariants } from '@/components/ui/button';
 import { Reveal } from '@/components/reveal';
 import { NewsletterCard } from '@/components/newsletter-card';
-import { BuyPackButton } from '@/components/pricing/buy-pack-button';
+import { BuyButton, BuyPackButton } from '@/components/pricing/buy-pack-button';
+import { listPlansFor } from '@/lib/membership';
+import { getSettings } from '@/lib/settings';
 import { getDisplayRegion, listCreditPacks } from '@/lib/catalogue';
 
 export const metadata: Metadata = {
@@ -24,7 +26,8 @@ const INCLUDED = [
 export default async function PricingPage() {
   const region = getDisplayRegion();
   const money = REGION_PRICING_UNIT[region] === 'money';
-  const packs = money ? [] : await listCreditPacks(region);
+  const [packs, settings] = await Promise.all([money ? Promise.resolve([]) : listCreditPacks(region), getSettings()]);
+  const plans = settings.membership_enabled ? await listPlansFor(region) : [];
   // One currency per row keeps the grid readable (T1 has GBP/USD/EUR packs).
   const currencies = [...new Set(packs.map((p) => p.currency))];
 
@@ -66,6 +69,44 @@ export default async function PricingPage() {
           </div>
         </Reveal>
       </section>
+
+      {plans.length > 0 && (
+        <section id="membership" className="scroll-mt-24">
+          <h2 className="mb-1 flex items-center gap-2 font-display text-2xl font-semibold tracking-tight">
+            <Crown className="h-5 w-5 text-amber-500" /> Membership passes
+          </h2>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Pay once, add lots of wallpapers to your library. No auto-renew — extend whenever you like.
+          </p>
+          <div className="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
+            {plans.map((plan, i) => (
+              <Reveal key={plan.id} delay={i * 60}>
+                <div className={`h-full rounded-2xl border p-7 ${i === plans.length - 1 ? 'border-foreground bg-card shadow-lg' : 'bg-card'}`}>
+                  <p className="text-sm font-medium text-muted-foreground">{plan.name}</p>
+                  <p className="mt-2">
+                    <span className="font-display text-4xl font-semibold">{formatMoneyMinor(plan.amountMinor, plan.currency)}</span>
+                    <span className="text-sm text-muted-foreground"> / {plan.duration_days} days</span>
+                  </p>
+                  {plan.description && <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>}
+                  <ul className="mt-5 space-y-2 text-sm">
+                    {[`Up to ${plan.download_limit} wallpapers`, ...(plan.includes_commercial ? ['Commercial licence included'] : []), ...plan.perks].map((perk) => (
+                      <li key={perk} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 shrink-0 text-emerald-500" /> {perk}
+                      </li>
+                    ))}
+                  </ul>
+                  <BuyButton
+                    body={{ type: 'membership', planId: plan.id }}
+                    label="Get pass"
+                    description={plan.name}
+                    successUrl="/account/membership?bought=1"
+                  />
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      )}
 
       {!money && (
         <section>
@@ -109,7 +150,7 @@ export default async function PricingPage() {
             wallpaper&rsquo;s page — 5× the personal price. <Link href="/licence" className="underline">Licence terms</Link>
           </p>
         </div>
-        <NewsletterCard />
+        {settings.newsletter_enabled && <NewsletterCard />}
       </section>
     </main>
   );

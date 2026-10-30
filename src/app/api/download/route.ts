@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getSettings } from '@/lib/settings';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
@@ -76,6 +77,9 @@ export async function POST(request: Request) {
 
     // --- Free variant path: no login, IP rate-limited, originals excluded ----
     if (isFreeVariant(variant)) {
+      if (!(await getSettings()).free_downloads) {
+        return NextResponse.json({ error: 'Free downloads are paused right now.' }, { status: 503 });
+      }
       if (!wallpaper.is_free) {
         return NextResponse.json({ error: 'Not a free wallpaper' }, { status: 403 });
       }

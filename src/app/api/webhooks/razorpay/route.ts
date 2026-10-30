@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getProvider } from '@/lib/payments';
+import { getSettings } from '@/lib/settings';
 
 export const runtime = 'nodejs';
 
@@ -79,8 +80,9 @@ export async function POST(request: Request) {
 
     const { data: items } = await supabase
       .from('order_items')
-      .select('wallpaper_id, set_id, credit_pack_id, licence')
+      .select('wallpaper_id, set_id, credit_pack_id, membership_plan_id, licence')
       .eq('order_id', order.id);
+    const maxDownloads = (await getSettings()).downloads_per_purchase;
 
     for (const item of items ?? []) {
       if (item.wallpaper_id) {
@@ -89,6 +91,7 @@ export async function POST(request: Request) {
           p_wallpaper: item.wallpaper_id,
           p_order: order.id,
           p_licence: item.licence ?? 'personal',
+          p_max_downloads: maxDownloads,
         });
       } else if (item.set_id) {
         // Expand the set into its wallpapers and grant each.
@@ -101,8 +104,16 @@ export async function POST(request: Request) {
             p_user: order.user_id,
             p_wallpaper: w.id,
             p_order: order.id,
+            p_max_downloads: maxDownloads,
           });
         }
+      } else if (item.membership_plan_id) {
+        const { error: mErr } = await supabase.rpc('grant_membership', {
+          p_user: order.user_id,
+          p_plan: item.membership_plan_id,
+          p_order: order.id,
+        });
+        if (mErr) throw mErr;
       } else if (item.credit_pack_id) {
         const { data: pack } = await supabase
           .from('credit_packs')

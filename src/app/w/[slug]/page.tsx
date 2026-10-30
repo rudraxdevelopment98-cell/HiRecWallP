@@ -6,6 +6,9 @@ import { Check, Download, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { FavouriteButton } from '@/components/favourite-button';
+import { MemberClaimButton } from '@/components/member-claim-button';
+import { getMyMembership } from '@/lib/membership';
+import { getSettings } from '@/lib/settings';
 import { AddToCart } from '@/components/add-to-cart';
 import { DownloadButton } from '@/components/download-button';
 import { FREE_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
@@ -50,6 +53,10 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
       ? ((await downloadableVariants([w.id])).get(w.id) ?? ['free_phone', 'free_desktop']).filter((v) => v in FREE_VARIANT_LABELS)
       : [];
   const sizes = (w.devices ?? []).filter((d) => d in SIZE_INFO);
+  const [membership, settings] = await Promise.all([
+    !w.is_free && UUID.test(w.id) ? getMyMembership() : Promise.resolve(null),
+    getSettings(),
+  ]);
   const commercialPrice =
     !w.is_free && w.price != null
       ? REGION_PRICING_UNIT[region] === 'money'
@@ -145,6 +152,8 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
                 >
                   <Download className="mr-1 h-4 w-4" /> Download Free
                 </a>
+              ) : !settings.free_downloads ? (
+                <p className="flex-1 rounded-xl border p-3 text-sm text-muted-foreground">Free downloads are paused right now.</p>
               ) : (
                 <div className="flex flex-1 flex-wrap items-start gap-2">
                   {freeVariants.map((v) => (
@@ -152,6 +161,8 @@ export default async function WallpaperDetailPage({ params }: { params: { slug: 
                   ))}
                 </div>
               )
+            ) : membership ? (
+              <MemberClaimButton wallpaperId={w.id} remaining={membership.download_limit - membership.downloads_used} />
             ) : (
               <AddToCart
                 item={{

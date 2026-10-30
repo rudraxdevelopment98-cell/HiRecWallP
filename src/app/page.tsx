@@ -8,15 +8,17 @@ import { CategoryRow } from '@/components/category-row';
 import { NewsletterCard } from '@/components/newsletter-card';
 import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listCategories, listPublishedWallpapers, listSets } from '@/lib/catalogue';
+import { getSettings } from '@/lib/settings';
 import { REGION_PRICING_UNIT } from '@/lib/geo';
 
 export default async function HomePage() {
   const region = getDisplayRegion();
-  const [featured, categories, sets, freePicks] = await Promise.all([
+  const [featured, categories, sets, freePicks, settings] = await Promise.all([
     listPublishedWallpapers({ sort: 'newest' }, region, 8),
     listCategories(),
     listSets(),
     listPublishedWallpapers({ free: true, sort: 'newest' }, region, 5),
+    getSettings(),
   ]);
   const money = REGION_PRICING_UNIT[region] === 'money';
   const set = sets[0];
@@ -107,9 +109,11 @@ export default async function HomePage() {
           </div>
         </Reveal>
 
-        <Reveal>
-          <NewsletterCard />
-        </Reveal>
+        {settings.newsletter_enabled && (
+          <Reveal>
+            <NewsletterCard />
+          </Reveal>
+        )}
       </section>
     </main>
   );

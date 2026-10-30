@@ -57,3 +57,14 @@ test('admin APIs reject non-admins', async ({ request, baseURL }) => {
   expect((await request.get('/api/admin/newsletter')).status()).toBe(403);
   expect((await request.patch(`/api/admin/creators/${id}`, { headers: origin(baseURL), data: { kyc_status: 'verified' } })).status()).toBe(403);
 });
+
+test('control-centre and membership APIs are protected', async ({ request, baseURL }) => {
+  const h = origin(baseURL);
+  const id = '00000000-0000-0000-0000-000000000000';
+  expect((await request.put('/api/admin/settings', { headers: h, data: { key: 'store_open', value: false } })).status()).toBe(403);
+  expect((await request.patch('/api/admin/price-rules', { headers: h, data: { region_code: 'IN' } })).status()).toBe(403);
+  expect((await request.post('/api/admin/plans', { headers: h, data: {} })).status()).toBe(403);
+  expect((await request.post('/api/admin/members', { headers: h, data: {} })).status()).toBe(403);
+  expect((await request.delete(`/api/admin/categories/${id}`, { headers: h })).status()).toBe(403);
+  expect((await request.post('/api/membership/claim', { headers: h, data: { wallpaperId: id } })).status()).toBe(401);
+});

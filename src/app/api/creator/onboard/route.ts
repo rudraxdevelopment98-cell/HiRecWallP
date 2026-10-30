@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getSettings } from '@/lib/settings';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/http';
@@ -31,6 +32,10 @@ export async function POST(request: Request) {
 
   try {
     const supabase = createServiceClient();
+    if (!(await getSettings()).creator_signups) {
+      const { data: existing } = await supabase.from('creators').select('user_id').eq('user_id', user.id).maybeSingle();
+      if (!existing) return NextResponse.json({ error: 'Creator sign-ups are closed right now.' }, { status: 403 });
+    }
     const kyc = await getPayoutProvider(parsed.data.payoutProvider).startKyc({
       creatorId: user.id,
       accountId: parsed.data.payoutAccountId,

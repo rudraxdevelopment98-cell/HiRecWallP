@@ -207,6 +207,20 @@ Key Phase 3 decisions:
   sold), orders, customers, creators (KYC/commission), messages (contact + takedowns),
   newsletter CSV. Migration 0009.
 
+## Admin control centre + membership (2026-10-30)
+
+- `site_settings` (migration 0010) + `getSettings()` (30 s cache): store_open, membership_enabled,
+  creator_signups, free_downloads, newsletter_enabled, downloads_per_purchase, announcement bar.
+  Edited at /admin/settings; enforced in create-order, credit unlocks, download (free), creator
+  onboard, newsletter API, and the UI.
+- Membership = **prepaid pass** (no auto-renew; avoids RBI e-mandate rules). Plans in
+  `membership_plans` (per-region prices in minor units). create-order `{type:'membership'}` →
+  webhook `grant_membership` (stacks renewals) → members use `/api/membership/claim`
+  (`member_unlock`, allowance per pass). Admin: /admin/membership (plans CRUD, comp passes,
+  extend/allowance/revoke). Starter plans seeded **inactive**.
+- Also editable now: default prices + commercial multiplier per region, credit packs,
+  categories, sets (`src/lib/admin-crud.ts` + `src/lib/admin-schemas.ts`).
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

@@ -15,6 +15,7 @@ Phase 1 schema, Row Level Security and seed data for HirecWallp.
 | `migrations/0007_security_hardening.sql` | **Security:** lock payment RPCs to service_role, block profile role self-escalation, add my_credit_balance() |
 | `migrations/0008_housekeeping.sql` | events_daily rollup + housekeeping() (raw events kept 30 days by the daily cron) |
 | `migrations/0009_site_completion.sql` | size metadata on wallpapers, favourites, newsletter, contact messages, invoice numbers; global prices public |
+| `migrations/0010_membership_and_settings.sql` | site_settings, membership plans/passes, grant_membership(), member_unlock() |
 | `setup/all-in-one.sql` | **Easiest:** 0001–0007 + seed concatenated, for one paste into the Supabase SQL Editor (new project only) |
 | `seed/seed.sql` | Regions, global price rules, credit packs, launch categories, sample prompts |
 
@@ -34,6 +35,7 @@ psql "$DATABASE_URL" -f supabase/migrations/0006_phase3_marketplace.sql
 psql "$DATABASE_URL" -f supabase/migrations/0007_security_hardening.sql
 psql "$DATABASE_URL" -f supabase/migrations/0008_housekeeping.sql
 psql "$DATABASE_URL" -f supabase/migrations/0009_site_completion.sql
+psql "$DATABASE_URL" -f supabase/migrations/0010_membership_and_settings.sql
 psql "$DATABASE_URL" -f supabase/seed/seed.sql
 ```
 

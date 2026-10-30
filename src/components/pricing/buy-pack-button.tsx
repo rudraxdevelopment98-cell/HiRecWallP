@@ -12,10 +12,23 @@ interface Status {
 }
 
 /**
- * Buy a credit pack directly (Razorpay, international cards). Credits are
- * added only by the verified webhook; the credits page shows them arriving.
+ * Buy something directly with Razorpay (credit pack or membership pass).
+ * Nothing is granted here — only the verified webhook does that; the
+ * success page shows it arriving.
  */
-export function BuyPackButton({ packId, credits }: { packId: string; credits: number }) {
+export function BuyButton({
+  body,
+  label,
+  description,
+  successUrl,
+  next = '/pricing',
+}: {
+  body: Record<string, unknown>;
+  label: string;
+  description: string;
+  successUrl: string;
+  next?: string;
+}) {
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +50,7 @@ export function BuyPackButton({ packId, credits }: { packId: string; credits: nu
   }
   if (!status.signedIn) {
     return (
-      <Link href="/login?next=/pricing" className={buttonVariants({ className: 'mt-4 w-full' })}>
+      <Link href={`/login?next=${encodeURIComponent(next)}`} className={buttonVariants({ className: 'mt-4 w-full' })}>
         Sign in to buy
       </Link>
     );
@@ -50,17 +63,17 @@ export function BuyPackButton({ packId, credits }: { packId: string; credits: nu
       const res = await fetch('/api/checkout/create-order', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ type: 'credit_pack', creditPackId: packId }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Checkout unavailable');
       const outcome = await payWithRazorpay({
         checkout: data.checkout,
         name: 'HirecWallp',
-        description: `${credits} credits`,
+        description,
         email: status?.email,
       });
-      if (outcome.status === 'success') window.location.href = '/account/credits?bought=1';
+      if (outcome.status === 'success') window.location.href = successUrl;
       else if (outcome.reason) setError(outcome.reason);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -72,9 +85,20 @@ export function BuyPackButton({ packId, credits }: { packId: string; credits: nu
   return (
     <>
       <Button className="mt-4 w-full" onClick={buy} disabled={busy}>
-        {busy ? 'Opening…' : 'Buy credits'}
+        {busy ? 'Opening…' : label}
       </Button>
       {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
     </>
+  );
+}
+
+export function BuyPackButton({ packId, credits }: { packId: string; credits: number }) {
+  return (
+    <BuyButton
+      body={{ type: 'credit_pack', creditPackId: packId }}
+      label="Buy credits"
+      description={`${credits} credits`}
+      successUrl="/account/credits?bought=1"
+    />
   );
 }

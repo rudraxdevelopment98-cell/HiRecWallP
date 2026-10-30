@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { OnboardForm } from '@/components/creator/onboard-form';
 import { createServiceClient } from '@/lib/supabase/service';
+import { getSettings } from '@/lib/settings';
 
 const STATUS_LABEL: Record<string, string> = {
   pending_review: 'In review',
@@ -17,6 +18,15 @@ export const metadata: Metadata = { title: 'Creator' };
 
 export default async function CreatorDashboardPage() {
   const creator = await getCreator();
+
+  if (!creator && !(await getSettings()).creator_signups) {
+    return (
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold">Creator sign-ups are closed</h1>
+        <p className="text-sm text-muted-foreground">We&rsquo;re not accepting new creators right now. Please check back soon.</p>
+      </div>
+    );
+  }
 
   if (!creator) {
     return (

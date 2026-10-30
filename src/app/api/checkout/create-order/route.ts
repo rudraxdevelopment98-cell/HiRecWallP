@@ -6,6 +6,7 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { getProvider } from '@/lib/payments';
 import { loadSellable, priceItems, toMinorUnits } from '@/lib/pricing';
 import {
+  REGION_CURRENCY,
   REGION_PRICING_UNIT,
   REGION_RANK,
   chargeRegionFor,
@@ -14,6 +15,7 @@ import {
   type RegionCode,
 } from '@/lib/geo';
 import { isSameOrigin } from '@/lib/http';
+import { getSettings } from '@/lib/settings';
 
 export const runtime = 'nodejs';
 
@@ -29,6 +31,7 @@ const schema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('wallpaper'), wallpaperId: z.string().uuid(), licence, billingCountry: country }),
   z.object({ type: z.literal('cart'), items: z.array(item).min(1).max(20), billingCountry: country }),
   z.object({ type: z.literal('credit_pack'), creditPackId: z.string().uuid(), billingCountry: country }),
+  z.object({ type: z.literal('membership'), planId: z.string().uuid(), billingCountry: country }),
 ]);
 
 /**
@@ -49,6 +52,11 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+
+  const settings = await getSettings();
+  if (!settings.store_open) {
+    return NextResponse.json({ error: 'The store is temporarily closed. Please try again soon.', code: 'store_closed' }, { status: 503 });
+  }
 
   const displayRegion = getDisplayRegion();
   const billingCountry = parsed.data.billingCountry ?? null;
@@ -101,6 +109,50 @@ export async function POST(request: Request) {
       await supabase.from('orders').update({ provider_order_id: providerOrder.providerOrderId }).eq('id', order.id);
 
       return NextResponse.json({ orderId: order.id, checkout: providerOrder.checkout, credits: pack.credits });
+    }
+
+    // --- Membership pass ---------------------------------------------------
+    if (parsed.data.type === 'membership') {
+      if (!settings.membership_enabled) {
+        return NextResponse.json({ error: 'Memberships are not on sale right now.' }, { status: 409 });
+      }
+      const { data: plan } = await supabase
+        .from('membership_plans')
+        .select('id, name, prices, active')
+        .eq('id', parsed.data.planId)
+        .eq('active', true)
+        .maybeSingle();
+      const amountMinor = plan ? (plan.prices as Record<string, number>)?.[chargeRegion] : undefined;
+      if (!plan || typeof amountMinor !== 'number' || amountMinor <= 0) {
+        return NextResponse.json({ error: 'This plan is not available for your billing country.' }, { status: 400 });
+      }
+      const money = REGION_PRICING_UNIT[chargeRegion] === 'money';
+      const provider = money ? 'razorpay' : 'razorpay_intl';
+      const currency = REGION_CURRENCY[chargeRegion];
+
+      const { data: order, error: orderErr } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          provider,
+          status: 'created',
+          currency,
+          amount_minor: amountMinor,
+          billing_country: billingCountry,
+        })
+        .select('id')
+        .single();
+      if (orderErr || !order) throw orderErr ?? new Error('order insert failed');
+      await supabase.from('order_items').insert({ order_id: order.id, membership_plan_id: plan.id });
+
+      const providerOrder = await getProvider(provider).createOrder({
+        amountMinor,
+        currency,
+        receipt: order.id,
+        notes: { orderId: order.id, userId: user.id, plan: String(plan.name) },
+      });
+      await supabase.from('orders').update({ provider_order_id: providerOrder.providerOrderId }).eq('id', order.id);
+      return NextResponse.json({ orderId: order.id, checkout: providerOrder.checkout, amountMinor, currency });
     }
 
     // --- Per-item wallpaper purchase (India, INR) ------------------------

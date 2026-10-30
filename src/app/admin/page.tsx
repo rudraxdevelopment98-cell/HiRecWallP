@@ -14,6 +14,7 @@ interface Stats {
   newMessages: number;
   openTakedowns: number;
   subscribers: number;
+  members: number;
   recent: { id: string; amount_minor: number; currency: string; status: string; created_at: string }[];
   /** Paid orders per day, last 7 days (count — currencies differ). */
   weekly: number[];
@@ -33,6 +34,11 @@ async function loadStats(): Promise<Stats | null> {
       supabase.from('takedown_reports').select('id', head).in('status', ['open', 'reviewing']),
       supabase.from('newsletter_subscribers').select('id', head),
     ]);
+    const { count: members } = await supabase
+      .from('memberships')
+      .select('id', head)
+      .eq('status', 'active')
+      .gt('ends_at', new Date().toISOString());
     const paid = orders.data ?? [];
     const weekly = Array.from({ length: 7 }, () => 0);
     const now = Date.now();
@@ -49,6 +55,7 @@ async function loadStats(): Promise<Stats | null> {
       newMessages: messages.count ?? 0,
       openTakedowns: takedowns.count ?? 0,
       subscribers: subs.count ?? 0,
+      members: members ?? 0,
       recent: paid.slice(0, 6),
       weekly,
     };
@@ -127,6 +134,8 @@ export default async function AdminOverviewPage() {
           <Todo href="/admin/catalogue?status=draft" n={stats.drafts} label="Drafts not published" />
           <Todo href="/admin/messages" n={stats.newMessages + stats.openTakedowns} label="Messages & takedowns open" />
           <Todo href="/admin/newsletter" n={stats.subscribers} label="Newsletter subscribers" />
+          <Todo href="/admin/membership" n={stats.members} label="Active members" />
+          <Todo href="/admin/settings" n={0} label="Settings & controls" hideCount />
         </div>
       )}
     </div>
@@ -142,10 +151,10 @@ function Kpi({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Todo({ href, n, label }: { href: string; n: number; label: string }) {
+function Todo({ href, n, label, hideCount }: { href: string; n: number; label: string; hideCount?: boolean }) {
   return (
     <Link href={href} className="rounded-2xl border bg-card p-4 text-sm hover:border-foreground/40">
-      <p className="text-xl font-semibold">{n}</p>
+      <p className="text-xl font-semibold">{hideCount ? '⚙︎' : n}</p>
       <p className="text-muted-foreground">{label} →</p>
     </Link>
   );

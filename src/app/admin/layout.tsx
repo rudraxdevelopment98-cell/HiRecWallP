@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
+  Coins,
+  Crown,
+  FolderTree,
+  Settings,
   Images,
   Inbox,
   LayoutDashboard,
@@ -28,7 +32,11 @@ const NAV = [
   { href: '/admin/creators', label: 'Creators', icon: Palette },
   { href: '/admin/messages', label: 'Messages', icon: Inbox },
   { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
-  { href: '/admin/pricing', label: 'Pricing', icon: Tags },
+  { href: '/admin/settings', label: 'Settings & controls', icon: Settings },
+  { href: '/admin/membership', label: 'Membership', icon: Crown },
+  { href: '/admin/credit-packs', label: 'Credit packs', icon: Coins },
+  { href: '/admin/categories', label: 'Categories & sets', icon: FolderTree },
+  { href: '/admin/pricing', label: 'Auto pricing', icon: Tags },
   { href: '/admin/social', label: 'Social', icon: Megaphone },
 ];
 
