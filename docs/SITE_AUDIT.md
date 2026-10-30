@@ -16,7 +16,7 @@ Legend: ✅ done · ⏳ in progress · ⬜ to do · 🧑‍⚖️ needs owner/pr
 - ✅ A6 Detail page details table: real max resolution/sizes instead of fixed "JPG / 8K, 24-bit"
 - ✅ A7 FAQ: remove membership-cancel answer, "up to 8K", fix answers to match how the shop works
 - ✅ A8 Contact page: remove "Live chat" (doesn't exist)
-- ✅ A9 Pricing page: membership plans have no backend → real pricing (India per-item, credit packs with Buy buttons); membership marked "coming soon" 🧑‍⚖️ (build later only if owner wants subscriptions)
+- ✅ A9 Pricing page: membership plans have no backend → real pricing (India per-item, credit packs with Buy buttons); membership removed 🧑‍⚖️ (build later only if owner wants subscriptions)
 - ✅ A10 Header "Membership" → "Pricing"
 - ✅ A11 Newsletter box saves nothing → store sign-ups (admin can export)
 - ✅ A12 Footer social icons link to "#" → hide until real accounts are configured
@@ -33,7 +33,7 @@ Legend: ✅ done · ⏳ in progress · ⬜ to do · 🧑‍⚖️ needs owner/pr
 
 ## C. Shop & catalogue
 - ✅ C1 Explore filters: Device / Orientation / Resolution actually filter (were ignored)
-- ✅ C2 Explore sorting (newest / price) and real pagination (was always "page 1 of 1")
+- ✅ C2 Explore sorting (newest / oldest / name — price sort skipped: prices are near-uniform) and real pagination (was always "page 1 of 1")
 - ✅ C3 Studio finder: device + mood choices carry through to results
 - ✅ C4 Detail page: "Choose resolution" was decorative → shows the sizes actually included
 - ✅ C5 Detail page: commercial licence can be added to cart (was price text only)
