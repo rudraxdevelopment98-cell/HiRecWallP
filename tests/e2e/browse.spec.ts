@@ -18,7 +18,7 @@ test('explore page renders with filters', async ({ page }) => {
 
 test('free page renders', async ({ page }) => {
   await page.goto('/free');
-  await expect(page.getByRole('heading', { name: 'Free picks' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Free wallpapers' })).toBeVisible();
 });
 
 test('pricing page renders', async ({ page }) => {

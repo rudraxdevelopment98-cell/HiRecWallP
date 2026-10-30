@@ -1,14 +1,21 @@
 import { createServiceClient } from '@/lib/supabase/service';
 import { publicEnv } from '@/lib/env';
 import { formatMoneyMinor } from '@/lib/format';
+import Link from 'next/link';
 import { RunJobButton } from '@/components/admin/run-job-button';
+import { sumByCurrency } from '@/lib/admin';
 
 interface Stats {
-  revenueMinor: number;
+  revenue: Map<string, number>;
   paidOrders: number;
   published: number;
+  drafts: number;
   creatorSubmissions: number;
+  newMessages: number;
+  openTakedowns: number;
+  subscribers: number;
   recent: { id: string; amount_minor: number; currency: string; status: string; created_at: string }[];
+  /** Paid orders per day, last 7 days (count — currencies differ). */
   weekly: number[];
 }
 
@@ -16,25 +23,32 @@ async function loadStats(): Promise<Stats | null> {
   if (!publicEnv.NEXT_PUBLIC_SUPABASE_URL) return null;
   try {
     const supabase = createServiceClient();
-    const [published, creatorSubs, orders] = await Promise.all([
-      supabase.from('wallpapers').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-      supabase.from('wallpapers').select('id', { count: 'exact', head: true }).eq('status', 'pending_review').not('creator_id', 'is', null),
-      supabase.from('orders').select('id, amount_minor, currency, status, created_at').eq('status', 'paid').order('created_at', { ascending: false }).limit(50),
+    const head = { count: 'exact' as const, head: true };
+    const [published, drafts, creatorSubs, orders, messages, takedowns, subs] = await Promise.all([
+      supabase.from('wallpapers').select('id', head).eq('status', 'published'),
+      supabase.from('wallpapers').select('id', head).eq('status', 'draft'),
+      supabase.from('wallpapers').select('id', head).eq('status', 'pending_review').not('creator_id', 'is', null),
+      supabase.from('orders').select('id, amount_minor, currency, status, created_at').eq('status', 'paid').order('created_at', { ascending: false }).limit(1000),
+      supabase.from('contact_messages').select('id', head).eq('status', 'new'),
+      supabase.from('takedown_reports').select('id', head).in('status', ['open', 'reviewing']),
+      supabase.from('newsletter_subscribers').select('id', head),
     ]);
     const paid = orders.data ?? [];
-    const revenueMinor = paid.reduce((s, o) => s + o.amount_minor, 0);
-    // last-7-day revenue buckets
     const weekly = Array.from({ length: 7 }, () => 0);
     const now = Date.now();
     for (const o of paid) {
       const days = Math.floor((now - new Date(o.created_at).getTime()) / 86_400_000);
-      if (days >= 0 && days < 7) weekly[6 - days]! += o.amount_minor;
+      if (days >= 0 && days < 7) weekly[6 - days]! += 1;
     }
     return {
-      revenueMinor,
+      revenue: sumByCurrency(paid),
       paidOrders: paid.length,
       published: published.count ?? 0,
+      drafts: drafts.count ?? 0,
       creatorSubmissions: creatorSubs.count ?? 0,
+      newMessages: messages.count ?? 0,
+      openTakedowns: takedowns.count ?? 0,
+      subscribers: subs.count ?? 0,
       recent: paid.slice(0, 6),
       weekly,
     };
@@ -45,8 +59,10 @@ async function loadStats(): Promise<Stats | null> {
 
 export default async function AdminOverviewPage() {
   const stats = await loadStats();
-  // Demo bars when there's no data yet, so the chart isn't empty.
-  const bars = stats && stats.weekly.some((v) => v > 0) ? stats.weekly : [40, 65, 52, 80, 72, 95, 88];
+  const bars = stats?.weekly ?? Array.from({ length: 7 }, () => 0);
+  const revenue = stats ? [...stats.revenue].map(([cur, minor]) => formatMoneyMinor(minor, cur)).join(' · ') : '';
+  const dayLabel = (i: number) =>
+    new Date(Date.now() - (6 - i) * 86_400_000).toLocaleDateString('en-IN', { weekday: 'short' });
 
   return (
     <div className="space-y-8">
@@ -59,15 +75,15 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi label="Revenue (paid)" value={stats ? formatMoneyMinor(stats.revenueMinor, stats.recent[0]?.currency ?? 'INR') : '—'} />
+        <Kpi label="Revenue (paid, all time)" value={revenue || '—'} />
         <Kpi label="Paid orders" value={stats ? String(stats.paidOrders) : '—'} />
         <Kpi label="Published" value={stats ? String(stats.published) : '—'} />
-        <Kpi label="Creator submissions" value={stats ? String(stats.creatorSubmissions) : '—'} />
+        <Kpi label="Drafts" value={stats ? String(stats.drafts) : '—'} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-4 font-semibold">Sales — last 7 days</h2>
+          <h2 className="mb-4 font-semibold">Paid orders — last 7 days</h2>
           <div className="flex h-40 items-end gap-3">
             {bars.map((v, i) => {
               const max = Math.max(...bars, 1);
@@ -75,14 +91,15 @@ export default async function AdminOverviewPage() {
                 <div key={i} className="flex flex-1 flex-col items-center gap-2">
                   <div
                     className="w-full rounded-t-md bg-primary/85 transition-[height]"
-                    style={{ height: `${Math.max(6, (v / max) * 100)}%` }}
+                    style={{ height: `${v === 0 ? 2 : Math.max(8, (v / max) * 100)}%` }}
+                    title={`${v} order(s)`}
                   />
-                  <span className="text-[10px] text-muted-foreground">D{i + 1}</span>
+                  <span className="text-[10px] text-muted-foreground">{dayLabel(i)}</span>
                 </div>
               );
             })}
           </div>
-          {!stats && <p className="mt-3 text-xs text-muted-foreground">Illustrative — connect Supabase for live sales.</p>}
+          {bars.every((v) => v === 0) && <p className="mt-3 text-xs text-muted-foreground">No paid orders in the last 7 days.</p>}
         </div>
 
         <div className="rounded-2xl border bg-card p-6">
@@ -93,7 +110,9 @@ export default async function AdminOverviewPage() {
             <ul className="divide-y text-sm">
               {stats.recent.map((o) => (
                 <li key={o.id} className="flex items-center justify-between py-2">
-                  <span className="truncate text-muted-foreground">#{o.id.slice(0, 8)}</span>
+                  <Link href="/admin/orders" className="truncate text-muted-foreground hover:underline">
+                    #{o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleDateString('en-IN')}
+                  </Link>
                   <span className="font-medium">{formatMoneyMinor(o.amount_minor, o.currency)}</span>
                 </li>
               ))}
@@ -102,10 +121,13 @@ export default async function AdminOverviewPage() {
         </div>
       </div>
 
-      {stats && stats.creatorSubmissions > 0 && (
-        <p className="text-sm text-muted-foreground">
-          {stats.creatorSubmissions} creator submission(s) awaiting review in <strong>Catalogue</strong>.
-        </p>
+      {stats && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Todo href="/admin/catalogue?status=pending_review" n={stats.creatorSubmissions} label="Creator submissions to review" />
+          <Todo href="/admin/catalogue?status=draft" n={stats.drafts} label="Drafts not published" />
+          <Todo href="/admin/messages" n={stats.newMessages + stats.openTakedowns} label="Messages & takedowns open" />
+          <Todo href="/admin/newsletter" n={stats.subscribers} label="Newsletter subscribers" />
+        </div>
       )}
     </div>
   );
@@ -117,5 +139,14 @@ function Kpi({ label, value }: { label: string; value: string }) {
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold">{value}</p>
     </div>
+  );
+}
+
+function Todo({ href, n, label }: { href: string; n: number; label: string }) {
+  return (
+    <Link href={href} className="rounded-2xl border bg-card p-4 text-sm hover:border-foreground/40">
+      <p className="text-xl font-semibold">{n}</p>
+      <p className="text-muted-foreground">{label} →</p>
+    </Link>
   );
 }

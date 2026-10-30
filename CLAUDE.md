@@ -195,6 +195,18 @@ Key Phase 3 decisions:
 - Owner decisions pending: Vercel Pro before taking payments (Hobby is non-commercial),
   Supabase Pro at launch (free pauses after 7 days idle), R2 custom domain for previews.
 
+## Site audit (2026-10-30) — see docs/SITE_AUDIT.md
+
+- Removed fake content (discounts, ratings, invented stats, 8K claims, membership plans, live chat).
+- Customer account: /account (settings + GSTIN), /account/orders (+ printable receipt with
+  sequential invoice no. via `assign_invoice`), /account/credits, /account/favourites.
+- Catalogue: `searchWallpapers` with real device/orientation/resolution filters (public
+  `wallpapers.orientation|max_long_edge|devices`, set at upload), sort, paging; display price
+  falls back to the global rule like checkout does.
+- Admin: per-currency revenue, catalogue edit/unpublish/archive/delete (delete blocked once
+  sold), orders, customers, creators (KYC/commission), messages (contact + takedowns),
+  newsletter CSV. Migration 0009.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

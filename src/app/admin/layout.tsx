@@ -2,7 +2,12 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
   Images,
+  Inbox,
   LayoutDashboard,
+  Mail,
+  Palette,
+  Receipt,
+  Users,
   ListChecks,
   Megaphone,
   Mountain,
@@ -18,6 +23,11 @@ const NAV = [
   { href: '/admin/prompts', label: 'Prompts', icon: Sparkles },
   { href: '/admin/upload', label: 'Upload', icon: Upload },
   { href: '/admin/catalogue', label: 'Catalogue', icon: Images },
+  { href: '/admin/orders', label: 'Orders', icon: Receipt },
+  { href: '/admin/customers', label: 'Customers', icon: Users },
+  { href: '/admin/creators', label: 'Creators', icon: Palette },
+  { href: '/admin/messages', label: 'Messages', icon: Inbox },
+  { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
   { href: '/admin/pricing', label: 'Pricing', icon: Tags },
   { href: '/admin/social', label: 'Social', icon: Megaphone },
 ];

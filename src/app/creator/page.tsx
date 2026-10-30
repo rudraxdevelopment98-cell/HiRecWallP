@@ -4,6 +4,14 @@ import { getCreator } from '@/lib/creator';
 import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { OnboardForm } from '@/components/creator/onboard-form';
+import { createServiceClient } from '@/lib/supabase/service';
+
+const STATUS_LABEL: Record<string, string> = {
+  pending_review: 'In review',
+  published: 'Live',
+  draft: 'Not published',
+  archived: 'Archived',
+};
 
 export const metadata: Metadata = { title: 'Creator' };
 
@@ -24,6 +32,14 @@ export default async function CreatorDashboardPage() {
       </div>
     );
   }
+
+  // Creators can't read their own unpublished rows under RLS; scope by their id.
+  const { data: submissions } = await createServiceClient()
+    .from('wallpapers')
+    .select('id, slug, title, status, created_at')
+    .eq('creator_id', creator.user_id)
+    .order('created_at', { ascending: false })
+    .limit(100);
 
   return (
     <div className="space-y-6">
@@ -49,6 +65,31 @@ export default async function CreatorDashboardPage() {
           Your KYC is <strong>{creator.kyc_status}</strong>. Payouts are released once verified.
         </p>
       )}
+
+      <section>
+        <h2 className="mb-3 font-semibold">Your submissions</h2>
+        {(submissions ?? []).length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nothing uploaded yet.</p>
+        ) : (
+          <ul className="divide-y rounded-2xl border bg-card text-sm">
+            {(submissions ?? []).map((w) => (
+              <li key={w.id as string} className="flex items-center justify-between gap-3 p-3">
+                {w.status === 'published' ? (
+                  <Link href={`/w/${w.slug}`} className="font-medium hover:underline">
+                    {w.title as string}
+                  </Link>
+                ) : (
+                  <span className="font-medium">{w.title as string}</span>
+                )}
+                <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                  {new Date(w.created_at as string).toLocaleDateString('en-IN')}
+                  <Badge variant={w.status === 'published' ? 'free' : 'secondary'}>{STATUS_LABEL[w.status as string] ?? (w.status as string)}</Badge>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
