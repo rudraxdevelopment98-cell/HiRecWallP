@@ -43,8 +43,8 @@ export function addItem(item: CartItem) {
   }
 }
 
-export function removeItem(id: string) {
-  save(getCart().filter((i) => i.id !== id));
+export function removeItem(id: string, licence?: CartItem['licence']) {
+  save(getCart().filter((i) => !(i.id === id && (licence === undefined || i.licence === licence))));
 }
 
 export function clearCart() {

@@ -43,7 +43,7 @@ export default function CartPage() {
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           <ul className="divide-y rounded-2xl border bg-card">
             {items.map((i) => (
-              <li key={i.id} className="flex items-center gap-4 p-4">
+              <li key={`${i.id}:${i.licence}`} className="flex items-center gap-4 p-4">
                 <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-lg border bg-muted">
                   {i.image && <Image src={i.image} alt={i.title} fill sizes="80px" className="object-cover" />}
                 </div>
@@ -56,7 +56,7 @@ export default function CartPage() {
                 <span className="font-semibold">{i.priceLabel}</span>
                 <button
                   type="button"
-                  onClick={() => removeItem(i.id)}
+                  onClick={() => removeItem(i.id, i.licence)}
                   aria-label="Remove"
                   className="rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
                 >

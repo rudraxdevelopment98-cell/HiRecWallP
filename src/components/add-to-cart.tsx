@@ -8,12 +8,23 @@ import { buttonVariants } from '@/components/ui/button';
 import { addItem, getCart, type CartItem } from '@/lib/cart';
 
 /** "Add to Cart" for the product detail page (client-side cart). */
-export function AddToCart({ item }: { item: CartItem }) {
+export function AddToCart({
+  item,
+  label = 'Add to Cart',
+  variant = 'default',
+}: {
+  item: CartItem;
+  label?: string;
+  variant?: 'default' | 'outline';
+}) {
   const [inCart, setInCart] = useState(false);
 
   useEffect(() => {
-    setInCart(getCart().some((i) => i.id === item.id));
-  }, [item.id]);
+    const sync = () => setInCart(getCart().some((i) => i.id === item.id && i.licence === item.licence));
+    sync();
+    window.addEventListener('cart:updated', sync);
+    return () => window.removeEventListener('cart:updated', sync);
+  }, [item.id, item.licence]);
 
   if (inCart) {
     return (
@@ -31,13 +42,14 @@ export function AddToCart({ item }: { item: CartItem }) {
   return (
     <Button
       size="lg"
+      variant={variant}
       className="flex-1"
       onClick={() => {
         addItem(item);
         setInCart(true);
       }}
     >
-      <ShoppingBag className="mr-1 h-4 w-4" /> Add to Cart
+      <ShoppingBag className="mr-1 h-4 w-4" /> {label}
     </Button>
   );
 }

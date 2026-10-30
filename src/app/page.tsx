@@ -7,19 +7,19 @@ import { Hero } from '@/components/hero';
 import { CategoryRow } from '@/components/category-row';
 import { NewsletterCard } from '@/components/newsletter-card';
 import { Reveal } from '@/components/reveal';
-import { getDisplayRegion, listCategories, listPublishedWallpapers } from '@/lib/catalogue';
+import { getDisplayRegion, listCategories, listPublishedWallpapers, listSets } from '@/lib/catalogue';
 import { REGION_PRICING_UNIT } from '@/lib/geo';
-import { formatRegionPrice } from '@/lib/format';
 
 export default async function HomePage() {
   const region = getDisplayRegion();
-  const [featured, categories] = await Promise.all([
-    listPublishedWallpapers({ sort: 'popular' }, region, 8),
+  const [featured, categories, sets, freePicks] = await Promise.all([
+    listPublishedWallpapers({ sort: 'newest' }, region, 8),
     listCategories(),
+    listSets(),
+    listPublishedWallpapers({ free: true, sort: 'newest' }, region, 5),
   ]);
   const money = REGION_PRICING_UNIT[region] === 'money';
-  const bundlePrice = money ? formatRegionPrice(149, region) : '8 credits';
-  const bundleWas = money ? formatRegionPrice(299, region) : '16 credits';
+  const set = sets[0];
 
   return (
     <main>
@@ -72,23 +72,38 @@ export default async function HomePage() {
 
         <Reveal>
           <div className="flex h-full flex-col rounded-2xl border bg-card p-6">
-            <SectionHead title="Wallpaper Bundles" subtitle="Save more with curated collections." href="/pricing" compact />
-            <div className="mb-4 flex gap-2">
-              {featured.slice(0, 5).map((w) => (
-                <div key={w.id} className="relative h-12 w-12 overflow-hidden rounded-lg border">
-                  <Image src={w.previewUrl ?? '/demo/hero.jpg'} alt="" fill sizes="48px" className="object-cover" />
+            {set ? (
+              <>
+                <SectionHead title="Matching Sets" subtitle="Wallpapers designed to go together." href={`/sets/${set.slug}`} compact />
+                <div className="mt-auto">
+                  <p className="font-semibold">{set.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {set.count} wallpaper{set.count === 1 ? '' : 's'} · all sizes included
+                  </p>
+                  <Link href={`/sets/${set.slug}`} className={buttonVariants({ size: 'sm', className: 'mt-3' })}>
+                    View set →
+                  </Link>
                 </div>
-              ))}
-            </div>
-            <div className="mt-auto">
-              <p className="font-semibold">Nature Lovers Bundle</p>
-              <p className="text-xs text-muted-foreground">10 Wallpapers · 4K &amp; 8K · All Devices</p>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-lg font-semibold">{bundlePrice}</span>
-                <span className="text-sm text-muted-foreground line-through">{bundleWas}</span>
-                <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">50% OFF</span>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <SectionHead title="Free Picks" subtitle="Try us out — no account needed." href="/free" compact />
+                <div className="mb-4 flex gap-2">
+                  {freePicks.map((w) => (
+                    <div key={w.id} className="relative h-12 w-12 overflow-hidden rounded-lg border">
+                      {w.previewUrl && <Image src={w.previewUrl} alt="" fill sizes="48px" className="object-cover" />}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-auto">
+                  <p className="font-semibold">Free wallpapers</p>
+                  <p className="text-xs text-muted-foreground">Download in HD · {money ? 'paid sizes from ₹9' : 'paid sizes from 1 credit'}</p>
+                  <Link href="/free" className={buttonVariants({ size: 'sm', variant: 'outline', className: 'mt-3' })}>
+                    Browse free →
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </Reveal>
 
@@ -133,23 +148,23 @@ function PremiumPromo({ bg }: { bg: string }) {
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/55 to-black/80" />
       <div className="relative">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
-          <Crown className="h-3.5 w-3.5 text-amber-300" /> Premium Collection
+          <Crown className="h-3.5 w-3.5 text-amber-300" /> Fair pricing
         </span>
         <h3 className="mt-4 font-display text-2xl font-semibold leading-tight">
-          Exclusive Wallpapers.
-          <br /> For True Enthusiasts.
+          Pay once.
+          <br /> Every size included.
         </h3>
         <p className="mt-2 max-w-xs text-sm text-white/80">
-          Get access to handpicked 8K collections, creator exclusives and more.
+          One purchase covers every size we make for that wallpaper. Prices are set for your country.
         </p>
         <Link href="/pricing" className="mt-5 inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition hover:bg-white/90">
-          Join Now →
+          See pricing →
         </Link>
       </div>
       <div className="relative mt-8 grid grid-cols-3 gap-3 border-t border-white/15 pt-5 text-center">
-        <Stat value="50+" label="Exclusive Collections" />
-        <Stat value="8K" label="Ultra HD" />
-        <Stat value="100%" label="Original Content" />
+        <Stat value="5K" label="Up to" />
+        <Stat value="5×" label="Downloads per buy" />
+        <Stat value="1:1" label="Watermark per buyer" />
       </div>
     </div>
   );

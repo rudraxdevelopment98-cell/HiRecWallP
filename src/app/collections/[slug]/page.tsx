@@ -16,7 +16,7 @@ export default async function CollectionPage({ params }: { params: { slug: strin
   const region = getDisplayRegion();
   const [cat, items, categories] = await Promise.all([
     getCategoryBySlug(params.slug),
-    listPublishedWallpapers({ category: params.slug, sort: 'popular' }, region),
+    listPublishedWallpapers({ category: params.slug, sort: 'newest' }, region),
     listCategories(),
   ]);
 

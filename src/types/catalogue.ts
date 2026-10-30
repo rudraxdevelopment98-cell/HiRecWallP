@@ -35,6 +35,11 @@ export interface Wallpaper {
   human_edited: boolean;
   set_id: string | null;
   created_at: string;
+  /** Public size metadata, filled at upload (migration 0009). */
+  orientation?: 'portrait' | 'landscape' | 'square' | null;
+  max_long_edge?: number | null;
+  /** Paid device variants included, e.g. ['phone','tablet'] or ['desktop_4k','desktop_5k']. */
+  devices?: string[];
 }
 
 /** A wallpaper plus its public preview URL and current price in a region. */
@@ -42,17 +47,19 @@ export interface WallpaperCard extends Wallpaper {
   previewUrl: string | null;
   price: number | null;
   region: RegionCode;
-  /** Optional display metadata (ratings, resolution badge, category label). */
-  rating?: number;
-  reviews?: number;
-  resolution?: '4K' | '5K' | '8K';
+  /** Display metadata: resolution badge (largest paid size) and category label. */
+  resolution?: '4K' | '5K';
   categoryName?: string;
 }
 
 export interface ExploreFilters {
-  device?: string;
+  /** Mobile | Desktop | Tablet | Ultrawide (one or more). */
+  devices?: string[];
+  orientation?: 'portrait' | 'landscape';
+  /** Minimum resolution: '4K' | '5K'. */
+  resolution?: '4K' | '5K';
   category?: string;
   free?: boolean;
-  sort?: 'newest' | 'popular' | 'price_asc' | 'price_desc';
+  sort?: 'newest' | 'oldest' | 'title';
   q?: string;
 }
