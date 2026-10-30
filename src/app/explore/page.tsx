@@ -13,8 +13,9 @@ export const metadata: Metadata = {
 
 const SORT_LABEL = { newest: 'Newest', oldest: 'Oldest', title: 'Name' } as const;
 
-export default async function ExplorePage({ searchParams }: { searchParams: SearchParams }) {
-  const region = getDisplayRegion();
+export default async function ExplorePage(props: { searchParams: Promise<SearchParams> }) {
+  const searchParams = await props.searchParams;
+  const region = (await getDisplayRegion());
   const { filters, page } = parseExploreParams(searchParams);
 
   const [result, categories] = await Promise.all([

@@ -27,7 +27,7 @@ PayPal Payouts / vision slot in via env.
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js 14 (App Router) + TypeScript (**strict**) |
+| Framework | Next.js 15.5 (App Router) + React 19 + TypeScript (**strict**) |
 | Styling | Tailwind CSS + shadcn/ui-style tokens · **"Obsidian Stone" dark theme** (warm stone neutrals) with CSS/IntersectionObserver motion (reduced-motion + no-JS safe) |
 | DB / Auth | Supabase (Postgres, Auth: email OTP + Google, **RLS on every table**) |
 | Originals | Cloudflare R2 **private** bucket (S3 API) — never public |
@@ -220,6 +220,17 @@ Key Phase 3 decisions:
   extend/allowance/revoke). Starter plans seeded **inactive**.
 - Also editable now: default prices + commercial multiplier per region, credit packs,
   categories, sets (`src/lib/admin-crud.ts` + `src/lib/admin-schemas.ts`).
+
+## Security upgrade (2026-10-30)
+
+- Next 14.2.35 → **15.5.28** (patches every open Next advisory incl. critical image-optimizer RCEs),
+  React 19, sharp 0.35.5 (libvips CVEs — matters: we process creator uploads), zod 4,
+  @supabase/ssr 0.12; nested postcss pinned via `overrides`. `npm audit --omit=dev` = 0.
+- Async request APIs: `createClient()` (server) and `getDisplayRegion()` are **async** — always
+  `await`. Page/route `params`/`searchParams` are Promises.
+- Layouts and pages render in parallel in Next 15, so every protected page calls
+  `requireUser()` / `requireAdmin()` itself; middleware also gates `/admin` + `/api/admin`.
+- Next 16 later: needs `next lint` → ESLint CLI and middleware → proxy migration.
 
 ## Manual setup owner must do (grows as we go)
 

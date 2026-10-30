@@ -1,10 +1,13 @@
+import { requireAdmin } from '@/lib/auth';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { StatusSelect } from '@/components/admin/status-select';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminMessagesPage({ searchParams }: { searchParams: { tab?: string } }) {
+export default async function AdminMessagesPage(props: { searchParams: Promise<{ tab?: string }> }) {
+  await requireAdmin();
+  const searchParams = await props.searchParams;
   const tab = searchParams.tab === 'takedowns' ? 'takedowns' : 'contact';
   const supabase = createServiceClient();
   const [{ data: messages }, { data: reports }] = await Promise.all([

@@ -9,8 +9,8 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
  * Use in Server Components, route handlers and server actions to act AS the
  * signed-in user.
  */
-export function createClient() {
-  const cookieStore = cookies();
+export async function createClient() {
+  const cookieStore = await cookies();
   const url = publicEnv.NEXT_PUBLIC_SUPABASE_URL;
   const anon = publicEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anon) {

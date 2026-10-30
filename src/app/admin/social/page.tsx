@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { publicEnv } from '@/lib/env';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,7 @@ function statusVariant(status: string): 'default' | 'secondary' | 'outline' | 'f
 }
 
 export default async function AdminSocialPage() {
+  await requireAdmin();
   const posts = await listPosts();
 
   return (

@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { formatMoneyMinor } from '@/lib/format';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ const FIELDS: FieldDef[] = [
 ];
 
 export default async function AdminCreditPacksPage() {
+  await requireAdmin();
   const { data } = await createServiceClient().from('credit_packs').select('*').order('region_code').order('currency').order('credits');
   const packs = (data ?? []) as { id: string; region_code: string; currency: string; amount_minor: number; credits: number; active: boolean }[];
 

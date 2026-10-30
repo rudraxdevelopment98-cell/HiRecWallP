@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { listAuthUsers } from '@/lib/admin';
@@ -37,6 +38,7 @@ interface Plan {
 }
 
 export default async function AdminMembershipPage() {
+  await requireAdmin();
   const supabase = createServiceClient();
   const [settings, { data: plans }, { data: members }, users] = await Promise.all([
     getSettings(),

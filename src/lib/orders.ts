@@ -51,7 +51,7 @@ function toSummary(r: Row): OrderSummary {
 
 /** The signed-in user's orders, newest first (RLS limits to own rows). */
 export async function listMyOrders(): Promise<OrderSummary[]> {
-  const { data } = await createClient()
+  const { data } = await (await createClient())
     .from('orders')
     .select(SELECT)
     .order('created_at', { ascending: false })
@@ -61,6 +61,6 @@ export async function listMyOrders(): Promise<OrderSummary[]> {
 }
 
 export async function getMyOrder(id: string): Promise<OrderSummary | null> {
-  const { data } = await createClient().from('orders').select(SELECT).eq('id', id).maybeSingle<Row>();
+  const { data } = await (await createClient()).from('orders').select(SELECT).eq('id', id).maybeSingle<Row>();
   return data ? toSummary(data) : null;
 }

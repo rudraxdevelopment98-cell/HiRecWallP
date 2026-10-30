@@ -24,7 +24,8 @@ export function createHandler(table: string, schema: ZodTypeAny) {
 
 /** PATCH handler: validate + update `table` row by `idColumn`. */
 export function updateHandler(table: string, schema: ZodTypeAny, idColumn = 'id') {
-  return async (request: Request, { params }: { params: { id: string } }) => {
+  return async (request: Request, ctx: { params: Promise<{ id: string }> }) => {
+    const params = await ctx.params;
     const denied = await adminGuard(request);
     if (denied) return denied;
     if (!UUID.test(params.id)) return NextResponse.json({ error: 'Invalid id' }, { status: 400 });
@@ -46,7 +47,8 @@ export function deleteHandler(
   inUse?: (id: string) => Promise<boolean>,
   fallback?: Record<string, unknown>,
 ) {
-  return async (request: Request, { params }: { params: { id: string } }) => {
+  return async (request: Request, ctx: { params: Promise<{ id: string }> }) => {
+    const params = await ctx.params;
     const denied = await adminGuard(request);
     if (denied) return denied;
     if (!UUID.test(params.id)) return NextResponse.json({ error: 'Invalid id' }, { status: 400 });

@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { publicEnv } from '@/lib/env';
 import { PricingRunner } from '@/components/admin/pricing-runner';
@@ -28,6 +29,7 @@ async function recentHistory(): Promise<HistoryRow[] | null> {
 }
 
 export default async function AdminPricingPage() {
+  await requireAdmin();
   const history = await recentHistory();
 
   return (

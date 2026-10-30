@@ -1,3 +1,4 @@
+import { requireUser } from '@/lib/auth';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ const STATUS: Record<string, { label: string; variant: 'default' | 'secondary' |
 };
 
 export default async function OrdersPage() {
+  await requireUser('/account/orders');
   const orders = await listMyOrders();
   return (
     <div className="space-y-6">

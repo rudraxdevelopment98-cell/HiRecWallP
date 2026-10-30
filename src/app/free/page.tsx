@@ -10,8 +10,9 @@ export const metadata: Metadata = {
   description: 'Free HD AI wallpapers — no account needed.',
 };
 
-export default async function FreePage({ searchParams }: { searchParams: SearchParams }) {
-  const region = getDisplayRegion();
+export default async function FreePage(props: { searchParams: Promise<SearchParams> }) {
+  const searchParams = await props.searchParams;
+  const region = (await getDisplayRegion());
   const { page } = parseExploreParams(searchParams);
   const result = await searchWallpapers({ free: true, sort: 'newest' }, region, page, 24);
   return (

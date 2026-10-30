@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -9,7 +10,9 @@ import { WallpaperEditForm, type EditableWallpaper } from '@/components/admin/wa
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminWallpaperEditPage({ params }: { params: { id: string } }) {
+export default async function AdminWallpaperEditPage(props: { params: Promise<{ id: string }> }) {
+  await requireAdmin();
+  const params = await props.params;
   if (!/^[0-9a-f-]{36}$/i.test(params.id)) notFound();
   const supabase = createServiceClient();
   const [{ data: w }, { data: categories }, { data: sets }, { count: sales }] = await Promise.all([

@@ -1,17 +1,17 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getUser } from '@/lib/auth';
+import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { ProfileForm } from '@/components/account/profile-form';
 
 export const metadata: Metadata = { title: 'Account settings' };
 
 export default async function AccountPage() {
-  const user = await getUser();
-  const { data: profile } = await createClient()
+  const user = await requireUser('/account');
+  const { data: profile } = await (await createClient())
     .from('profiles')
     .select('display_name, country_code, gstin, role, created_at')
-    .eq('id', user!.id)
+    .eq('id', user.id)
     .maybeSingle();
 
   return (
@@ -19,7 +19,7 @@ export default async function AccountPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold">Settings</h1>
         <p className="text-sm text-muted-foreground">
-          Signed in as <span className="font-medium text-foreground">{user!.email ?? user!.id}</span>
+          Signed in as <span className="font-medium text-foreground">{user.email ?? user.id}</span>
           {profile?.role === 'admin' && (
             <>
               {' · '}

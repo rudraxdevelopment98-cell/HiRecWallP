@@ -6,15 +6,17 @@ import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, getSetBySlug, listSetWallpapers } from '@/lib/catalogue';
 import { formatRegionPrice } from '@/lib/format';
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const set = await getSetBySlug(params.slug);
   return { title: set ? set.title : 'Set', description: set?.description ?? undefined };
 }
 
-export default async function SetPage({ params }: { params: { slug: string } }) {
+export default async function SetPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const set = await getSetBySlug(params.slug);
   if (!set) notFound();
-  const region = getDisplayRegion();
+  const region = (await getDisplayRegion());
   const items = await listSetWallpapers(set.id, region);
   const paid = items.filter((w) => !w.is_free && w.price != null);
   const total = paid.reduce((s, w) => s + (w.price ?? 0), 0);

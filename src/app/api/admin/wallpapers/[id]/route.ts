@@ -27,7 +27,8 @@ function refresh(slug?: string) {
 }
 
 /** Edit wallpaper details or unpublish/archive. */
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const denied = await adminGuard(request);
   if (denied) return denied;
   const parsed = patch.safeParse(await request.json().catch(() => null));
@@ -49,7 +50,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
  * Delete a wallpaper and its files. Refused once anyone has bought it —
  * buyers keep access, so archive it instead.
  */
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const denied = await adminGuard(request);
   if (denied) return denied;
   if (!/^[0-9a-f-]{36}$/i.test(params.id)) return NextResponse.json({ error: 'Invalid id' }, { status: 400 });

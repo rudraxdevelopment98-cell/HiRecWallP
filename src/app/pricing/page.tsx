@@ -24,7 +24,7 @@ const INCLUDED = [
 ];
 
 export default async function PricingPage() {
-  const region = getDisplayRegion();
+  const region = (await getDisplayRegion());
   const money = REGION_PRICING_UNIT[region] === 'money';
   const [packs, settings] = await Promise.all([money ? Promise.resolve([]) : listCreditPacks(region), getSettings()]);
   const plans = settings.membership_enabled ? await listPlansFor(region) : [];

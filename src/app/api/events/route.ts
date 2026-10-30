@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
 
   try {
-    const [user, region] = [await getUser(), getDisplayRegion()];
+    const [user, region] = [await getUser(), (await getDisplayRegion())];
     const country = request.headers.get('x-vercel-ip-country') ?? null;
     const supabase = createServiceClient();
     await supabase.from('events').insert({

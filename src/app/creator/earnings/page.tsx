@@ -19,7 +19,7 @@ export default async function CreatorEarningsPage() {
   const creator = await getCreator();
   if (!creator) redirect('/creator');
 
-  const supabase = createClient();
+  const supabase = (await createClient());
   const { data } = await supabase
     .from('creator_payouts')
     .select('period, gross, commission, net, currency, status')

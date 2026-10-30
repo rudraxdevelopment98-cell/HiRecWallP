@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { listAuthUsers, sumByCurrency } from '@/lib/admin';
@@ -21,7 +22,9 @@ interface Row {
   order_items: { licence: string | null; wallpapers: { title: string } | null; credit_packs: { credits: number } | null }[];
 }
 
-export default async function AdminOrdersPage({ searchParams }: { searchParams: { status?: string } }) {
+export default async function AdminOrdersPage(props: { searchParams: Promise<{ status?: string }> }) {
+  await requireAdmin();
+  const searchParams = await props.searchParams;
   const status = (TABS as readonly string[]).includes(searchParams.status ?? '') ? searchParams.status! : 'paid';
   let query = createServiceClient()
     .from('orders')

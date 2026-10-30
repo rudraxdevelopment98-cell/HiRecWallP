@@ -8,11 +8,12 @@ export const metadata: Metadata = { title: 'Payment successful' };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export default function PaymentSuccessPage({
-  searchParams,
-}: {
-  searchParams: { order?: string; credits?: string };
-}) {
+export default async function PaymentSuccessPage(
+  props: {
+    searchParams: Promise<{ order?: string; credits?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const order = searchParams.order ?? null;
   const real = order != null && UUID.test(order);
   const credits = searchParams.credits === '1';

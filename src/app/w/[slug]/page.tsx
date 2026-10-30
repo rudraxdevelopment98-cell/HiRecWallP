@@ -23,8 +23,9 @@ import { publicEnv } from '@/lib/env';
 const COMMERCIAL_MULTIPLIER = 5;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const region = getDisplayRegion();
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
+  const region = (await getDisplayRegion());
   const w = await getWallpaperBySlug(params.slug, region);
   if (!w) return { title: 'Wallpaper not found' };
   return {
@@ -42,8 +43,9 @@ const SIZE_INFO: Record<string, { label: string; dims: string }> = {
   ultrawide: { label: 'Ultrawide', dims: '5120 × 2160' },
 };
 
-export default async function WallpaperDetailPage({ params }: { params: { slug: string } }) {
-  const region = getDisplayRegion();
+export default async function WallpaperDetailPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
+  const region = (await getDisplayRegion());
   const w = await getWallpaperBySlug(params.slug, region);
   if (!w) notFound();
 

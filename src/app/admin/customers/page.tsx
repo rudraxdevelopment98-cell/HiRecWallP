@@ -1,10 +1,13 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { listAuthUsers } from '@/lib/admin';
 import { Badge } from '@/components/ui/badge';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminCustomersPage({ searchParams }: { searchParams: { q?: string } }) {
+export default async function AdminCustomersPage(props: { searchParams: Promise<{ q?: string }> }) {
+  await requireAdmin();
+  const searchParams = await props.searchParams;
   const supabase = createServiceClient();
   const [users, { data: profiles }, { data: orders }, { data: ents }] = await Promise.all([
     listAuthUsers().catch(() => []),

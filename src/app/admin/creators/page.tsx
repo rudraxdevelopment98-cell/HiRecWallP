@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { listAuthUsers } from '@/lib/admin';
 import { formatMoneyMinor } from '@/lib/format';
@@ -8,6 +9,7 @@ import { RunJobButton } from '@/components/admin/run-job-button';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminCreatorsPage() {
+  await requireAdmin();
   const supabase = createServiceClient();
   const [{ data: creators }, { data: payouts }, { data: subs }, users] = await Promise.all([
     supabase.from('creators').select('*').order('created_at', { ascending: false }),

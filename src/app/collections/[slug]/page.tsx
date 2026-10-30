@@ -8,19 +8,21 @@ import { Reveal } from '@/components/reveal';
 import { getCategoryBySlug, getDisplayRegion, listCategories, searchWallpapers } from '@/lib/catalogue';
 import { parseExploreParams, type SearchParams } from '@/lib/explore-params';
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const cat = await getCategoryBySlug(params.slug);
   return { title: cat ? `${cat.name} Wallpapers` : 'Collection', description: cat ? `${cat.name} wallpapers in 4K & 5K.` : undefined };
 }
 
-export default async function CollectionPage({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: SearchParams;
-}) {
-  const region = getDisplayRegion();
+export default async function CollectionPage(
+  props: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<SearchParams>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+  const region = (await getDisplayRegion());
   const { filters, page } = parseExploreParams(searchParams);
   const scoped = { ...filters, category: params.slug };
   const [cat, result, categories] = await Promise.all([

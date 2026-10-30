@@ -5,7 +5,8 @@ import { buttonVariants } from '@/components/ui/button';
 
 export const metadata: Metadata = { title: 'Payment failed' };
 
-export default function PaymentFailurePage({ searchParams }: { searchParams: { reason?: string } }) {
+export default async function PaymentFailurePage(props: { searchParams: Promise<{ reason?: string }> }) {
+  const searchParams = await props.searchParams;
   const reason = searchParams.reason?.slice(0, 200);
   return (
     <main className="container flex max-w-md flex-col items-center gap-4 py-24 text-center">

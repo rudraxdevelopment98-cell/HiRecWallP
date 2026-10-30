@@ -1,8 +1,10 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminNewsletterPage() {
+  await requireAdmin();
   const { data, count } = await createServiceClient()
     .from('newsletter_subscribers')
     .select('email, source, created_at', { count: 'exact' })

@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
 
   try {
-    return await unlockWithCredits(user.id, parsed.data.items, getDisplayRegion());
+    return await unlockWithCredits(user.id, parsed.data.items, (await getDisplayRegion()));
   } catch {
     return NextResponse.json({ error: 'Unlock unavailable' }, { status: 503 });
   }

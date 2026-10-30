@@ -30,7 +30,7 @@ export interface ActiveMembership {
 /** Active plans with a price for `region` (public). */
 export async function listPlansFor(region: RegionCode): Promise<(MembershipPlan & { amountMinor: number; currency: string })[]> {
   try {
-    const { data } = await createClient()
+    const { data } = await (await createClient())
       .from('membership_plans')
       .select('*')
       .eq('active', true)
@@ -47,7 +47,7 @@ export async function listPlansFor(region: RegionCode): Promise<(MembershipPlan 
 export async function getMyMembership(): Promise<ActiveMembership | null> {
   try {
     const now = new Date().toISOString();
-    const { data } = await createClient()
+    const { data } = await (await createClient())
       .from('memberships')
       .select('id, starts_at, ends_at, download_limit, downloads_used, includes_commercial, membership_plans(name)')
       .eq('status', 'active')

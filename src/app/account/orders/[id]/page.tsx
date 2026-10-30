@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getUser } from '@/lib/auth';
+import { requireUser } from '@/lib/auth';
 import { formatMoneyMinor } from '@/lib/format';
 import { getMyOrder } from '@/lib/orders';
 import { PrintButton } from '@/components/account/print-button';
@@ -15,9 +15,11 @@ export const metadata: Metadata = { title: 'Receipt' };
  * Prices are treated as GST-inclusive. ⚠️ Invoice format and tax treatment
  * (CGST/SGST vs IGST, exports of services) must be confirmed by a CA.
  */
-export default async function ReceiptPage({ params }: { params: { id: string } }) {
+export default async function ReceiptPage(props: { params: Promise<{ id: string }> }) {
+  const user = await requireUser('/account/orders');
+  const params = await props.params;
   if (!/^[0-9a-f-]{36}$/i.test(params.id)) notFound();
-  const [order, user] = await Promise.all([getMyOrder(params.id), getUser()]);
+  const order = await getMyOrder(params.id);
   if (!order || order.status !== 'paid') notFound();
 
   const seller = {

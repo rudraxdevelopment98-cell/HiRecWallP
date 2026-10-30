@@ -12,7 +12,7 @@ import { getSettings } from '@/lib/settings';
 import { REGION_PRICING_UNIT } from '@/lib/geo';
 
 export default async function HomePage() {
-  const region = getDisplayRegion();
+  const region = (await getDisplayRegion());
   const [featured, categories, sets, freePicks, settings] = await Promise.all([
     listPublishedWallpapers({ sort: 'newest' }, region, 8),
     listCategories(),

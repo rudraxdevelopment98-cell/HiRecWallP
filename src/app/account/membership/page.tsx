@@ -1,3 +1,4 @@
+import { requireUser } from '@/lib/auth';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Crown } from 'lucide-react';
@@ -7,7 +8,9 @@ import { getSettings } from '@/lib/settings';
 
 export const metadata: Metadata = { title: 'Membership' };
 
-export default async function MembershipPage({ searchParams }: { searchParams: { bought?: string } }) {
+export default async function MembershipPage(props: { searchParams: Promise<{ bought?: string }> }) {
+  await requireUser('/account/membership');
+  const searchParams = await props.searchParams;
   const [m, settings] = await Promise.all([getMyMembership(), getSettings()]);
   const fmt = (d: string) => new Date(d).toLocaleDateString('en-IN', { dateStyle: 'long' });
 

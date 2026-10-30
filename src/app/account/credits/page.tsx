@@ -1,3 +1,4 @@
+import { requireUser } from '@/lib/auth';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Coins } from 'lucide-react';
@@ -14,8 +15,10 @@ const REASON: Record<string, string> = {
   admin_adjust: 'Adjustment',
 };
 
-export default async function CreditsPage({ searchParams }: { searchParams: { bought?: string } }) {
-  const supabase = createClient();
+export default async function CreditsPage(props: { searchParams: Promise<{ bought?: string }> }) {
+  await requireUser('/account/credits');
+  const searchParams = await props.searchParams;
+  const supabase = (await createClient());
   const [{ data: balance }, { data: ledger }] = await Promise.all([
     supabase.rpc('my_credit_balance'),
     supabase

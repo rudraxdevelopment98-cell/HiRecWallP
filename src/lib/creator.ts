@@ -13,7 +13,7 @@ export interface CreatorRow {
 /** The current user's creator row (RLS: own only), or null if not a creator. */
 export async function getCreator(): Promise<CreatorRow | null> {
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return null;
     const { data } = await supabase

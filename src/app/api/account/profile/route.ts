@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 });
   }
-  const { error } = await createClient().from('profiles').update(parsed.data).eq('id', user.id);
+  const { error } = await (await createClient()).from('profiles').update(parsed.data).eq('id', user.id);
   if (error) return NextResponse.json({ error: 'Could not save' }, { status: 400 });
   return NextResponse.json({ ok: true });
 }

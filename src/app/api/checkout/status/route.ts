@@ -27,7 +27,7 @@ export async function GET() {
       db = false;
     }
   }
-  const region = getDisplayRegion();
+  const region = (await getDisplayRegion());
   const payments = supabase && db && paymentsKeys;
   return NextResponse.json({
     payments,

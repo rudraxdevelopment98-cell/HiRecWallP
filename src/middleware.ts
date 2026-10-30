@@ -17,6 +17,9 @@ export async function middleware(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
   const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
   const hasSession = request.cookies.getAll().some((c) => c.name.startsWith('sb-'));
+  const path = request.nextUrl.pathname;
+  const adminPath = path === '/admin' || path.startsWith('/admin/') || path.startsWith('/api/admin/');
+  let isAdmin = false;
   if (supabaseUrl && supabaseAnon && hasSession) {
     try {
       const supabase = createServerClient(supabaseUrl, supabaseAnon, {
@@ -31,10 +34,20 @@ export async function middleware(request: NextRequest) {
           },
         },
       });
-      await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
+      // First line of the admin gate (pages and APIs re-check server-side; RLS too).
+      if (adminPath && data.user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+        isAdmin = profile?.role === 'admin';
+      }
     } catch {
       // Never block a page on auth refresh.
     }
+  }
+  if (adminPath && !isAdmin) {
+    response = path.startsWith('/api/')
+      ? NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      : NextResponse.redirect(new URL('/login?next=/admin', request.url));
   }
 
   // --- Pricing region cookie (display only) ---------------------------------

@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getSettings } from '@/lib/settings';
@@ -8,6 +9,7 @@ export const dynamic = 'force-dynamic';
 const REGION_NAME: Record<string, string> = { IN: 'India (₹ per wallpaper)', T1: 'Tier 1 (credits)', T2: 'Tier 2 (credits)', T3: 'Rest of world (credits)' };
 
 export default async function AdminSettingsPage() {
+  await requireAdmin();
   const supabase = createServiceClient();
   const [settings, { data: rules }, { data: regions }] = await Promise.all([
     getSettings(),

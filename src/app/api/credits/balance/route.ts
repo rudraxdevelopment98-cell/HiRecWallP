@@ -10,7 +10,7 @@ export async function GET() {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     const { data, error } = await supabase.rpc('my_credit_balance');
     if (error) throw error;
     return NextResponse.json({ balance: Number(data ?? 0) });

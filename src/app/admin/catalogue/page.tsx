@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
@@ -29,7 +30,9 @@ interface Row {
   wallpaper_assets: { variant: string; storage_key: string }[] | null;
 }
 
-export default async function AdminCataloguePage({ searchParams }: { searchParams: { status?: string; q?: string } }) {
+export default async function AdminCataloguePage(props: { searchParams: Promise<{ status?: string; q?: string }> }) {
+  await requireAdmin();
+  const searchParams = await props.searchParams;
   const status = TABS.some((t) => t.key === searchParams.status) ? searchParams.status! : 'all';
   let rows: Row[] | null = null;
   if (publicEnv.NEXT_PUBLIC_SUPABASE_URL) {

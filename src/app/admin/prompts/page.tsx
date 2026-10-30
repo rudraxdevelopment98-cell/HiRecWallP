@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { publicEnv } from '@/lib/env';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,7 @@ async function listPrompts(): Promise<Prompt[] | null> {
 }
 
 export default async function PromptsPage() {
+  await requireAdmin();
   const prompts = await listPrompts();
 
   return (

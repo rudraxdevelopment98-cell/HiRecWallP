@@ -72,7 +72,7 @@ async function catalogueLive(): Promise<boolean> {
   if (!dbConfigured()) return false;
   if (liveCheck && Date.now() - liveCheck.at < 60_000) return liveCheck.live;
   try {
-    const { count } = await createClient()
+    const { count } = await (await createClient())
       .from('wallpapers')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'published');
@@ -84,8 +84,8 @@ async function catalogueLive(): Promise<boolean> {
 }
 
 /** The visitor's current display region (cookie, seeded by middleware). */
-export function getDisplayRegion(): RegionCode {
-  const value = cookies().get('region')?.value;
+export async function getDisplayRegion(): Promise<RegionCode> {
+  const value = (await cookies()).get('region')?.value;
   return isRegionCode(value) ? value : DEFAULT_REGION;
 }
 
@@ -114,7 +114,7 @@ type WallpaperRow = Wallpaper & {
  */
 async function globalBasePrice(region: RegionCode): Promise<number | null> {
   try {
-    const { data } = await createClient()
+    const { data } = await (await createClient())
       .from('price_rules')
       .select('base_price')
       .eq('region_code', region)
@@ -170,7 +170,7 @@ export async function searchWallpapers(
     };
   }
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     let query = supabase
       .from('wallpapers')
       .select(CARD_SELECT, { count: 'exact' })
@@ -235,7 +235,7 @@ export async function listWallpapersByIds(ids: string[], region: RegionCode): Pr
   }
   try {
     const [{ data }, fallback] = await Promise.all([
-      createClient().from('wallpapers').select(CARD_SELECT).in('id', ids).eq('status', 'published'),
+      (await createClient()).from('wallpapers').select(CARD_SELECT).in('id', ids).eq('status', 'published'),
       globalBasePrice(region),
     ]);
     const cards = ((data ?? []) as WallpaperRow[]).map((row) => toCard(row, region, fallback));
@@ -252,7 +252,7 @@ export async function getWallpaperBySlug(
   if (!(await catalogueLive())) return demoWallpaperBySlug(slug, region);
   try {
     const [{ data, error }, fallback] = await Promise.all([
-      createClient()
+      (await createClient())
         .from('wallpapers')
         .select(CARD_SELECT)
         .eq('slug', slug)
@@ -274,7 +274,7 @@ export async function listCategories(): Promise<Category[]> {
     return DEMO_CATEGORIES.map((c) => ({ ...c, count: demo.filter((w) => w.category_id === c.id).length }));
   }
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     const [{ data, error }, { data: rows }] = await Promise.all([
       supabase.from('categories').select('*').order('sort_order', { ascending: true }),
       supabase.from('wallpapers').select('category_id').eq('status', 'published'),
@@ -293,7 +293,7 @@ export async function listCategories(): Promise<Category[]> {
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   if (!(await catalogueLive())) return DEMO_CATEGORIES.find((c) => c.slug === slug) ?? null;
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     const { data, error } = await supabase
       .from('categories')
       .select('*')
@@ -318,7 +318,7 @@ export interface CreditPack {
 export async function listCreditPacks(region: RegionCode): Promise<CreditPack[]> {
   if (!dbConfigured()) return [];
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     const { data, error } = await supabase
       .from('credit_packs')
       .select('*')
@@ -335,7 +335,7 @@ export async function listCreditPacks(region: RegionCode): Promise<CreditPack[]>
 export async function getSetBySlug(slug: string): Promise<WallpaperSet | null> {
   if (!dbConfigured()) return null;
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     const { data, error } = await supabase
       .from('wallpaper_sets')
       .select('*')
@@ -353,7 +353,7 @@ export async function listSetWallpapers(setId: string, region: RegionCode): Prom
   if (!(await catalogueLive())) return [];
   try {
     const [{ data }, fallback] = await Promise.all([
-      createClient()
+      (await createClient())
         .from('wallpapers')
         .select(CARD_SELECT)
         .eq('set_id', setId)
@@ -371,7 +371,7 @@ export async function listSetWallpapers(setId: string, region: RegionCode): Prom
 export async function listSets(): Promise<(WallpaperSet & { count: number })[]> {
   if (!(await catalogueLive())) return [];
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     const [{ data: sets }, { data: rows }] = await Promise.all([
       supabase.from('wallpaper_sets').select('*'),
       supabase.from('wallpapers').select('set_id').eq('status', 'published').not('set_id', 'is', null),

@@ -1,3 +1,4 @@
+import { requireUser } from '@/lib/auth';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { WallpaperCard } from '@/components/wallpaper-card';
@@ -8,8 +9,9 @@ import { getDisplayRegion, listWallpapersByIds } from '@/lib/catalogue';
 export const metadata: Metadata = { title: 'Favourites' };
 
 export default async function FavouritesPage() {
-  const region = getDisplayRegion();
-  const { data } = await createClient()
+  await requireUser('/account/favourites');
+  const region = (await getDisplayRegion());
+  const { data } = await (await createClient())
     .from('favourites')
     .select('wallpaper_id')
     .order('created_at', { ascending: false });

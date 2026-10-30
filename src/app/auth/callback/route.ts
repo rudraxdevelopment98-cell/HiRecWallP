@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   const type = url.searchParams.get('type') as EmailOtpType | null;
 
   try {
-    const supabase = createClient();
+    const supabase = (await createClient());
     if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) return NextResponse.redirect(new URL(next, url.origin));

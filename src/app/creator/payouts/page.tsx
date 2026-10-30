@@ -27,7 +27,7 @@ export default async function CreatorPayoutsPage() {
   const creator = await getCreator();
   if (!creator) redirect('/creator');
 
-  const supabase = createClient();
+  const supabase = (await createClient());
   const { data } = await supabase
     .from('creator_payouts')
     .select('id, period, net, currency, status, provider_ref, created_at')

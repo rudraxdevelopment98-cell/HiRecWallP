@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'The store is temporarily closed. Please try again soon.', code: 'store_closed' }, { status: 503 });
   }
 
-  const displayRegion = getDisplayRegion();
+  const displayRegion = (await getDisplayRegion());
   const billingCountry = parsed.data.billingCountry ?? null;
   const chargeRegion = billingCountry
     ? chargeRegionFor(displayRegion, regionForCountry(billingCountry))

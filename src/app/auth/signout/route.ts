@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   }
   try {
-    await createClient().auth.signOut();
+    await (await createClient()).auth.signOut();
   } catch {
     // not configured / already signed out
   }

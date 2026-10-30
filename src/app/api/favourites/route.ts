@@ -13,7 +13,7 @@ const body = z.object({ wallpaperId: z.string().uuid() });
 export async function GET() {
   const user = await getUser();
   if (!user) return NextResponse.json({ signedIn: false, ids: [] });
-  const { data } = await createClient().from('favourites').select('wallpaper_id');
+  const { data } = await (await createClient()).from('favourites').select('wallpaper_id');
   return NextResponse.json({ signedIn: true, ids: (data ?? []).map((r) => r.wallpaper_id) });
 }
 
@@ -24,7 +24,7 @@ async function mutate(request: Request, add: boolean) {
   const parsed = body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
 
-  const supabase = createClient();
+  const supabase = (await createClient());
   const { error } = add
     ? await supabase
         .from('favourites')

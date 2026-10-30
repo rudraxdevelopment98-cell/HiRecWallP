@@ -1,9 +1,11 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { AdminUploadForm } from '@/components/admin/upload-form';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminUploadPage() {
+  await requireAdmin();
   let categories: { id: string; name: string }[] = [];
   try {
     const { data } = await createServiceClient().from('categories').select('id, name').order('sort_order');

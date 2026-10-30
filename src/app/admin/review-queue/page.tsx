@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import Image from 'next/image';
 import { createServiceClient } from '@/lib/supabase/service';
 import { publicEnv } from '@/lib/env';
@@ -44,6 +45,7 @@ async function listQueue(): Promise<Job[] | null> {
 }
 
 export default async function ReviewQueuePage() {
+  await requireAdmin();
   const jobs = await listQueue();
 
   return (

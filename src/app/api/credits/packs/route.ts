@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request) {
   const billing = new URL(request.url).searchParams.get('billingCountry');
-  const display = getDisplayRegion();
+  const display = (await getDisplayRegion());
   const chargeRegion =
     billing && /^[A-Za-z]{2}$/.test(billing)
       ? chargeRegionFor(display, regionForCountry(billing.toUpperCase()))

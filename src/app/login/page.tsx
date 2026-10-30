@@ -7,11 +7,12 @@ import { safeNextPath } from '@/lib/http';
 export const metadata: Metadata = { title: 'Sign in' };
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: { next?: string; error?: string };
-}) {
+export default async function LoginPage(
+  props: {
+    searchParams: Promise<{ next?: string; error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const next = safeNextPath(searchParams.next);
   const configured = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { publicEnv } from '@/lib/env';
 import { formatMoneyMinor } from '@/lib/format';
@@ -65,6 +66,7 @@ async function loadStats(): Promise<Stats | null> {
 }
 
 export default async function AdminOverviewPage() {
+  await requireAdmin();
   const stats = await loadStats();
   const bars = stats?.weekly ?? Array.from({ length: 7 }, () => 0);
   const revenue = stats ? [...stats.revenue].map(([cur, minor]) => formatMoneyMinor(minor, cur)).join(' · ') : '';

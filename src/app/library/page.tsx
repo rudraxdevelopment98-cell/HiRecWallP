@@ -27,7 +27,7 @@ export default async function LibraryPage() {
   const user = await getUser();
   if (!user) redirect('/login?next=/library');
 
-  const supabase = createClient();
+  const supabase = (await createClient());
   const [{ data: entitlements }, { data: balance }] = await Promise.all([
     supabase
       .from('entitlements')

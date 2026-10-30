@@ -13,8 +13,8 @@ const NAV = [
   { href: '/pricing', label: 'Pricing' },
 ];
 
-export function SiteHeader() {
-  const region = getDisplayRegion();
+export async function SiteHeader() {
+  const region = (await getDisplayRegion());
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/85 backdrop-blur">
       <div className="container flex h-16 items-center gap-4">

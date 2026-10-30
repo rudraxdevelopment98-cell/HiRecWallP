@@ -13,7 +13,8 @@ const schema = z
   .partial();
 
 /** Admin: set a creator's KYC status or commission. */
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const denied = await adminGuard(request);
   if (denied) return denied;
   const parsed = schema.safeParse(await request.json().catch(() => null));

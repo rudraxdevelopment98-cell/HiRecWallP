@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { AdminForm, type FieldDef } from '@/components/admin/admin-form';
 
@@ -15,6 +16,7 @@ const SET_FIELDS: FieldDef[] = [
 ];
 
 export default async function AdminCategoriesPage() {
+  await requireAdmin();
   const supabase = createServiceClient();
   const [{ data: categories }, { data: sets }, { data: rows }] = await Promise.all([
     supabase.from('categories').select('id, name, slug, sort_order').order('sort_order'),

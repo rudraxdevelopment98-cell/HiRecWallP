@@ -25,7 +25,7 @@ const SOCIAL = [
   { icon: Facebook, label: 'Facebook', href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK },
 ].filter((s) => s.href);
 
-export function SiteFooter() {
+export async function SiteFooter() {
   return (
     <footer className="mt-16 border-t bg-card">
       <div className="container flex flex-col gap-6 py-10 lg:flex-row lg:items-center lg:justify-between">
@@ -64,7 +64,7 @@ export function SiteFooter() {
         <div className="container flex flex-col items-center justify-between gap-2 py-4 text-xs text-muted-foreground sm:flex-row">
           {/* The header switcher is hidden on small screens; offer it here instead. */}
           <div className="sm:hidden">
-            <RegionSwitcher current={getDisplayRegion()} />
+            <RegionSwitcher current={(await getDisplayRegion())} />
           </div>
           <p>
             © {new Date().getFullYear()} {publicEnv.NEXT_PUBLIC_BRAND_NAME}. AI-generated wallpapers.
