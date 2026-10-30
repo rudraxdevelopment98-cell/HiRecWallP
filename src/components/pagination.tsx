@@ -10,16 +10,21 @@ export function Pagination({
   page: number;
   totalPages: number;
   basePath: string;
-  query?: Record<string, string | undefined>;
+  query?: Record<string, string | string[] | undefined>;
 }) {
   if (totalPages <= 1) return null;
   const href = (p: number) => {
     const params = new URLSearchParams();
-    for (const [k, v] of Object.entries(query ?? {})) if (v) params.set(k, v);
+    for (const [k, v] of Object.entries(query ?? {})) {
+      if (k === 'page' || v == null || v === '') continue;
+      for (const one of Array.isArray(v) ? v : [v]) params.append(k, one);
+    }
     params.set('page', String(p));
     return `${basePath}?${params.toString()}`;
   };
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 6);
+  // A window of up to 5 pages around the current one.
+  const first = Math.max(1, Math.min(page - 2, totalPages - 4));
+  const pages = Array.from({ length: Math.min(5, totalPages) }, (_, i) => first + i);
   return (
     <nav className="flex items-center justify-center gap-1.5 pt-6 text-sm">
       {page > 1 && (

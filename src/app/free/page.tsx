@@ -1,24 +1,39 @@
 import type { Metadata } from 'next';
-import { WallpaperGrid } from '@/components/wallpaper-grid';
-import { getDisplayRegion, listPublishedWallpapers } from '@/lib/catalogue';
+import { WallpaperCard } from '@/components/wallpaper-card';
+import { Pagination } from '@/components/pagination';
+import { Reveal } from '@/components/reveal';
+import { getDisplayRegion, searchWallpapers } from '@/lib/catalogue';
+import { parseExploreParams, type SearchParams } from '@/lib/explore-params';
 
 export const metadata: Metadata = {
   title: 'Free wallpapers',
-  description: 'Free ultra-HD AI wallpapers — no login required for free variants.',
+  description: 'Free HD AI wallpapers — no account needed.',
 };
 
-export default async function FreePage() {
+export default async function FreePage({ searchParams }: { searchParams: SearchParams }) {
   const region = getDisplayRegion();
-  const items = await listPublishedWallpapers({ free: true, sort: 'newest' }, region);
+  const { page } = parseExploreParams(searchParams);
+  const result = await searchWallpapers({ free: true, sort: 'newest' }, region, page, 24);
   return (
     <main className="container space-y-6 py-10">
       <div>
-        <h1 className="text-2xl font-semibold">Free picks</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Free wallpapers</h1>
         <p className="text-sm text-muted-foreground">
-          Free variants are capped below 4K and never expose the original files.
+          Download in HD with no account. Want the 4K/5K version of anything? Paid sizes start small.
         </p>
       </div>
-      <WallpaperGrid items={items} emptyMessage="No free wallpapers published yet." />
+      {result.items.length === 0 ? (
+        <p className="glass rounded-2xl p-10 text-center text-sm text-muted-foreground">No free wallpapers published yet.</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+          {result.items.map((w, i) => (
+            <Reveal key={w.id} delay={(i % 4) * 50}>
+              <WallpaperCard wallpaper={w} />
+            </Reveal>
+          ))}
+        </div>
+      )}
+      <Pagination page={result.page} totalPages={result.totalPages} basePath="/free" />
     </main>
   );
 }
