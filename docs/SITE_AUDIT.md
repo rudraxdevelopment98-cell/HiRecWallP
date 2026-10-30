@@ -55,7 +55,7 @@ Legend: ✅ done · ⏳ in progress · ⬜ to do · 🧑‍⚖️ needs owner/pr
 - ✅ E2 Creator dashboard lists the creator's own submissions + status
 
 ## Owner decisions still open
-- Membership/subscription: removed from the site (no backend existed). Build it later only if wanted — needs price, perks and Razorpay Subscriptions.
+- ✅ Membership built as prepaid passes, fully managed from Admin → Membership (plans start switched off — set prices, then turn on in Admin → Settings).
 - Fill seller details for receipts in Vercel env: `BUSINESS_LEGAL_NAME`, `BUSINESS_ADDRESS`, `BUSINESS_GSTIN`, `GST_RATE_PERCENT` (default 18).
 - Social links (footer icons appear when set): `NEXT_PUBLIC_SOCIAL_INSTAGRAM`, `_YOUTUBE`, `_X`, `_FACEBOOK`.
 
