@@ -10,7 +10,7 @@ const NAV = [
   { href: '/explore', label: 'Explore' },
   { href: '/collections', label: 'Collections' },
   { href: '/studio', label: 'Studio' },
-  { href: '/pricing', label: 'Membership' },
+  { href: '/pricing', label: 'Pricing' },
 ];
 
 export function SiteHeader() {
@@ -52,10 +52,10 @@ export function SiteHeader() {
           <div className="mr-1 hidden sm:block">
             <RegionSwitcher current={region} />
           </div>
-          <Link href="/account" aria-label="Account" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
+          <Link href="/library" aria-label="My account" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
             <User className="h-4 w-4" />
           </Link>
-          <Link href="/library" aria-label="Saved" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
+          <Link href="/account/favourites" aria-label="Favourites" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
             <Heart className="h-4 w-4" />
           </Link>
           <CartCount />

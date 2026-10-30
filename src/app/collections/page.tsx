@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { Reveal } from '@/components/reveal';
 import { listCategories } from '@/lib/catalogue';
 
-export const metadata: Metadata = { title: 'Collections', description: 'Curated wallpaper collections in 4K & 8K.' };
+export const metadata: Metadata = { title: 'Collections', description: 'Curated wallpaper collections in 4K & 5K.' };
 
 const CHIPS = ['All', 'Premium', 'Seasonal', 'Popular'];
 

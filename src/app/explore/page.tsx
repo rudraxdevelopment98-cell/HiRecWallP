@@ -8,7 +8,7 @@ import type { ExploreFilters } from '@/types/catalogue';
 
 export const metadata: Metadata = {
   title: 'Explore wallpapers',
-  description: 'Browse thousands of stunning 4K & 8K wallpapers for every device.',
+  description: 'Browse ultra-HD 4K & 5K wallpapers for phone, tablet and desktop.',
 };
 
 type SearchParams = { [key: string]: string | string[] | undefined };

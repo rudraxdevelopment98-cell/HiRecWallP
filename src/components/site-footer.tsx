@@ -11,14 +11,19 @@ const LINKS = [
   { href: '/terms', label: 'Terms & Conditions' },
   { href: '/privacy', label: 'Privacy Policy' },
   { href: '/licence', label: 'Licence' },
+  { href: '/refunds', label: 'Refunds' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/creator', label: 'Sell your art' },
+  { href: '/contact-takedown', label: 'Report content' },
 ];
 
+// Shown only once the account URL is configured (no dead "#" links).
 const SOCIAL = [
-  { icon: Twitter, label: 'Twitter' },
-  { icon: Instagram, label: 'Instagram' },
-  { icon: Youtube, label: 'YouTube' },
-  { icon: Facebook, label: 'Facebook' },
-];
+  { icon: Instagram, label: 'Instagram', href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM },
+  { icon: Youtube, label: 'YouTube', href: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE },
+  { icon: Twitter, label: 'X / Twitter', href: process.env.NEXT_PUBLIC_SOCIAL_X },
+  { icon: Facebook, label: 'Facebook', href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK },
+].filter((s) => s.href);
 
 export function SiteFooter() {
   return (
@@ -41,10 +46,12 @@ export function SiteFooter() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {SOCIAL.map(({ icon: Icon, label }) => (
+          {SOCIAL.map(({ icon: Icon, label, href }) => (
             <a
               key={label}
-              href="#"
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label={label}
               className="grid h-9 w-9 place-items-center rounded-full border text-muted-foreground transition-colors hover:text-foreground"
             >

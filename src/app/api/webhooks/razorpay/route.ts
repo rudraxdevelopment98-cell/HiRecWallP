@@ -74,6 +74,9 @@ export async function POST(request: Request) {
       .select('id');
     if (!claimed || claimed.length === 0) return NextResponse.json({ ok: true, alreadyHandled: true });
 
+    // Sequential invoice number + buyer GSTIN snapshot for the receipt.
+    await supabase.rpc('assign_invoice', { p_order: order.id });
+
     const { data: items } = await supabase
       .from('order_items')
       .select('wallpaper_id, set_id, credit_pack_id, licence')

@@ -11,13 +11,10 @@ export function ContactForm() {
     setStatus('sending');
     const form = new FormData(event.currentTarget);
     try {
-      const res = await fetch('/api/takedown', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          reporter_email: form.get('email'),
-          details: `[Contact] ${form.get('name')}: ${form.get('message')}`,
-        }),
+        body: JSON.stringify({ name: form.get('name'), email: form.get('email'), message: form.get('message') }),
       });
       if (!res.ok) throw new Error();
       setStatus('ok');
@@ -35,7 +32,7 @@ export function ContactForm() {
       <input name="name" required placeholder="Your name" className="w-full rounded-xl border bg-card px-4 py-2.5 text-sm outline-none focus:border-ring" />
       <input name="email" type="email" required placeholder="Your email" className="w-full rounded-xl border bg-card px-4 py-2.5 text-sm outline-none focus:border-ring" />
       <textarea name="message" required rows={5} placeholder="How can we help?" className="w-full rounded-xl border bg-card px-4 py-2.5 text-sm outline-none focus:border-ring" />
-      {status === 'error' && <p className="text-sm text-red-500">Couldn’t send — please email us directly.</p>}
+      {status === 'error' && <p className="text-sm text-red-500">Couldn’t send — please email support@hirecwallp.com directly.</p>}
       <Button type="submit" disabled={status === 'sending'}>{status === 'sending' ? 'Sending…' : 'Send Message'}</Button>
     </form>
   );

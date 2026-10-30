@@ -93,7 +93,7 @@ function publicBaseUrl(): string {
   return process.env.R2_PUBLIC_BASE_URL ?? '';
 }
 
-function previewUrlFor(storageKey: string | null | undefined): string | null {
+export function previewUrlFor(storageKey: string | null | undefined): string | null {
   if (!storageKey) return null;
   const base = publicBaseUrl().replace(/\/$/, '');
   return base ? `${base}/${storageKey}` : null;

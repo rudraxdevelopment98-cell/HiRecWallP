@@ -4,9 +4,9 @@ import { Download, Gem, MonitorSmartphone, ShieldCheck } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 
 const FEATURES = [
-  { icon: Gem, title: '4K & 8K Quality', sub: 'Crystal clear detail' },
+  { icon: Gem, title: '4K & 5K Quality', sub: 'Crystal clear detail' },
   { icon: Download, title: 'Instant Download', sub: 'Get it right away' },
-  { icon: MonitorSmartphone, title: 'All Devices', sub: 'Mobile to 8K displays' },
+  { icon: MonitorSmartphone, title: 'All Devices', sub: 'Phone, tablet & desktop' },
   { icon: ShieldCheck, title: 'Secure Payment', sub: '100% safe & encrypted' },
 ];
 
@@ -37,7 +37,7 @@ export function Hero() {
             <br /> Any Screen.
           </h1>
           <p className="animate-fade-up mt-5 max-w-md text-balance text-muted-foreground [animation-delay:80ms]">
-            Discover 4K &amp; 8K high-resolution wallpapers for your mobile, tablet, laptop and
+            Discover 4K &amp; 5K high-resolution wallpapers for your mobile, tablet, laptop and
             desktop. Curated for those who love beautiful screens.
           </p>
           <div className="animate-fade-up mt-7 flex flex-wrap gap-3 [animation-delay:160ms]">
@@ -64,7 +64,7 @@ export function Hero() {
         {/* Device mockups composited over the image (desktop only) */}
         <div className="pointer-events-none absolute bottom-6 right-[5%] hidden w-[42%] max-w-xl items-end justify-end gap-0 lg:flex">
           <span className="absolute -top-10 right-10 rotate-[-10deg] font-display text-sm text-foreground/70">
-            Your world, in 4K &amp; 8K ↓
+            Your world, in 4K &amp; 5K ↓
           </span>
 
           {/* Laptop */}

@@ -9,7 +9,7 @@ import { getCategoryBySlug, getDisplayRegion, listCategories, listPublishedWallp
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const cat = await getCategoryBySlug(params.slug);
-  return { title: cat ? `${cat.name} Wallpapers` : 'Collection', description: cat ? `${cat.name} wallpapers in 4K & 8K.` : undefined };
+  return { title: cat ? `${cat.name} Wallpapers` : 'Collection', description: cat ? `${cat.name} wallpapers in 4K & 5K.` : undefined };
 }
 
 export default async function CollectionPage({ params }: { params: { slug: string } }) {
@@ -34,7 +34,7 @@ export default async function CollectionPage({ params }: { params: { slug: strin
           <p className="text-sm text-white/80">Collections · {name}</p>
           <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">{name} Wallpapers</h1>
           <p className="mt-1 max-w-xl text-sm text-white/80">
-            Explore the beauty of our {name.toLowerCase()} collection — curated in stunning 4K &amp; 8K.
+            Explore the beauty of our {name.toLowerCase()} collection — curated in stunning 4K &amp; 5K.
           </p>
         </div>
       </section>

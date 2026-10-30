@@ -23,7 +23,7 @@ test('free page renders', async ({ page }) => {
 
 test('pricing page renders', async ({ page }) => {
   await page.goto('/pricing');
-  await expect(page.getByRole('heading', { name: 'Unlimited beautiful screens' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Simple, fair pricing' })).toBeVisible();
 });
 
 test('region switcher changes the pricing cookie', async ({ page, context }) => {

@@ -1,29 +1,56 @@
-import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getUser } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
+import { ProfileForm } from '@/components/account/profile-form';
 
-export const metadata: Metadata = { title: 'Account' };
+export const metadata: Metadata = { title: 'Account settings' };
 
 export default async function AccountPage() {
   const user = await getUser();
-  if (!user) redirect('/login?next=/account');
+  const { data: profile } = await createClient()
+    .from('profiles')
+    .select('display_name, country_code, gstin, role, created_at')
+    .eq('id', user!.id)
+    .maybeSingle();
 
   return (
-    <main className="container max-w-xl space-y-4 py-10">
-      <h1 className="text-2xl font-semibold">Account</h1>
-      <div className="rounded-lg border p-4 text-sm">
-        <p className="text-muted-foreground">Signed in as</p>
-        <p className="font-medium">{user.email ?? user.id}</p>
+    <div className="max-w-xl space-y-8">
+      <div>
+        <h1 className="font-display text-2xl font-semibold">Settings</h1>
+        <p className="text-sm text-muted-foreground">
+          Signed in as <span className="font-medium text-foreground">{user!.email ?? user!.id}</span>
+          {profile?.role === 'admin' && (
+            <>
+              {' · '}
+              <Link href="/admin" className="underline">
+                Admin panel
+              </Link>
+            </>
+          )}
+        </p>
       </div>
-      <form action="/auth/signout" method="post">
-        <button type="submit" className="rounded-lg border px-4 py-2 text-sm hover:bg-secondary">
-          Sign out
-        </button>
-      </form>
-      <p className="text-sm text-muted-foreground">
-        Your purchases and credit balance live in <a href="/library" className="underline">My
-        Library</a>. Receipts and GST details (for Indian buyers) will be added here.
-      </p>
-    </main>
+
+      <section className="rounded-2xl border bg-card p-6">
+        <h2 className="mb-4 font-semibold">Profile</h2>
+        <ProfileForm
+          initial={{
+            display_name: profile?.display_name ?? null,
+            country_code: profile?.country_code ?? null,
+            gstin: profile?.gstin ?? null,
+          }}
+        />
+      </section>
+
+      <section className="rounded-2xl border bg-card p-6 text-sm">
+        <h2 className="font-semibold">Sell your own wallpapers</h2>
+        <p className="mt-1 text-muted-foreground">
+          Join as a creator: upload your work, we handle checks, sales and monthly payouts.
+        </p>
+        <Link href="/creator" className="mt-3 inline-block underline">
+          Become a creator →
+        </Link>
+      </section>
+    </div>
   );
 }

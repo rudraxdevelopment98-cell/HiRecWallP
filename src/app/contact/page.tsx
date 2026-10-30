@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Clock, Mail, MessageCircle } from 'lucide-react';
+import { Clock, Mail } from 'lucide-react';
 import { ContactForm } from '@/components/contact-form';
 
 export const metadata: Metadata = { title: 'Contact us' };
@@ -14,8 +14,7 @@ export default function ContactPage() {
         </p>
         <div className="mt-8 space-y-5 text-sm">
           <Info icon={<Mail className="h-5 w-5" />} title="Email" value="support@hirecwallp.com" />
-          <Info icon={<MessageCircle className="h-5 w-5" />} title="Live chat" value="Available 9am–6pm IST" />
-          <Info icon={<Clock className="h-5 w-5" />} title="Business hours" value="Mon–Sat · 9am–6pm IST" />
+          <Info icon={<Clock className="h-5 w-5" />} title="Response time" value="Usually within 1–2 business days (IST)" />
         </div>
         <p className="mt-8 text-xs text-muted-foreground">
           Copyright / takedown requests → use the{' '}

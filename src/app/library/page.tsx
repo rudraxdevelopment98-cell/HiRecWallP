@@ -8,6 +8,8 @@ import { AccountSidebar } from '@/components/account-sidebar';
 import { DownloadButton } from '@/components/download-button';
 import { buttonVariants } from '@/components/ui/button';
 import { PAID_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
+import { previewUrlFor } from '@/lib/catalogue';
+import Image from 'next/image';
 
 export const metadata: Metadata = { title: 'My Library' };
 
@@ -17,7 +19,8 @@ interface EntitlementRow {
   max_downloads: number;
   downloads_used: number;
   created_at: string;
-  wallpapers: { slug: string; title: string } | null;
+  licence: string;
+  wallpapers: { slug: string; title: string; wallpaper_assets: { variant: string; storage_key: string }[] | null } | null;
 }
 
 export default async function LibraryPage() {
@@ -28,7 +31,7 @@ export default async function LibraryPage() {
   const [{ data: entitlements }, { data: balance }] = await Promise.all([
     supabase
       .from('entitlements')
-      .select('id, wallpaper_id, max_downloads, downloads_used, created_at, wallpapers(slug, title)')
+      .select('id, wallpaper_id, licence, max_downloads, downloads_used, created_at, wallpapers(slug, title, wallpaper_assets(variant, storage_key))')
       .order('created_at', { ascending: false })
       .returns<EntitlementRow[]>(),
     supabase.rpc('my_credit_balance'),
@@ -50,8 +53,8 @@ export default async function LibraryPage() {
             <h1 className="font-display text-2xl font-semibold">Welcome back, {name}</h1>
             <p className="text-sm text-muted-foreground">Here’s what’s happening with your account.</p>
           </div>
-          <Link href="/pricing" className={buttonVariants({ size: 'sm', variant: 'outline' })}>
-            Credits: {balance ?? 0} · Buy more
+          <Link href="/account/credits" className={buttonVariants({ size: 'sm', variant: 'outline' })}>
+            Credits: {balance ?? 0}
           </Link>
         </div>
 
@@ -75,11 +78,27 @@ export default async function LibraryPage() {
             <ul className="divide-y rounded-2xl border bg-card">
               {items.map((e) => (
                 <li key={e.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                  <div>
-                    <p className="font-medium">{e.wallpapers?.title ?? 'Wallpaper'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {e.max_downloads - e.downloads_used} of {e.max_downloads} downloads left
-                    </p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border bg-muted">
+                      {(() => {
+                        const key = e.wallpapers?.wallpaper_assets?.find((a) => a.variant === 'preview')?.storage_key;
+                        const url = previewUrlFor(key);
+                        return url ? <Image src={url} alt="" fill sizes="64px" className="object-cover" /> : null;
+                      })()}
+                    </div>
+                    <div className="min-w-0">
+                      {e.wallpapers?.slug ? (
+                        <Link href={`/w/${e.wallpapers.slug}`} className="font-medium hover:underline">
+                          {e.wallpapers.title}
+                        </Link>
+                      ) : (
+                        <p className="font-medium">Wallpaper</p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {e.licence === 'commercial' ? 'Commercial' : 'Personal'} licence ·{' '}
+                        {e.max_downloads - e.downloads_used} of {e.max_downloads} downloads left
+                      </p>
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {(variants.get(e.wallpaper_id) ?? ['phone', 'desktop_4k'])

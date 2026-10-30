@@ -31,9 +31,9 @@ export default function AboutPage() {
       </section>
 
       <section className="mt-14 grid gap-6 rounded-2xl border bg-card p-8 text-center sm:grid-cols-3">
-        <Stat value="50K+" label="Wallpapers served" />
-        <Stat value="10K+" label="Happy customers" />
-        <Stat value="99%" label="Original content" />
+        <Stat value="Up to 5K" label="Sizes for phone, tablet & desktop" />
+        <Stat value="1 per buyer" label="Invisible forensic watermark" />
+        <Stat value="60 sec" label="Secure, expiring download links" />
       </section>
 
       <section className="mt-14">

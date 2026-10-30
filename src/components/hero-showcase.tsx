@@ -9,9 +9,9 @@ import { cn } from '@/lib/utils';
 import type { WallpaperCard } from '@/types/catalogue';
 
 const FEATURES = [
-  { icon: Gem, title: '4K & 8K Quality', sub: 'Crystal clear detail' },
+  { icon: Gem, title: '4K & 5K Quality', sub: 'Crystal clear detail' },
   { icon: Download, title: 'Instant Download', sub: 'Get it right away' },
-  { icon: MonitorSmartphone, title: 'All Devices', sub: 'Mobile to 8K displays' },
+  { icon: MonitorSmartphone, title: 'All Devices', sub: 'Phone, tablet & desktop' },
   { icon: ShieldCheck, title: 'Secure Payment', sub: '100% safe & encrypted' },
 ];
 
@@ -54,7 +54,7 @@ export function HeroShowcase({ items }: { items: WallpaperCard[] }) {
           <br /> Any Screen.
         </h1>
         <p className="mt-5 max-w-md text-balance text-muted-foreground">
-          Discover 4K &amp; 8K high-resolution wallpapers for your mobile, tablet, laptop and
+          Discover 4K &amp; 5K high-resolution wallpapers for your mobile, tablet, laptop and
           desktop. Curated for those who love beautiful screens.
         </p>
         <div className="mt-7 flex flex-wrap gap-3">
@@ -82,7 +82,7 @@ export function HeroShowcase({ items }: { items: WallpaperCard[] }) {
       {current && (
         <div className="relative flex flex-col items-center gap-5">
           <span className="absolute -top-4 right-2 hidden rotate-[-8deg] font-display text-sm text-muted-foreground sm:block">
-            Your world, in 4K &amp; 8K ↓
+            Your world, in 4K &amp; 5K ↓
           </span>
           <div className="device-stage w-full pt-6" onPointerMove={onMove} onPointerLeave={reset}>
             <div ref={clusterRef} className="device-cluster mx-auto">
