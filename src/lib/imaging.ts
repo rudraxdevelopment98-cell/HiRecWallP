@@ -1,7 +1,7 @@
 import 'server-only';
 
 import sharp from 'sharp';
-import type { R2Bucket } from '@/lib/r2';
+import type { R2Bucket } from '@/lib/storage';
 
 /**
  * Server-side image processing (sharp).

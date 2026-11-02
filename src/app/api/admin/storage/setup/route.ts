@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { isAdminUser } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/http';
 import { publicEnv } from '@/lib/env';
-import { applyStorageRules } from '@/lib/r2';
+import { applyStorageRules } from '@/lib/storage';
 
 export const runtime = 'nodejs';
 
@@ -17,8 +17,8 @@ export async function POST(request: Request) {
   if (process.env.VERCEL_URL) origins.add(`https://${process.env.VERCEL_URL}`);
 
   try {
-    await applyStorageRules([...origins]);
-    return NextResponse.json({ ok: true, origins: [...origins] });
+    const summary = await applyStorageRules([...origins]);
+    return NextResponse.json({ ok: true, summary, origins: [...origins] });
   } catch (err) {
     return NextResponse.json(
       { error: 'Could not apply storage rules', detail: err instanceof Error ? err.message : String(err) },

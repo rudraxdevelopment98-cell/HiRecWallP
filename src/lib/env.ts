@@ -30,14 +30,18 @@ const serverSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 
-  R2_ACCOUNT_ID: z.string().min(1),
-  R2_ACCESS_KEY_ID: z.string().min(1),
-  R2_SECRET_ACCESS_KEY: z.string().min(1),
-  R2_PRIVATE_BUCKET: z.string().min(1),
-  R2_PUBLIC_BUCKET: z.string().min(1),
-  R2_PUBLIC_BASE_URL: z.string().url(),
+  // Storage: R2 when these are set (see src/lib/storage); otherwise Supabase Storage.
+  STORAGE_PROVIDER: z.enum(['r2', 'supabase']).optional(),
+  R2_ACCOUNT_ID: z.string().min(1).optional(),
+  R2_ACCESS_KEY_ID: z.string().min(1).optional(),
+  R2_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  R2_PRIVATE_BUCKET: z.string().min(1).optional(),
+  R2_PUBLIC_BUCKET: z.string().min(1).optional(),
+  R2_PUBLIC_BASE_URL: z.string().url().optional(),
 
-  DOWNLOAD_TOKEN_SECRET: z.string().min(16),
+  // Keyed hash for IPs / download tokens. Falls back to a value derived from
+  // the service-role key so a missing var never breaks downloads.
+  DOWNLOAD_TOKEN_SECRET: z.string().min(16).optional(),
 
   // Payments (validated only when the payments adapter is used).
   RAZORPAY_KEY_ID: z.string().optional(),

@@ -2,7 +2,7 @@ import 'server-only';
 
 import { createServiceClient } from '@/lib/supabase/service';
 import { getImageProvider, getUpscaleProvider, getVisionProvider } from '@/lib/ai';
-import { putObject } from '@/lib/r2';
+import { publicObjectUrl, putObject } from '@/lib/storage';
 import { dHash, isNearDuplicate } from '@/lib/phash';
 import type { AspectKey } from '@/lib/ai/types';
 
@@ -25,8 +25,11 @@ interface Candidate {
 }
 
 function publicUrl(key: string): string | null {
-  const base = process.env.R2_PUBLIC_BASE_URL;
-  return base ? `${base.replace(/\/$/, '')}/${key}` : null;
+  try {
+    return publicObjectUrl(key);
+  } catch {
+    return null;
+  }
 }
 
 /**

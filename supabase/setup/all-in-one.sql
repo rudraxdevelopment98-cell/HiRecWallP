@@ -1,5 +1,5 @@
 -- HirecWallp: ONE-PASTE database setup for the Supabase SQL Editor.
--- Generated from supabase/migrations/0001..0010 + supabase/seed/seed.sql (in order).
+-- Generated from supabase/migrations/0001..0011 + supabase/seed/seed.sql (in order).
 -- Run ONCE on a NEW, empty project. Do not edit here; edit the source files.
 
 -- ================================================================
@@ -1209,6 +1209,32 @@ insert into membership_plans (name, description, duration_days, prices, download
    array['Add up to 30 wallpapers to your library', 'Every size of each wallpaper', 'Keep them forever'], false, 10),
   ('Yearly Pass', '365 days of access', 365, '{"IN": 149900, "T1": 4999, "T2": 3499, "T3": 1999}', 400, false,
    array['Add up to 400 wallpapers to your library', 'Every size of each wallpaper', 'Keep them forever', 'Best value'], false, 20);
+
+
+-- ================================================================
+-- >>> supabase/migrations/0011_storage_buckets.sql
+-- ================================================================
+-- =============================================================================
+-- HirecWallp — Supabase Storage buckets (zero-setup storage; see src/lib/storage)
+--
+-- wallpapers-private : originals, paid sizes, free sizes, per-buyer copies,
+--                      raw uploads. NOT public; no RLS policies, so only the
+--                      service role (server) can read/write; buyers get 60 s
+--                      signed URLs.
+-- wallpapers-public  : watermarked previews (≤720 px) + 600² crops only.
+-- 50 MB per file = Supabase free-plan limit. Switch to R2 any time via env.
+-- =============================================================================
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values
+  ('wallpapers-private', 'wallpapers-private', false, 52428800,
+   array['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/tiff']),
+  ('wallpapers-public', 'wallpapers-public', true, 5242880,
+   array['image/jpeg', 'image/webp', 'image/avif'])
+on conflict (id) do update
+  set public = excluded.public,
+      file_size_limit = excluded.file_size_limit,
+      allowed_mime_types = excluded.allowed_mime_types;
 
 
 -- ================================================================

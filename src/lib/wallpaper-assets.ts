@@ -2,7 +2,7 @@ import 'server-only';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { encodeMaster, orientationOf, type GeneratedVariant } from '@/lib/imaging';
-import { putObject } from '@/lib/r2';
+import { putObject } from '@/lib/storage';
 
 /**
  * Store a wallpaper's master + generated variants and record them in

@@ -75,7 +75,8 @@ export async function middleware(request: NextRequest) {
     // Next.js injects inline bootstrap scripts; dev also needs eval for HMR.
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://checkout.razorpay.com`,
     `style-src 'self' 'unsafe-inline'`,
-    `img-src 'self' data: blob: ${razorpay} ${publicBase}`.trim(),
+    // Previews come from R2 (publicBase) or Supabase Storage (supabaseUrl).
+    `img-src 'self' data: blob: ${razorpay} ${publicBase} ${supabaseUrl}`.trim(),
     `font-src 'self' data:`,
     // R2 S3 endpoint: browsers PUT large originals via presigned URLs.
     `connect-src 'self' ${razorpay} https://*.r2.cloudflarestorage.com ${supabaseUrl}`.trim(),

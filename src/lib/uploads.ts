@@ -1,10 +1,10 @@
 import 'server-only';
 
 import crypto from 'node:crypto';
-import { deleteObject, getObject } from '@/lib/r2';
+import { deleteObject, getObject, storage } from '@/lib/storage';
 
-/** Originals from upscalers are often 40–80 MB PNGs; allow headroom. */
-export const MAX_UPLOAD_BYTES = 150 * 1024 * 1024;
+/** Largest original the active storage accepts (R2 150 MB, Supabase free 50 MB). */
+export const maxUploadBytes = () => storage().maxUploadBytes;
 
 export const UPLOAD_TYPES: Record<string, string> = {
   'image/jpeg': 'jpg',

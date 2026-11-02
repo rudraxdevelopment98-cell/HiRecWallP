@@ -16,6 +16,9 @@ export function clientIp(request: Request): string {
 
 /** Keyed hash of an IP (never store raw IPs). */
 export function hashIp(ip: string): string {
-  const secret = serverEnv().DOWNLOAD_TOKEN_SECRET;
+  const secret =
+    serverEnv().DOWNLOAD_TOKEN_SECRET ??
+    crypto.createHash('sha256').update(`hw-download:${process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''}`).digest('hex');
+  if (secret.length < 16) throw new Error('No secret available for IP hashing');
   return crypto.createHmac('sha256', secret).update(ip).digest('hex').slice(0, 32);
 }

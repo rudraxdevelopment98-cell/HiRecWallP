@@ -3,7 +3,7 @@ import { getSettings } from '@/lib/settings';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
-import { getObject, objectExists, presignedGetUrl, putObject, type R2Bucket } from '@/lib/r2';
+import { getObject, objectExists, presignedGetUrl, putObject, type R2Bucket } from '@/lib/storage';
 import { clientIp, hashIp } from '@/lib/request';
 import { isSameOrigin } from '@/lib/http';
 import { embedWatermark, isWatermarkConfigured } from '@/lib/watermark';

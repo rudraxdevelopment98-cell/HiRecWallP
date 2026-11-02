@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createServiceClient } from '@/lib/supabase/service';
 import { serverEnv } from '@/lib/env';
 import { generateVariants } from '@/lib/imaging';
-import { getObject } from '@/lib/r2';
+import { getObject, publicObjectUrl } from '@/lib/storage';
 import { persistWallpaperAssets } from '@/lib/wallpaper-assets';
 import { dHash } from '@/lib/phash';
 
@@ -88,9 +88,7 @@ export async function runPublishApproved(jobId: string): Promise<Record<string, 
   await persistWallpaperAssets(supabase, wallpaper.id, original, variants, async (v) =>
     v.variant === 'preview' ? dHash(v.buffer) : null,
   );
-  const previewPublicUrl = process.env.R2_PUBLIC_BASE_URL
-    ? `${process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, '')}/wallpapers/${wallpaper.id}/preview.jpg`
-    : null;
+  const previewPublicUrl = publicObjectUrl(`wallpapers/${wallpaper.id}/preview.jpg`);
 
   // Seed a price per region from the global rule (launch price).
   const { data: rules } = await supabase

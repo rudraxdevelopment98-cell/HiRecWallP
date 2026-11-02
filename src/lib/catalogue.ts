@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { publicEnv } from '@/lib/env';
+import { publicObjectUrl } from '@/lib/storage';
 import { DEFAULT_REGION, isRegionCode, type RegionCode } from '@/lib/geo';
 import { DEMO_CATEGORIES, demoWallpaperBySlug, demoWallpapers } from '@/lib/demo';
 import type {
@@ -89,14 +90,14 @@ export async function getDisplayRegion(): Promise<RegionCode> {
   return isRegionCode(value) ? value : DEFAULT_REGION;
 }
 
-function publicBaseUrl(): string {
-  return process.env.R2_PUBLIC_BASE_URL ?? '';
-}
-
+/** Public (watermarked preview) URL for a storage key, via the active provider. */
 export function previewUrlFor(storageKey: string | null | undefined): string | null {
   if (!storageKey) return null;
-  const base = publicBaseUrl().replace(/\/$/, '');
-  return base ? `${base}/${storageKey}` : null;
+  try {
+    return publicObjectUrl(storageKey);
+  } catch {
+    return null;
+  }
 }
 
 type AssetRow = { variant: string; storage_key: string };

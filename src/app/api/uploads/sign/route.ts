@@ -3,14 +3,14 @@ import { z } from 'zod';
 import { getUser, isAdminUser } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/http';
 import { createServiceClient } from '@/lib/supabase/service';
-import { presignedPutUrl } from '@/lib/r2';
-import { MAX_UPLOAD_BYTES, UPLOAD_TYPES, incomingKeyFor } from '@/lib/uploads';
+import { presignedPutUrl } from '@/lib/storage';
+import { UPLOAD_TYPES, incomingKeyFor, maxUploadBytes } from '@/lib/uploads';
 
 export const runtime = 'nodejs';
 
 const schema = z.object({
   contentType: z.string().refine((t) => t in UPLOAD_TYPES, 'unsupported image type'),
-  size: z.number().int().positive().max(MAX_UPLOAD_BYTES),
+  size: z.number().int().positive(),
 });
 
 /**
@@ -24,8 +24,12 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const parsed = schema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Unsupported file (JPEG/PNG/WebP/AVIF/TIFF, max 150 MB)' }, { status: 400 });
+  const max = maxUploadBytes();
+  if (!parsed.success || parsed.data.size > max) {
+    return NextResponse.json(
+      { error: `Unsupported file — JPEG, PNG, WebP, AVIF or TIFF up to ${Math.round(max / 1048576)} MB. (Tip: save very large PNGs as high-quality JPEG.)` },
+      { status: 400 },
+    );
   }
 
   let allowed = await isAdminUser();

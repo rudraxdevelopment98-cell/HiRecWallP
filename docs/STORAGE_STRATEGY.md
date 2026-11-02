@@ -1,5 +1,13 @@
 # Storage & scaling strategy
 
+> **Provider (2026-11-02):** storage is behind `src/lib/storage` with two providers.
+> **Supabase Storage is the default** (buckets `wallpapers-private` / `wallpapers-public`,
+> migration 0011; uses the existing service-role key — no extra setup). Free plan: 1 GB
+> storage (~100 wallpapers), 50 MB per file, ~5 GB/month egress. When those get close,
+> add the `R2_*` env vars (or `STORAGE_PROVIDER=r2`) and redeploy — R2 is picked
+> automatically; nothing else changes. Supabase has no lifecycle rules, so the daily
+> housekeeping job deletes expired `incoming/`, `wm/` and `generation/` files.
+
 How HirecWallp stores wallpapers and data so cost stays near zero while the
 catalogue grows, and the exact points where a paid plan becomes necessary.
 Numbers are **measured** with the real pipeline (`src/lib/imaging.ts`) on 8K

@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { adminGuard } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
-import { deleteObject, type R2Bucket } from '@/lib/r2';
+import { deleteObject, type R2Bucket } from '@/lib/storage';
 
 export const runtime = 'nodejs';
 

@@ -232,6 +232,14 @@ Key Phase 3 decisions:
   `requireUser()` / `requireAdmin()` itself; middleware also gates `/admin` + `/api/admin`.
 - Next 16 later: needs `next lint` → ESLint CLI and middleware → proxy migration.
 
+## Storage provider (2026-11-02)
+
+- `src/lib/storage` (`storage()` picks provider): **Supabase Storage default** (buckets from
+  migration 0011, service-role key, 50 MB/file) or **R2** when all `R2_*` env vars are set /
+  `STORAGE_PROVIDER=r2`. Import storage helpers from `@/lib/storage` (old `@/lib/r2` removed).
+- Public preview URLs via `publicObjectUrl()`; `DOWNLOAD_TOKEN_SECRET` optional (derived
+  from the service key if absent). Housekeeping cron cleans temp files on Supabase.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International
