@@ -61,7 +61,11 @@ export async function POST(request: Request) {
           console.error('[webhook] refund failed', order.id, err);
         }
       }
-      await supabase.from('orders').update({ status: 'refunded' }).eq('id', order.id).eq('status', 'created');
+      await supabase
+        .from('orders')
+        .update({ status: 'refunded', provider_payment_id: result.paymentId })
+        .eq('id', order.id)
+        .eq('status', 'created');
       return NextResponse.json({ ok: true, refunded: true });
     }
 
@@ -69,7 +73,7 @@ export async function POST(request: Request) {
     // order.paid) gets to flip created → paid and grant.
     const { data: claimed } = await supabase
       .from('orders')
-      .update({ status: 'paid' })
+      .update({ status: 'paid', provider_payment_id: result.paymentId })
       .eq('id', order.id)
       .eq('status', 'created')
       .select('id');
@@ -128,6 +132,14 @@ export async function POST(request: Request) {
           });
         }
       }
+    }
+
+    // Analytics: one purchase event per wallpaper line (funnel + best sellers).
+    const bought = (items ?? []).filter((i) => i.wallpaper_id);
+    if (bought.length) {
+      await supabase
+        .from('events')
+        .insert(bought.map((i) => ({ type: 'purchase', user_id: order.user_id, wallpaper_id: i.wallpaper_id })));
     }
 
     return NextResponse.json({ ok: true });

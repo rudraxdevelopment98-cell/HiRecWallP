@@ -6,6 +6,7 @@ import { Check, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { buttonVariants } from '@/components/ui/button';
 import { addItem, getCart, type CartItem } from '@/lib/cart';
+import { track } from '@/lib/track';
 
 /** "Add to Cart" for the product detail page (client-side cart). */
 export function AddToCart({
@@ -46,6 +47,7 @@ export function AddToCart({
       className="flex-1"
       onClick={() => {
         addItem(item);
+        track('add_to_cart', item.id);
         setInCart(true);
       }}
     >

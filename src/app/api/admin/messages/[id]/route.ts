@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminGuard } from '@/lib/admin';
+import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -22,5 +22,6 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
   const table = parsed.data.kind === 'contact' ? 'contact_messages' : 'takedown_reports';
   const { error } = await createServiceClient().from(table).update({ status: parsed.data.status }).eq('id', params.id);
   if (error) return NextResponse.json({ error: 'Could not update' }, { status: 400 });
+  await audit(`${parsed.data.kind}.status`, parsed.data.kind, params.id, { status: parsed.data.status });
   return NextResponse.json({ ok: true });
 }

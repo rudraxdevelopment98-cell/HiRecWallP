@@ -1,3 +1,4 @@
+import { TrackEvent } from '@/components/track-event';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Crown, MonitorSmartphone } from 'lucide-react';
@@ -25,6 +26,7 @@ export default async function HomePage() {
 
   return (
     <main>
+      <TrackEvent type="view" />
       {/* Hero */}
       <Hero />
 

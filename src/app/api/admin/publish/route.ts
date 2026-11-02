@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { isAdminUser } from '@/lib/auth';
+import { audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 import { isSameOrigin } from '@/lib/http';
 
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
       );
     }
 
+    await audit('wallpaper.publish', 'wallpaper', parsed.data.wallpaperId);
     revalidatePath('/');
     revalidatePath('/explore');
     revalidatePath('/free');

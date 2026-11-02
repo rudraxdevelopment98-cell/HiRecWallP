@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminGuard, listAuthUsers } from '@/lib/admin';
+import { adminGuard, listAuthUsers, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -35,5 +35,6 @@ export async function POST(request: Request) {
       note: parsed.data.note || 'Complimentary (admin)',
     });
   if (error) return NextResponse.json({ error: 'Could not create pass' }, { status: 400 });
+  await audit('membership.grant', 'user', user.id, { days: parsed.data.days, download_limit: parsed.data.download_limit });
   return NextResponse.json({ ok: true });
 }

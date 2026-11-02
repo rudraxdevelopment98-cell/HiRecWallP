@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { adminGuard } from '@/lib/admin';
+import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -32,6 +32,7 @@ export async function PATCH(request: Request) {
     supabase.from('regions').update({ commercial_multiplier }).eq('code', region_code),
   ]);
   if (a.error || b.error) return NextResponse.json({ error: 'Could not save' }, { status: 400 });
+  await audit('prices.update', 'region', region_code, { ...rule, commercial_multiplier });
   revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true });
 }

@@ -16,6 +16,7 @@ import {
   type RegionCode,
 } from '@/lib/geo';
 import { payWithRazorpay } from '@/lib/razorpay-client';
+import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 
 function regionFromCookie(): RegionCode {
@@ -211,6 +212,7 @@ export default function CheckoutPage() {
     }
 
     if (payable.length === 0) return;
+    track('checkout_start');
     setBusy(true);
     try {
       if (payInCredits) await unlockWithCredits();

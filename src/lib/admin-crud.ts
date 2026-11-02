@@ -3,7 +3,7 @@ import 'server-only';
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import type { ZodTypeAny } from 'zod';
-import { adminGuard } from '@/lib/admin';
+import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -17,6 +17,7 @@ export function createHandler(table: string, schema: ZodTypeAny) {
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 });
     const { error } = await createServiceClient().from(table).insert(parsed.data as Record<string, unknown>);
     if (error) return NextResponse.json({ error: error.code === '23505' ? 'That already exists (duplicate slug/name?)' : 'Could not create' }, { status: 400 });
+    await audit(`${table}.create`, table, null, parsed.data as Record<string, unknown>);
     revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true });
   };
@@ -33,6 +34,7 @@ export function updateHandler(table: string, schema: ZodTypeAny, idColumn = 'id'
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 });
     const { error } = await createServiceClient().from(table).update(parsed.data as Record<string, unknown>).eq(idColumn, params.id);
     if (error) return NextResponse.json({ error: error.code === '23505' ? 'That slug/name is taken' : 'Could not save' }, { status: 400 });
+    await audit(`${table}.update`, table, params.id, parsed.data as Record<string, unknown>);
     revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true });
   };
@@ -56,11 +58,13 @@ export function deleteHandler(
     if (inUse && (await inUse(params.id))) {
       if (!fallback) return NextResponse.json({ error: 'In use — cannot delete' }, { status: 409 });
       await supabase.from(table).update(fallback).eq('id', params.id);
+      await audit(`${table}.deactivate`, table, params.id);
       revalidatePath('/', 'layout');
       return NextResponse.json({ ok: true, deactivated: true });
     }
     const { error } = await supabase.from(table).delete().eq('id', params.id);
     if (error) return NextResponse.json({ error: 'Could not delete' }, { status: 400 });
+    await audit(`${table}.delete`, table, params.id);
     revalidatePath('/', 'layout');
     return NextResponse.json({ ok: true });
   };

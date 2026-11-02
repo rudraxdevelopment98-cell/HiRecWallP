@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminGuard } from '@/lib/admin';
+import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -36,5 +36,6 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
           : { download_limit: Number(m.download_limit) + a.add };
   const { error } = await supabase.from('memberships').update(update).eq('id', params.id);
   if (error) return NextResponse.json({ error: 'Could not update' }, { status: 400 });
+  await audit(`membership.${a.action}`, 'membership', params.id, a);
   return NextResponse.json({ ok: true });
 }

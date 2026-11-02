@@ -2,20 +2,15 @@
 
 import { useEffect, useRef } from 'react';
 
-type EventType = 'view' | 'detail_view' | 'preview_zoom' | 'free_download';
+import { track, type TrackType } from '@/lib/track';
 
 /** Fires a single analytics event on mount (fire-and-forget). */
-export function TrackEvent({ type, wallpaperId }: { type: EventType; wallpaperId?: string }) {
+export function TrackEvent({ type, wallpaperId }: { type: TrackType; wallpaperId?: string }) {
   const sent = useRef(false);
   useEffect(() => {
     if (sent.current) return;
     sent.current = true;
-    void fetch('/api/events', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type, wallpaperId }),
-      keepalive: true,
-    }).catch(() => {});
+    track(type, wallpaperId);
   }, [type, wallpaperId]);
   return null;
 }

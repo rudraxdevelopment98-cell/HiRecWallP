@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { TrackEvent } from '@/components/track-event';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { FilterSidebar } from '@/components/filter-sidebar';
 import { Pagination } from '@/components/pagination';
@@ -26,6 +27,7 @@ export default async function ExplorePage(props: { searchParams: Promise<SearchP
 
   return (
     <main className="container py-10">
+      <TrackEvent type="view" />
       <div className="mb-8">
         <h1 className="font-display text-3xl font-semibold tracking-tight">Explore Wallpapers</h1>
         <p className="text-sm text-muted-foreground">

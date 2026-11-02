@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { adminGuard } from '@/lib/admin';
+import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 import { deleteObject, type R2Bucket } from '@/lib/storage';
 
@@ -43,6 +43,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     .maybeSingle();
   if (error || !data) return NextResponse.json({ error: 'Could not save' }, { status: 400 });
   refresh(data.slug as string);
+  await audit('wallpaper.update', 'wallpaper', params.id, parsed.data);
   return NextResponse.json({ ok: true });
 }
 
@@ -81,6 +82,7 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
 
   const { error } = await supabase.from('wallpapers').delete().eq('id', params.id);
   if (error) return NextResponse.json({ error: 'Could not delete' }, { status: 400 });
+  await audit('wallpaper.delete', 'wallpaper', params.id);
   refresh();
   return NextResponse.json({ ok: true });
 }

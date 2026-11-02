@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { adminGuard } from '@/lib/admin';
+import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 import { clearSettingsCache } from '@/lib/settings';
 
@@ -36,6 +36,7 @@ export async function PUT(request: Request) {
     .upsert({ key: parsed.data.key, value: parsed.data.value, updated_at: new Date().toISOString() });
   if (error) return NextResponse.json({ error: 'Could not save' }, { status: 400 });
   clearSettingsCache();
+  await audit('settings.update', 'setting', parsed.data.key, { value: parsed.data.value as unknown });
   revalidatePath('/', 'layout');
   return NextResponse.json({ ok: true });
 }
