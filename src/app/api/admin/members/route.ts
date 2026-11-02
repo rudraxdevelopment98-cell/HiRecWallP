@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminGuard, listAuthUsers, audit } from '@/lib/admin';
+import { adminGuard, audit, userIdByEmail } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -20,7 +20,8 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid input' }, { status: 400 });
 
-  const user = (await listAuthUsers()).find((u) => u.email?.toLowerCase() === parsed.data.email);
+  const userId = await userIdByEmail(parsed.data.email);
+  const user = userId ? { id: userId } : null;
   if (!user) return NextResponse.json({ error: 'No account with that email — they need to sign in once first.' }, { status: 404 });
 
   const now = Date.now();

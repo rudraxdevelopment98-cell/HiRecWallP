@@ -68,3 +68,20 @@ export async function audit(
     console.error('[audit] failed', action, err);
   }
 }
+
+/** id → email for just these users (profiles.email is synced from auth). */
+export async function emailsFor(userIds: string[]): Promise<Map<string, string | null>> {
+  const ids = [...new Set(userIds)].filter(Boolean);
+  const out = new Map<string, string | null>();
+  for (let i = 0; i < ids.length; i += 500) {
+    const { data } = await createServiceClient().from('profiles').select('id, email').in('id', ids.slice(i, i + 500));
+    for (const r of data ?? []) out.set(r.id as string, (r.email as string | null) ?? null);
+  }
+  return out;
+}
+
+/** Find an account by email (case-insensitive). */
+export async function userIdByEmail(email: string): Promise<string | null> {
+  const { data } = await createServiceClient().from('profiles').select('id').ilike('email', email.trim()).limit(1).maybeSingle();
+  return (data?.id as string | undefined) ?? null;
+}

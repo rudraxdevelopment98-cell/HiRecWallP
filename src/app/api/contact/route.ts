@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { isSameOrigin } from '@/lib/http';
+import { allowRequest, isBot } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -15,7 +16,12 @@ const schema = z.object({
 /** Contact form → contact_messages (read and answered from Admin → Messages). */
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
-  const parsed = schema.safeParse(await request.json().catch(() => null));
+  const body = await request.json().catch(() => null);
+  if (isBot(body)) return NextResponse.json({ ok: true });
+  if (!(await allowRequest(request, 'contact', 5, 3600))) {
+    return NextResponse.json({ error: 'Too many requests — please try again later.' }, { status: 429 });
+  }
+  const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Please fill in your name, email and a message.' }, { status: 400 });
   try {
     const user = await getUser();

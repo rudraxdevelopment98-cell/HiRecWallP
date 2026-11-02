@@ -4,6 +4,7 @@ import { getUser } from '@/lib/auth';
 import { getDisplayRegion } from '@/lib/catalogue';
 import { createServiceClient } from '@/lib/supabase/service';
 import { isSameOrigin } from '@/lib/http';
+import { allowRequest } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -36,6 +37,10 @@ export async function POST(request: Request) {
   }
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+
+  if (!(await allowRequest(request, 'events', 600, 3600))) {
+    return NextResponse.json({ ok: false }, { status: 202 });
+  }
 
   try {
     const [user, region] = [await getUser(), (await getDisplayRegion())];

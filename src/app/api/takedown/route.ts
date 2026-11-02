@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/service';
 import { isSameOrigin } from '@/lib/http';
+import { allowRequest, isBot } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -26,6 +27,10 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+  }
+  if (isBot(body)) return NextResponse.json({ ok: true }, { status: 201 });
+  if (!(await allowRequest(request, 'takedown', 5, 3600))) {
+    return NextResponse.json({ error: 'Too many requests — please try again later.' }, { status: 429 });
   }
 
   try {

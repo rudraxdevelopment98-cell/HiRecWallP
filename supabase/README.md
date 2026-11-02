@@ -17,6 +17,8 @@ Phase 1 schema, Row Level Security and seed data for HirecWallp.
 | `migrations/0009_site_completion.sql` | size metadata on wallpapers, favourites, newsletter, contact messages, invoice numbers; global prices public |
 | `migrations/0010_membership_and_settings.sql` | site_settings, membership plans/passes, grant_membership(), member_unlock() |
 | `migrations/0011_storage_buckets.sql` | Supabase Storage buckets (private originals/paid files, public previews) |
+| `migrations/0012_admin_pro.sql` | profile emails, payment ids, admin audit log, analytics + customer-list functions |
+| `migrations/0013_rate_limits.sql` | shared rate limiting for public endpoints |
 | `setup/all-in-one.sql` | **Easiest:** 0001–0007 + seed concatenated, for one paste into the Supabase SQL Editor (new project only) |
 | `seed/seed.sql` | Regions, global price rules, credit packs, launch categories, sample prompts |
 
@@ -38,6 +40,8 @@ psql "$DATABASE_URL" -f supabase/migrations/0008_housekeeping.sql
 psql "$DATABASE_URL" -f supabase/migrations/0009_site_completion.sql
 psql "$DATABASE_URL" -f supabase/migrations/0010_membership_and_settings.sql
 psql "$DATABASE_URL" -f supabase/migrations/0011_storage_buckets.sql
+psql "$DATABASE_URL" -f supabase/migrations/0012_admin_pro.sql
+psql "$DATABASE_URL" -f supabase/migrations/0013_rate_limits.sql
 psql "$DATABASE_URL" -f supabase/seed/seed.sql
 ```
 

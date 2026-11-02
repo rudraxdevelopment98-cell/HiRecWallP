@@ -1,7 +1,7 @@
 import { requireAdmin } from '@/lib/auth';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
-import { listAuthUsers } from '@/lib/admin';
+import { emailsFor } from '@/lib/admin';
 import { getSettings } from '@/lib/settings';
 import { Badge } from '@/components/ui/badge';
 import { AdminForm, SettingToggle, type FieldDef } from '@/components/admin/admin-form';
@@ -40,7 +40,7 @@ interface Plan {
 export default async function AdminMembershipPage() {
   await requireAdmin();
   const supabase = createServiceClient();
-  const [settings, { data: plans }, { data: members }, users] = await Promise.all([
+  const [settings, { data: plans }, { data: members }] = await Promise.all([
     getSettings(),
     supabase.from('membership_plans').select('*').order('sort_order'),
     supabase
@@ -48,9 +48,8 @@ export default async function AdminMembershipPage() {
       .select('id, user_id, starts_at, ends_at, download_limit, downloads_used, status, note, membership_plans(name)')
       .order('ends_at', { ascending: false })
       .limit(300),
-    listAuthUsers().catch(() => []),
   ]);
-  const email = new Map(users.map((u) => [u.id, u.email]));
+  const email = await emailsFor(((members ?? []) as { user_id: string }[]).map((m) => m.user_id));
   const now = Date.now();
   const rows = (members ?? []) as unknown as {
     id: string;

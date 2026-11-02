@@ -1,6 +1,6 @@
 import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
-import { listAuthUsers } from '@/lib/admin';
+import { emailsFor } from '@/lib/admin';
 import { formatMoneyMinor } from '@/lib/format';
 import { Badge } from '@/components/ui/badge';
 import { StatusSelect } from '@/components/admin/status-select';
@@ -11,13 +11,15 @@ export const dynamic = 'force-dynamic';
 export default async function AdminCreatorsPage() {
   await requireAdmin();
   const supabase = createServiceClient();
-  const [{ data: creators }, { data: payouts }, { data: subs }, users] = await Promise.all([
+  const [{ data: creators }, { data: payouts }, { data: subs }] = await Promise.all([
     supabase.from('creators').select('*').order('created_at', { ascending: false }),
     supabase.from('creator_payouts').select('*').order('created_at', { ascending: false }).limit(100),
     supabase.from('wallpapers').select('creator_id, status').not('creator_id', 'is', null),
-    listAuthUsers().catch(() => []),
   ]);
-  const email = new Map(users.map((u) => [u.id, u.email]));
+  const email = await emailsFor([
+    ...((creators ?? []) as { user_id: string }[]).map((c) => c.user_id),
+    ...((payouts ?? []) as { creator_id: string }[]).map((p) => p.creator_id),
+  ]);
   const counts = new Map<string, { total: number; published: number }>();
   for (const s of subs ?? []) {
     const c = counts.get(s.creator_id as string) ?? { total: 0, published: 0 };

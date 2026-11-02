@@ -240,6 +240,20 @@ Key Phase 3 decisions:
 - Public preview URLs via `publicObjectUrl()`; `DOWNLOAD_TOKEN_SECRET` optional (derived
   from the service key if absent). Housekeeping cron cleans temp files on Supabase.
 
+## Production admin (2026-11-02)
+
+- Migration 0012: `profiles.email` (synced from auth by trigger), `orders.provider_payment_id`
+  (webhook stores it), `admin_audit`, SQL functions `admin_sales_daily|admin_top_sellers|
+  admin_top_viewed|admin_funnel|admin_sales_by_country|admin_customers` (service role only).
+- Admin: /admin/analytics, paginated+searchable orders (CSV export, detail, **refund** via
+  `refundOrder()` which revokes entitlements/credits/passes), customers (detail: credits ±,
+  gift, block/unblock via auth ban, role), catalogue bulk actions (`/api/admin/wallpapers/bulk`,
+  shared `publishWallpapers()`), /admin/activity (every admin mutation calls `audit()`),
+  /admin/health. Grouped nav in `components/admin/admin-nav.tsx`.
+- Use `emailsFor()` / `userIdByEmail()` (profiles) — never list all auth users.
+- Funnel events: view, detail_view, add_to_cart, checkout_start (client `track()`), purchase (webhook).
+- Migration 0013: `rate_limit_hit()` + `allowRequest()`; honeypot field `website` on public forms.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

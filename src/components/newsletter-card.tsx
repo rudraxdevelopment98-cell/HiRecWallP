@@ -24,18 +24,20 @@ export function NewsletterCard() {
             e.preventDefault();
             setBusy(true);
             setError(null);
-            const email = new FormData(e.currentTarget).get('email');
+            const fd = new FormData(e.currentTarget);
+            const email = fd.get('email');
             const res = await fetch('/api/newsletter', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ email, source: 'home' }),
+              body: JSON.stringify({ email, source: 'home', website: fd.get('website') }),
             }).catch(() => null);
             setBusy(false);
             if (res?.ok) setDone(true);
             else setError(((await res?.json().catch(() => null)) as { error?: string } | null)?.error ?? 'Please try again.');
           }}
-          className="flex gap-2"
+          className="relative flex gap-2"
         >
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 opacity-0" />
           <input
             type="email"
             name="email"

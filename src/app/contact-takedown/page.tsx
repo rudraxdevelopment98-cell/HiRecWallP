@@ -22,6 +22,7 @@ export default function ContactTakedownPage() {
           reporter_email: form.get('reporter_email'),
           url: form.get('url'),
           details: form.get('details'),
+          website: form.get('website'),
         }),
       });
       if (!res.ok) throw new Error(await res.text());
@@ -46,7 +47,8 @@ export default function ContactTakedownPage() {
           {message}
         </p>
       ) : (
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="relative space-y-4">
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 opacity-0" />
           <div className="space-y-1">
             <label htmlFor="reporter_email" className="text-sm font-medium">
               Your email

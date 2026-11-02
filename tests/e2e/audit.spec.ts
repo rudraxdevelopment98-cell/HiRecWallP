@@ -68,3 +68,20 @@ test('control-centre and membership APIs are protected', async ({ request, baseU
   expect((await request.delete(`/api/admin/categories/${id}`, { headers: h })).status()).toBe(403);
   expect((await request.post('/api/membership/claim', { headers: h, data: { wallpaperId: id } })).status()).toBe(401);
 });
+
+test('pro admin APIs are protected', async ({ request, baseURL }) => {
+  const h = origin(baseURL);
+  const id = '00000000-0000-0000-0000-000000000000';
+  expect((await request.post('/api/admin/wallpapers/bulk', { headers: h, data: { action: 'archive', ids: [id] } })).status()).toBe(403);
+  expect((await request.post(`/api/admin/orders/${id}/refund`, { headers: h, data: { reason: 'test', viaProvider: false } })).status()).toBe(403);
+  expect((await request.post(`/api/admin/customers/${id}`, { headers: h, data: { action: 'block' } })).status()).toBe(403);
+  expect((await request.get('/api/admin/orders/export')).status()).toBe(403);
+});
+
+test('bots filling the hidden field are quietly ignored', async ({ request, baseURL }) => {
+  const res = await request.post('/api/contact', {
+    headers: origin(baseURL),
+    data: { name: 'Bot', email: 'bot@example.com', message: 'buy cheap stuff', website: 'http://spam.example' },
+  });
+  expect(res.status()).toBe(200);
+});

@@ -1,13 +1,12 @@
 import { requireAdmin } from '@/lib/auth';
-import Image from 'next/image';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
-import { publicEnv } from '@/lib/env';
 import { previewUrlFor } from '@/lib/catalogue';
-import { Badge } from '@/components/ui/badge';
-import { WallpaperActions } from '@/components/admin/wallpaper-actions';
+import { Pagination } from '@/components/pagination';
+import { CatalogueTable, type CatalogueRow } from '@/components/admin/catalogue-table';
 
 export const dynamic = 'force-dynamic';
+const PER_PAGE = 50;
 
 const TABS = [
   { key: 'all', label: 'All' },
@@ -17,7 +16,7 @@ const TABS = [
   { key: 'archived', label: 'Archived' },
 ];
 
-interface Row {
+interface DbRow {
   id: string;
   slug: string;
   title: string;
@@ -25,36 +24,47 @@ interface Row {
   is_free: boolean;
   orientation: string | null;
   devices: string[];
-  created_at: string;
   creator_id: string | null;
+  categories: { name: string } | null;
   wallpaper_assets: { variant: string; storage_key: string }[] | null;
 }
 
-export default async function AdminCataloguePage(props: { searchParams: Promise<{ status?: string; q?: string }> }) {
+export default async function AdminCataloguePage(props: { searchParams: Promise<{ status?: string; q?: string; page?: string }> }) {
   await requireAdmin();
-  const searchParams = await props.searchParams;
-  const status = TABS.some((t) => t.key === searchParams.status) ? searchParams.status! : 'all';
-  let rows: Row[] | null = null;
-  if (publicEnv.NEXT_PUBLIC_SUPABASE_URL) {
-    try {
-      let query = createServiceClient()
-        .from('wallpapers')
-        .select('id, slug, title, status, is_free, orientation, devices, created_at, creator_id, wallpaper_assets(variant, storage_key)')
-        .order('created_at', { ascending: false })
-        .limit(200);
-      if (status !== 'all') query = query.eq('status', status);
-      if (searchParams.q) query = query.ilike('title', `%${searchParams.q.replace(/[%,]/g, ' ')}%`);
-      const { data } = await query;
-      rows = (data as Row[]) ?? [];
-    } catch {
-      rows = null;
-    }
-  }
+  const sp = await props.searchParams;
+  const status = TABS.some((t) => t.key === sp.status) ? sp.status! : 'all';
+  const q = (sp.q ?? '').trim();
+  const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1);
+
+  const supabase = createServiceClient();
+  let query = supabase
+    .from('wallpapers')
+    .select('id, slug, title, status, is_free, orientation, devices, creator_id, categories(name), wallpaper_assets(variant, storage_key)', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range((page - 1) * PER_PAGE, page * PER_PAGE - 1);
+  if (status !== 'all') query = query.eq('status', status);
+  if (q) query = query.ilike('title', `%${q.replace(/[%,]/g, ' ')}%`);
+  const [{ data, count }, { data: categories }] = await Promise.all([
+    query,
+    supabase.from('categories').select('id, name').order('sort_order'),
+  ]);
+  const rows: CatalogueRow[] = ((data ?? []) as unknown as DbRow[]).map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    status: r.status,
+    is_free: r.is_free,
+    orientation: r.orientation,
+    devices: r.devices ?? [],
+    creator: Boolean(r.creator_id),
+    category: r.categories?.name ?? null,
+    previewUrl: previewUrlFor(r.wallpaper_assets?.find((a) => a.variant === 'preview')?.storage_key),
+  }));
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold">Catalogue</h1>
+        <h1 className="font-display text-2xl font-semibold">Wallpapers</h1>
         <Link href="/admin/upload" className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
           + Upload
         </Link>
@@ -71,47 +81,16 @@ export default async function AdminCataloguePage(props: { searchParams: Promise<
         ))}
         <form className="ml-auto" action="/admin/catalogue">
           {status !== 'all' && <input type="hidden" name="status" value={status} />}
-          <input name="q" defaultValue={searchParams.q ?? ''} placeholder="Search titles…" className="input h-8 w-48 py-1" />
+          <input name="q" defaultValue={q} placeholder="Search titles…" className="input h-8 w-48 py-1" aria-label="Search wallpapers" />
         </form>
       </div>
-
-      {rows == null ? (
-        <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Connect Supabase to manage the catalogue.</p>
-      ) : rows.length === 0 ? (
+      <p className="text-sm text-muted-foreground">{(count ?? 0).toLocaleString('en-IN')} wallpaper(s)</p>
+      {rows.length === 0 ? (
         <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Nothing here yet.</p>
       ) : (
-        <ul className="divide-y rounded-2xl border bg-card">
-          {rows.map((row) => {
-            const url = previewUrlFor(row.wallpaper_assets?.find((a) => a.variant === 'preview')?.storage_key);
-            return (
-              <li key={row.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
-                <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-md border bg-muted">
-                  {url && <Image src={url} alt="" fill sizes="64px" className="object-cover" />}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">
-                    {row.status === 'published' ? (
-                      <Link href={`/w/${row.slug}`} className="hover:underline">
-                        {row.title}
-                      </Link>
-                    ) : (
-                      row.title
-                    )}
-                  </p>
-                  <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                    <Badge variant={row.status === 'published' ? 'default' : 'secondary'}>{row.status.replace('_', ' ')}</Badge>
-                    {row.is_free && <Badge variant="free">FREE</Badge>}
-                    {row.creator_id && <span>creator upload</span>}
-                    {row.orientation && <span>· {row.orientation}</span>}
-                    {row.devices?.length > 0 && <span>· {row.devices.join(', ')}</span>}
-                  </p>
-                </div>
-                <WallpaperActions id={row.id} status={row.status} />
-              </li>
-            );
-          })}
-        </ul>
+        <CatalogueTable rows={rows} categories={(categories ?? []) as { id: string; name: string }[]} />
       )}
+      <Pagination page={page} totalPages={Math.max(1, Math.ceil((count ?? 0) / PER_PAGE))} basePath="/admin/catalogue" query={{ status: status === 'all' ? undefined : status, q }} />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/service';
 import { isSameOrigin } from '@/lib/http';
 import { getSettings } from '@/lib/settings';
+import { allowRequest, isBot } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +15,12 @@ const schema = z.object({
 /** Newsletter sign-up. Idempotent per email; admins export from the panel. */
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
-  const parsed = schema.safeParse(await request.json().catch(() => null));
+  const body = await request.json().catch(() => null);
+  if (isBot(body)) return NextResponse.json({ ok: true });
+  if (!(await allowRequest(request, 'newsletter', 10, 3600))) {
+    return NextResponse.json({ error: 'Too many requests — please try again later.' }, { status: 429 });
+  }
+  const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Please enter a valid email.' }, { status: 400 });
   if (!(await getSettings()).newsletter_enabled) {
     return NextResponse.json({ error: 'Sign-ups are closed right now.' }, { status: 403 });
