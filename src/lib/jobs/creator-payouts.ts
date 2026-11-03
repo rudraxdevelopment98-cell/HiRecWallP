@@ -2,19 +2,21 @@ import 'server-only';
 
 import { createServiceClient } from '@/lib/supabase/service';
 import { getPayoutProvider, type PayoutProviderId } from '@/lib/payouts';
+import { getSettings } from '@/lib/settings';
 
 /**
  * creator_payouts: compute each creator's monthly earnings and (on a live run)
  * trigger payouts.
  *
- * gross  = sum of unit_price for the creator's wallpapers sold in paid money
- *          (INR) orders during the period
+ * gross  = (credits spent on the creator's wallpapers + membership claims of
+ *          them, each valued at `creator_credit_value_inr` per credit; a
+ *          commercial-licence claim counts as 5 credits) + any legacy per-item
+ *          INR sales, during the period
  * commission = gross × creators.commission_pct%
  * net    = gross − commission
  *
  * Idempotent on (creator_id, period); already-paid rows are not re-paid.
- * NOTE: credit-based (international) sales aren't yet valued into payouts —
- * flagged as a follow-up. Marketplace TDS/TCS is for CA review.
+ * ⚠️ The credit value and marketplace TDS/TCS treatment are for CA review.
  */
 function previousMonth(): string {
   const now = new Date();
@@ -55,10 +57,35 @@ export async function runCreatorPayouts(opts: {
     .returns<ItemRow[]>();
 
   const rows = (items ?? []).filter((i) => i.wallpaper_id && i.unit_price != null);
-  if (rows.length === 0) return { period, dryRun, creators: 0, note: 'no sales in period' };
+
+  // Credit spends + membership claims in the period (library items by source).
+  const creditValue = (await getSettings()).creator_credit_value_inr;
+  const { data: ents } = await supabase
+    .from('entitlements')
+    .select('id, wallpaper_id, source, licence')
+    .in('source', ['credits', 'membership'])
+    .gte('created_at', start)
+    .lt('created_at', end);
+  const entRows = (ents ?? []) as { id: string; wallpaper_id: string; source: string; licence: string }[];
+  const creditsByEnt = new Map<string, number>();
+  const creditEnts = entRows.filter((e) => e.source === 'credits').map((e) => e.id);
+  for (let i = 0; i < creditEnts.length; i += 200) {
+    const { data: spends } = await supabase
+      .from('credit_ledger')
+      .select('ref_id, delta')
+      .eq('reason', 'spend')
+      .in('ref_id', creditEnts.slice(i, i + 200));
+    for (const sp of spends ?? []) creditsByEnt.set(sp.ref_id as string, (creditsByEnt.get(sp.ref_id as string) ?? 0) - Number(sp.delta));
+  }
+  const valued = entRows.map((e) => ({
+    wallpaper_id: e.wallpaper_id,
+    amount: (e.source === 'credits' ? creditsByEnt.get(e.id) ?? 0 : e.licence === 'commercial' ? 5 : 1) * creditValue,
+  }));
+
+  if (rows.length === 0 && valued.length === 0) return { period, dryRun, creators: 0, note: 'no sales in period' };
 
   // Map wallpapers → creators.
-  const wallpaperIds = [...new Set(rows.map((r) => r.wallpaper_id!))];
+  const wallpaperIds = [...new Set([...rows.map((r) => r.wallpaper_id!), ...valued.map((v) => v.wallpaper_id)])];
   const { data: wps } = await supabase
     .from('wallpapers')
     .select('id, creator_id')
@@ -71,6 +98,11 @@ export async function runCreatorPayouts(opts: {
     const creatorId = creatorOf.get(r.wallpaper_id!);
     if (!creatorId) continue;
     grossByCreator.set(creatorId, (grossByCreator.get(creatorId) ?? 0) + Number(r.unit_price));
+  }
+  for (const v of valued) {
+    const creatorId = creatorOf.get(v.wallpaper_id);
+    if (!creatorId || v.amount <= 0) continue;
+    grossByCreator.set(creatorId, Math.round(((grossByCreator.get(creatorId) ?? 0) + v.amount) * 100) / 100);
   }
   if (grossByCreator.size === 0) return { period, dryRun, creators: 0, note: 'no creator sales' };
 

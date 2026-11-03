@@ -1,24 +1,20 @@
 import { NextResponse } from 'next/server';
-import { getDisplayRegion, listCreditPacks } from '@/lib/catalogue';
-import { REGION_PRICING_UNIT, chargeRegionFor, regionForCountry } from '@/lib/geo';
+import { getDisplayCountry, getDisplayRegion, listCreditPacks } from '@/lib/catalogue';
+import { chargeContext } from '@/lib/geo';
+import { getSettings } from '@/lib/settings';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
- * Credit packs for the region the buyer will actually be charged in: the
- * higher-priced of their display region and `?billingCountry=`.
+ * Credit packs priced for where the buyer will be charged: the higher-priced
+ * tier of their display country and `?billingCountry=`, using that country's
+ * own prices (e.g. GBP) when it has them.
  */
 export async function GET(request: Request) {
   const billing = new URL(request.url).searchParams.get('billingCountry');
-  const display = (await getDisplayRegion());
-  const chargeRegion =
-    billing && /^[A-Za-z]{2}$/.test(billing)
-      ? chargeRegionFor(display, regionForCountry(billing.toUpperCase()))
-      : display;
-  if (REGION_PRICING_UNIT[chargeRegion] === 'money') {
-    return NextResponse.json({ chargeRegion, packs: [] });
-  }
-  const packs = await listCreditPacks(chargeRegion);
-  return NextResponse.json({ chargeRegion, packs });
+  const [region, country, settings] = await Promise.all([getDisplayRegion(), getDisplayCountry(), getSettings()]);
+  const ctx = chargeContext(country, region, billing, settings.country_tiers);
+  const packs = await listCreditPacks(ctx);
+  return NextResponse.json({ chargeRegion: ctx.region, country: ctx.country, packs });
 }

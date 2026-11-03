@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { regionForCountry } from '@/lib/geo';
+import { normaliseCountry, regionForCountry } from '@/lib/geo';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -50,19 +50,16 @@ export async function middleware(request: NextRequest) {
       : NextResponse.redirect(new URL('/login?next=/admin', request.url));
   }
 
-  // --- Pricing region cookie (display only) ---------------------------------
-  const existing = request.cookies.get('region')?.value;
-  if (!existing) {
-    const country =
-      request.headers.get('x-vercel-ip-country') ??
-      request.headers.get('cf-ipcountry') ??
-      undefined;
-    const region = regionForCountry(country);
-    response.cookies.set('region', region, {
-      path: '/',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30,
-    });
+  // --- Country / pricing tier cookies (display only) -------------------------
+  // Auto-detected from the geo header on first visit; the visitor can change it
+  // with the country picker. Checkout re-checks against the billing country.
+  if (!request.cookies.get('country')?.value) {
+    const country = normaliseCountry(
+      request.headers.get('x-vercel-ip-country') ?? request.headers.get('cf-ipcountry') ?? undefined,
+    );
+    const cookie = { path: '/', sameSite: 'lax' as const, maxAge: 60 * 60 * 24 * 30 };
+    if (country) response.cookies.set('country', country, cookie);
+    response.cookies.set('region', regionForCountry(country), cookie);
   }
 
   // --- Security headers ------------------------------------------------------

@@ -81,8 +81,8 @@ seed/                     # Local sample wallpaper source assets (gitignored ori
 - **TypeScript strict** everywhere; no `any` without justification. Path alias `@/*` → `src/*`.
 - **Secrets only via env vars** (see `.env.example`). Never commit `.env*`.
   Only `NEXT_PUBLIC_*` vars may reach the browser bundle; everything else is server-only.
-- Prices stored in **minor units** with an explicit currency. India in INR;
-  outside India in **credits**.
+- Money stored in **minor units** with an explicit currency. **Everything is bought with credits**
+  (India too, since 2026-11-03); wallpapers are priced in credits, credit packs/plans in money.
 - Money/tax logic is **configurable and flagged for CA review** (GST India, VAT UK/EU).
 - Every wallpaper is `is_ai_generated` and shows an "AI-generated" label on detail pages.
 - Legal page text is **placeholder only** — clearly marked for lawyer/accountant review.
@@ -274,6 +274,33 @@ Key Phase 3 decisions:
 - Admin client components use `useRefresh()` (`router.refresh()` in a transition) and stay
   "busy" until the refreshed data is on screen. Use it instead of bare `router.refresh()`.
 - Admin sidebar is sticky with its own scroll; mobile section picker is sticky and uses client navigation.
+
+## Credit economy (2026-11-03) — migrations 0015 + 0016
+
+- **Credits everywhere.** 1 credit ≈ 1 wallpaper (all sizes); commercial ×5. India's per-item ₹
+  checkout is gone (`create-order` rejects `cart`/`wallpaper` with `use_credits`).
+- **5 tiers** in `src/lib/geo.ts` (IN, T1–T4; unknown → T3) + admin overrides (`site_settings.country_tiers`,
+  /admin/countries). Middleware sets a `country` cookie from the geo header; `getDisplayCountry()` /
+  `getDisplayRegion()` / `getPriceContext()` (catalogue.ts, React-cached). Country picker in header/footer.
+- **Price points:** `credit_packs` and `plan_prices` rows have `region_code` + optional `country_codes`
+  (local currency, e.g. GBP for GB). `pickPricePoints(rows, ctx, key)` → country row beats tier row.
+  Charged context = `chargeContext(displayCountry, displayRegion, billingCountry)` (higher tier wins;
+  IN cheapest, protected by the foreign-card refund). Seeded T4 USD prices are always > India's ₹.
+- **Bonus credits:** packs have `bonus_credits`; `add_pack_credits()` writes a paid entry + a bonus *lot*
+  (`credit_ledger.bucket='bonus'`, `expires_at` +365d). `credit_balance()` = paid + unexpired lot remainders;
+  `spend_credits_and_entitle()` uses bonus lots first; `reverse_order_credits()` for refunds;
+  `housekeeping()` writes `expire` entries. Paid credits never expire.
+- **Plans** (`membership_plans.kind`: monthly | contract | category | business; `term_months`;
+  `download_limit` = per 30-day period; `category_id` for category passes). `member_unlock()` picks the
+  narrowest covering pass with allowance left this period (no rollover). Pricing page tabs: `/pricing?tab=`.
+- **Autopay** = Razorpay Subscriptions (`src/lib/subscriptions.ts`, adapter `SubscriptionCapable`):
+  plan created lazily per `plan_prices` row (`provider_plan_id`, cleared on price edit); webhook
+  `subscription.charged` → order `subpay_<payment>` + `grant_membership(..., p_days 30, p_subscription)`.
+  One-click cancel `/api/membership/autopay/cancel` (cancel at cycle end) — required by India's dark-pattern rules.
+- **Creator payouts** value credit spends + membership claims (`entitlements.source`) at
+  `creator_credit_value_inr` (default ₹5) per credit. ⚠️ CA review: GST on credits/subscriptions, credit value, TDS.
+- No dark patterns: no countdowns, fake scarcity, struck-through prices, pre-ticked add-ons or hidden fees;
+  savings badges are computed from real prices (e2e checks this on /pricing).
 
 ## Manual setup owner must do (grows as we go)
 

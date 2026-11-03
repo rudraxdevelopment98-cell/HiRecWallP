@@ -6,6 +6,7 @@ import type {
   CreatedOrder,
   PaymentProvider,
   ProviderId,
+  SubscriptionCapable,
   WebhookVerificationResult,
 } from './provider';
 
@@ -16,7 +17,7 @@ const RAZORPAY_API = 'https://api.razorpay.com/v1';
  * domestic (`razorpay`, INR) and international (`razorpay_intl`, card) flows;
  * the currency comes from the order input.
  */
-export class RazorpayProvider implements PaymentProvider {
+export class RazorpayProvider implements PaymentProvider, SubscriptionCapable {
   readonly id: ProviderId;
 
   constructor(id: Extract<ProviderId, 'razorpay' | 'razorpay_intl'>) {
@@ -34,30 +35,26 @@ export class RazorpayProvider implements PaymentProvider {
     return { keyId, keySecret };
   }
 
-  async createOrder(input: CreateOrderInput): Promise<CreatedOrder> {
+  private async api<T>(path: string, body: unknown): Promise<T> {
     const { keyId, keySecret } = this.credentials();
     const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
-
-    const res = await fetch(`${RAZORPAY_API}/orders`, {
+    const res = await fetch(`${RAZORPAY_API}${path}`, {
       method: 'POST',
-      headers: {
-        authorization: `Basic ${auth}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        amount: input.amountMinor,
-        currency: input.currency,
-        receipt: input.receipt,
-        notes: input.notes ?? {},
-      }),
+      headers: { authorization: `Basic ${auth}`, 'content-type': 'application/json' },
+      body: JSON.stringify(body),
     });
+    if (!res.ok) throw new Error(`Razorpay ${path} failed (${res.status}): ${await res.text()}`);
+    return (await res.json()) as T;
+  }
 
-    if (!res.ok) {
-      const detail = await res.text();
-      throw new Error(`Razorpay order creation failed (${res.status}): ${detail}`);
-    }
-
-    const order = (await res.json()) as { id: string; amount: number; currency: string };
+  async createOrder(input: CreateOrderInput): Promise<CreatedOrder> {
+    const { keyId } = this.credentials();
+    const order = await this.api<{ id: string; amount: number; currency: string }>('/orders', {
+      amount: input.amountMinor,
+      currency: input.currency,
+      receipt: input.receipt,
+      notes: input.notes ?? {},
+    });
     return {
       providerId: this.id,
       providerOrderId: order.id,
@@ -70,6 +67,34 @@ export class RazorpayProvider implements PaymentProvider {
         currency: order.currency,
       },
     };
+  }
+
+  async ensureMonthlyPlan(input: { amountMinor: number; currency: string; name: string; existingPlanId?: string | null }): Promise<string> {
+    if (input.existingPlanId) return input.existingPlanId;
+    const plan = await this.api<{ id: string }>('/plans', {
+      period: 'monthly',
+      interval: 1,
+      item: { name: input.name.slice(0, 100), amount: input.amountMinor, currency: input.currency },
+    });
+    return plan.id;
+  }
+
+  async createSubscription(input: { planId: string; totalCount: number; notes: Record<string, string> }) {
+    const { keyId } = this.credentials();
+    const sub = await this.api<{ id: string }>('/subscriptions', {
+      plan_id: input.planId,
+      total_count: input.totalCount,
+      quantity: 1,
+      customer_notify: 1,
+      notes: input.notes,
+    });
+    return { providerSubscriptionId: sub.id, checkout: { key: keyId, subscriptionId: sub.id } };
+  }
+
+  async cancelSubscription(providerSubscriptionId: string, atCycleEnd: boolean): Promise<void> {
+    await this.api(`/subscriptions/${encodeURIComponent(providerSubscriptionId)}/cancel`, {
+      cancel_at_cycle_end: atCycleEnd ? 1 : 0,
+    });
   }
 
   verifyWebhook(rawBody: string, headers: Record<string, string>): WebhookVerificationResult {
@@ -112,30 +137,45 @@ export class RazorpayProvider implements PaymentProvider {
     // payment entity id (still stable per event for our purposes).
     const providerEventId =
       headers['x-razorpay-event-id'] ?? payload.payload?.payment?.entity?.id ?? null;
-    const paymentId = payload.payload?.payment?.entity?.id ?? null;
-    const international = payload.payload?.payment?.entity?.international === true;
+    const payment = payload.payload?.payment?.entity;
+    const paymentId = payment?.id ?? null;
+    const international = payment?.international === true;
+    const sub = payload.payload?.subscription?.entity;
+    const subscription = sub?.id
+      ? {
+          providerSubscriptionId: sub.id,
+          status: sub.status ?? null,
+          paidCount: typeof sub.paid_count === 'number' ? sub.paid_count : null,
+          currentEnd: typeof sub.current_end === 'number' ? new Date(sub.current_end * 1000).toISOString() : null,
+          notes: (sub.notes && typeof sub.notes === 'object' ? sub.notes : {}) as Record<string, string>,
+        }
+      : null;
 
-    return { verified: true, providerEventId, eventType, providerOrderId, paid, paymentId, international };
+    return {
+      verified: true,
+      providerEventId,
+      eventType,
+      // Subscription charges are handled by the subscription branch, not as orders.
+      providerOrderId: subscription ? null : providerOrderId,
+      paid: paid && !subscription,
+      paymentId,
+      international,
+      amountMinor: typeof payment?.amount === 'number' ? payment.amount : null,
+      currency: payment?.currency ?? null,
+      subscription,
+    };
   }
 
   async refundPayment(paymentId: string, reason: string): Promise<void> {
-    const { keyId, keySecret } = this.credentials();
-    const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
-    const res = await fetch(`${RAZORPAY_API}/payments/${encodeURIComponent(paymentId)}/refund`, {
-      method: 'POST',
-      headers: { authorization: `Basic ${auth}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ speed: 'normal', notes: { reason } }),
-    });
-    if (!res.ok) {
-      throw new Error(`Razorpay refund failed (${res.status}): ${await res.text()}`);
-    }
+    await this.api(`/payments/${encodeURIComponent(paymentId)}/refund`, { speed: 'normal', notes: { reason } });
   }
 }
 
 interface RazorpayWebhookBody {
   event?: string;
   payload?: {
-    payment?: { entity?: { id?: string; order_id?: string; international?: boolean } };
+    payment?: { entity?: { id?: string; order_id?: string; international?: boolean; amount?: number; currency?: string } };
     order?: { entity?: { id?: string } };
+    subscription?: { entity?: { id?: string; status?: string; paid_count?: number; current_end?: number; notes?: unknown } };
   };
 }

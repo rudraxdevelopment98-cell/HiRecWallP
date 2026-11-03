@@ -33,10 +33,13 @@ test('favourite heart toggles', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Remove from favourites' }).first()).toBeVisible();
 });
 
-test('pricing page shows real offers, not membership', async ({ page }) => {
+test('pricing page shows full prices and honest terms (no fake urgency)', async ({ page }) => {
   await page.goto('/pricing');
-  await expect(page.getByRole('heading', { name: 'Simple, fair pricing' })).toBeVisible();
-  await expect(page.getByText('Cancel anytime')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Pick how you want to pay' })).toBeVisible();
+  await expect(page.getByText('Prices include applicable taxes', { exact: false })).toBeVisible();
+  // No countdowns / fake scarcity / struck-through "was" prices.
+  await expect(page.getByText(/only \d+ left|offer ends|hurry/i)).toHaveCount(0);
+  await expect(page.locator('s, del')).toHaveCount(0);
 });
 
 test('account pages require sign-in', async ({ page }) => {

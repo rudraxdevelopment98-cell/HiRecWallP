@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 import { clearSettingsCache } from '@/lib/settings';
+import { REGION_CODES } from '@/lib/geo';
 
 export const runtime = 'nodejs';
 
@@ -16,6 +17,11 @@ const schema = z.discriminatedUnion('key', [
   z.object({ key: z.literal('free_downloads'), value: bool }),
   z.object({ key: z.literal('newsletter_enabled'), value: bool }),
   z.object({ key: z.literal('google_login'), value: bool }),
+  z.object({ key: z.literal('creator_credit_value_inr'), value: z.number().min(0.5).max(100) }),
+  z.object({
+    key: z.literal('country_tiers'),
+    value: z.record(z.string().regex(/^[A-Z]{2}$/), z.enum(REGION_CODES)).refine((v) => Object.keys(v).length <= 300, 'Too many overrides'),
+  }),
   z.object({
     key: z.literal('business'),
     value: z.object({

@@ -2,7 +2,7 @@ import 'server-only';
 
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
-import { REGION_PRICING_UNIT, type RegionCode } from '@/lib/geo';
+import type { RegionCode } from '@/lib/geo';
 import { loadSellable, priceItems, resolveCreditRegion, type Licence } from '@/lib/pricing';
 import { getSettings } from '@/lib/settings';
 
@@ -27,12 +27,6 @@ export async function unlockWithCredits(
     return NextResponse.json({ error: 'The store is temporarily closed. Please try again soon.', code: 'store_closed' }, { status: 503 });
   }
   const creditRegion = await resolveCreditRegion(userId, displayRegion);
-  if (REGION_PRICING_UNIT[creditRegion] === 'money') {
-    return NextResponse.json(
-      { error: 'This region pays per item; use checkout instead.', code: 'use_money', creditRegion },
-      { status: 409 },
-    );
-  }
 
   const unique = [...new Map(requested.map((i) => [`${i.wallpaperId}:${i.licence}`, i])).values()];
   const sellable = await loadSellable(unique.map((i) => i.wallpaperId));

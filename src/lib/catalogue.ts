@@ -1,8 +1,10 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { publicEnv } from '@/lib/env';
 import { publicObjectUrl } from '@/lib/storage';
-import { DEFAULT_REGION, isRegionCode, type RegionCode } from '@/lib/geo';
+import { cache } from 'react';
+import { DEFAULT_REGION, isRegionCode, normaliseCountry, pickPricePoints, regionForCountry, type PriceContext, type RegionCode } from '@/lib/geo';
+import { getSettings } from '@/lib/settings';
 import { DEMO_CATEGORIES, demoWallpaperBySlug, demoWallpapers } from '@/lib/demo';
 import type {
   Category,
@@ -84,10 +86,27 @@ async function catalogueLive(): Promise<boolean> {
   return liveCheck.live;
 }
 
-/** The visitor's current display region (cookie, seeded by middleware). */
-export async function getDisplayRegion(): Promise<RegionCode> {
+/** The visitor's country (cookie seeded from the geo header by middleware, or picked by them). */
+export const getDisplayCountry = cache(async (): Promise<string | null> => {
+  const fromCookie = normaliseCountry((await cookies()).get('country')?.value);
+  if (fromCookie) return fromCookie;
+  // First visit: the cookie is only on the response, so read the geo header directly.
+  const h = await headers();
+  return normaliseCountry(h.get('x-vercel-ip-country') ?? h.get('cf-ipcountry'));
+});
+
+/** The visitor's pricing tier: from their country (with admin tier overrides), else the legacy region cookie. */
+export const getDisplayRegion = cache(async (): Promise<RegionCode> => {
+  const country = await getDisplayCountry();
+  if (country) return regionForCountry(country, (await getSettings()).country_tiers);
   const value = (await cookies()).get('region')?.value;
   return isRegionCode(value) ? value : DEFAULT_REGION;
+});
+
+/** Tier + country used to pick display prices. */
+export async function getPriceContext(): Promise<PriceContext> {
+  const [region, country] = await Promise.all([getDisplayRegion(), getDisplayCountry()]);
+  return { region, country };
 }
 
 /** Public (watermarked preview) URL for a storage key, via the active provider. */
@@ -126,7 +145,7 @@ async function globalBasePrice(region: RegionCode): Promise<number | null> {
   } catch {
     /* ignore */
   }
-  return ({ IN: 19, T1: 2, T2: 2, T3: 1 } as Record<RegionCode, number>)[region] ?? null;
+  return ({ IN: 1, T1: 1, T2: 1, T3: 1, T4: 1 } as Record<RegionCode, number>)[region] ?? null;
 }
 
 function toCard(row: WallpaperRow, region: RegionCode, fallbackPrice: number | null): WallpaperCard {
@@ -309,25 +328,35 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 
 export interface CreditPack {
   id: string;
+  name: string | null;
   region_code: string;
+  country_codes: string[];
   currency: string;
   amount_minor: number;
   credits: number;
+  bonus_credits: number;
+  badge: 'recommended' | 'best_value' | null;
+  sort_order: number;
   active: boolean;
 }
 
-export async function listCreditPacks(region: RegionCode): Promise<CreditPack[]> {
+/**
+ * Active credit packs for a price context: the country's own prices where the
+ * owner set them (e.g. GBP for the UK), otherwise the tier's prices.
+ */
+export async function listCreditPacks(ctx: PriceContext | RegionCode): Promise<CreditPack[]> {
   if (!dbConfigured()) return [];
+  const c: PriceContext = typeof ctx === 'string' ? { region: ctx, country: null } : ctx;
   try {
-    const supabase = (await createClient());
-    const { data, error } = await supabase
+    const { data, error } = await (await createClient())
       .from('credit_packs')
       .select('*')
-      .eq('region_code', region)
-      .eq('active', true)
-      .order('credits', { ascending: true });
+      .eq('region_code', c.region)
+      .eq('active', true);
     if (error || !data) return [];
-    return data as CreditPack[];
+    return pickPricePoints(data as CreditPack[], c, (p) => p.name ?? p.id).sort(
+      (a, b) => a.sort_order - b.sort_order || a.credits - b.credits,
+    );
   } catch {
     return [];
   }

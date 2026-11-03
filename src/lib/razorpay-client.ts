@@ -54,11 +54,14 @@ export async function payWithRazorpay(opts: {
   const Razorpay = await loadRazorpay();
   return new Promise((resolve) => {
     let failure: string | null = null;
+    // Autopay: the customer authorises a subscription (UPI Autopay / card
+    // mandate) instead of paying a one-time order.
+    const target = opts.checkout.subscriptionId
+      ? { subscription_id: opts.checkout.subscriptionId }
+      : { order_id: opts.checkout.orderId, amount: opts.checkout.amount, currency: opts.checkout.currency };
     const rzp = new Razorpay({
       key: opts.checkout.key,
-      order_id: opts.checkout.orderId,
-      amount: opts.checkout.amount,
-      currency: opts.checkout.currency,
+      ...target,
       name: opts.name,
       description: opts.description,
       prefill: { email: opts.email ?? undefined, method: opts.method },

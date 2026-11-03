@@ -6,7 +6,7 @@ import { AdminForm, SettingToggle } from '@/components/admin/admin-form';
 
 export const dynamic = 'force-dynamic';
 
-const REGION_NAME: Record<string, string> = { IN: 'India (₹ per wallpaper)', T1: 'Tier 1 (credits)', T2: 'Tier 2 (credits)', T3: 'Rest of world (credits)' };
+const REGION_NAME: Record<string, string> = { IN: 'India (credits)', T1: 'Tier 1 (credits)', T2: 'Tier 2 (credits)', T4: 'Tier 4 (credits)', T3: 'Tier 3 / rest of world (credits)' };
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
@@ -113,7 +113,7 @@ export default async function AdminSettingsPage() {
       <section className="rounded-2xl border bg-card p-6">
         <h2 className="mb-1 font-semibold">Default prices</h2>
         <p className="mb-4 text-xs text-muted-foreground">
-          The price a new wallpaper starts at in each region (₹ for India, credits elsewhere), the allowed range for automatic
+          The price a new wallpaper starts at in each region (in credits — 1 credit = 1 wallpaper; what a credit costs is set in Credit packs), the allowed range for automatic
           pricing, and how much more the commercial licence costs. Fine-tune with the automatic job on{' '}
           <Link href="/admin/pricing" className="underline">Pricing</Link>.
         </p>

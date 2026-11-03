@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getCreator } from '@/lib/creator';
 import { createClient } from '@/lib/supabase/server';
-import { formatRegionPrice } from '@/lib/format';
+import { formatRupees } from '@/lib/format';
 
 export const metadata: Metadata = { title: 'Creator earnings' };
 
@@ -35,8 +35,8 @@ export default async function CreatorEarningsPage() {
       <h1 className="text-2xl font-semibold">Earnings</h1>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Lifetime gross" value={formatRegionPrice(lifetimeGross, 'IN')} />
-        <Stat label="Lifetime net" value={formatRegionPrice(lifetimeNet, 'IN')} />
+        <Stat label="Lifetime gross" value={formatRupees(lifetimeGross)} />
+        <Stat label="Lifetime net" value={formatRupees(lifetimeNet)} />
         <Stat label="Commission" value={`${creator.commission_pct}%`} />
       </div>
 
@@ -60,9 +60,9 @@ export default async function CreatorEarningsPage() {
             {rows.map((r) => (
               <tr key={r.period} className="border-b">
                 <td className="py-2">{r.period}</td>
-                <td>{formatRegionPrice(Number(r.gross), 'IN')}</td>
-                <td>{formatRegionPrice(Number(r.commission), 'IN')}</td>
-                <td>{formatRegionPrice(Number(r.net), 'IN')}</td>
+                <td>{formatRupees(Number(r.gross))}</td>
+                <td>{formatRupees(Number(r.commission))}</td>
+                <td>{formatRupees(Number(r.net))}</td>
                 <td>{r.status}</td>
               </tr>
             ))}

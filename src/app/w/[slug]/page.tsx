@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { buttonVariants } from '@/components/ui/button';
 import { FavouriteButton } from '@/components/favourite-button';
 import { MemberClaimButton } from '@/components/member-claim-button';
-import { getMyMembership } from '@/lib/membership';
+import { getMyPasses, passesFor } from '@/lib/membership';
 import { getSettings } from '@/lib/settings';
 import { AddToCart } from '@/components/add-to-cart';
 import { DownloadButton } from '@/components/download-button';
@@ -17,7 +17,6 @@ import { Reveal } from '@/components/reveal';
 import { TrackEvent } from '@/components/track-event';
 import { getDisplayRegion, getWallpaperBySlug, listPublishedWallpapers } from '@/lib/catalogue';
 import { formatRegionPrice } from '@/lib/format';
-import { REGION_PRICING_UNIT } from '@/lib/geo';
 import { publicEnv } from '@/lib/env';
 
 const COMMERCIAL_MULTIPLIER = 5;
@@ -55,16 +54,14 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
       ? ((await downloadableVariants([w.id])).get(w.id) ?? ['free_phone', 'free_desktop']).filter((v) => v in FREE_VARIANT_LABELS)
       : [];
   const sizes = (w.devices ?? []).filter((d) => d in SIZE_INFO);
-  const [membership, settings] = await Promise.all([
-    !w.is_free && UUID.test(w.id) ? getMyMembership() : Promise.resolve(null),
+  const [passes, settings] = await Promise.all([
+    !w.is_free && UUID.test(w.id) ? getMyPasses() : Promise.resolve([]),
     getSettings(),
   ]);
-  const commercialPrice =
-    !w.is_free && w.price != null
-      ? REGION_PRICING_UNIT[region] === 'money'
-        ? Math.round(w.price * COMMERCIAL_MULTIPLIER)
-        : Math.ceil(w.price * COMMERCIAL_MULTIPLIER)
-      : null;
+  // Passes that cover this wallpaper's category and still have allowance this month.
+  const covering = passesFor(passes, w.category_id ?? null);
+  const memberRemaining = covering.reduce((n, p) => n + (p.allowance - p.used_this_period), 0);
+  const commercialPrice = !w.is_free && w.price != null ? Math.ceil(w.price * COMMERCIAL_MULTIPLIER) : null;
   const cartBase = { id: w.id, slug: w.slug, title: w.title, image: w.previewUrl, resolution: w.resolution };
 
   const jsonLd = {
@@ -163,8 +160,8 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
                   ))}
                 </div>
               )
-            ) : membership ? (
-              <MemberClaimButton wallpaperId={w.id} remaining={membership.download_limit - membership.downloads_used} />
+            ) : covering.length > 0 ? (
+              <MemberClaimButton wallpaperId={w.id} remaining={memberRemaining} />
             ) : (
               <AddToCart
                 item={{
@@ -181,13 +178,13 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
           {!w.is_free && (
             <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="h-4 w-4" /> Secure payment by Razorpay ·{' '}
-              {REGION_PRICING_UNIT[region] === 'money' ? 'UPI · Cards · Netbanking' : 'Credits (bought by card)'}
+              Unlock with credits · UPI, cards &amp; netbanking for credit packs
             </p>
           )}
 
           <div className="grid grid-cols-3 gap-2 border-t pt-4 text-center text-xs text-muted-foreground">
             <Perk label="Instant download" />
-            <Perk label="5 downloads per purchase" />
+            <Perk label={`${settings.downloads_per_purchase} downloads per purchase`} />
             <Perk label="Per-buyer watermark" />
           </div>
 

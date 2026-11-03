@@ -22,7 +22,7 @@ export async function refundOrder(orderId: string, reason: string, viaProvider: 
   const supabase = createServiceClient();
   const { data: order } = await supabase
     .from('orders')
-    .select('id, user_id, status, provider, provider_payment_id, order_items(credit_pack_id, credit_packs(credits))')
+    .select('id, user_id, status, provider, provider_payment_id')
     .eq('id', orderId)
     .maybeSingle();
   if (!order) throw new Error('Order not found');
@@ -48,13 +48,10 @@ export async function refundOrder(orderId: string, reason: string, viaProvider: 
 
   const { data: removed } = await supabase.from('entitlements').delete().eq('order_id', orderId).select('id');
 
-  const credits = ((order.order_items ?? []) as unknown as { credit_packs: { credits: number } | null }[]).reduce(
-    (s, i) => s + (i.credit_packs?.credits ?? 0),
-    0,
-  );
-  if (credits > 0) {
-    await supabase.from('credit_ledger').insert({ user_id: order.user_id, delta: -credits, reason: 'refund', ref_id: orderId });
-  }
+  // Paid credits are reversed in full; bonus credits lose whatever is left.
+  const { data: reversed, error: revErr } = await supabase.rpc('reverse_order_credits', { p_order: orderId, p_reason: reason });
+  if (revErr) throw revErr;
+  const credits = Number(reversed ?? 0);
 
   const { data: revoked } = await supabase
     .from('memberships')

@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Facebook, Heart, Instagram, Mountain, Pin, Twitter, Youtube } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
-import { getDisplayRegion } from '@/lib/catalogue';
-import { RegionSwitcher } from '@/components/region-switcher';
+import { getDisplayCountry } from '@/lib/catalogue';
+import { CountrySwitcher } from '@/components/country-switcher';
 import { getSettings, socialLinks } from '@/lib/settings';
 
 const LINKS = [
@@ -66,7 +66,7 @@ export async function SiteFooter() {
         <div className="container flex flex-col items-center justify-between gap-2 py-4 text-xs text-muted-foreground sm:flex-row">
           {/* The header switcher is hidden on small screens; offer it here instead. */}
           <div className="sm:hidden">
-            <RegionSwitcher current={(await getDisplayRegion())} />
+            <CountrySwitcher current={await getDisplayCountry()} />
           </div>
           <p>
             © {new Date().getFullYear()} {publicEnv.NEXT_PUBLIC_BRAND_NAME}. AI-generated wallpapers.

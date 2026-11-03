@@ -1,41 +1,77 @@
 import { z } from 'zod';
+import { REGION_CODES } from '@/lib/geo';
 
 const slug = z
   .string()
   .trim()
   .toLowerCase()
   .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Slug: lowercase letters, numbers and dashes');
-const minor = z.number().int().nonnegative().nullable();
+
+const badge = z
+  .enum(['', 'recommended', 'best_value'])
+  .default('')
+  .transform((v) => (v === '' ? null : v));
+const regionCode = z.enum(REGION_CODES);
+/** "gb, ie" → ["GB","IE"]; blank → [] (= the whole tier). */
+const countryList = z
+  .union([z.string(), z.array(z.string())])
+  .default('')
+  .transform((v) => (Array.isArray(v) ? v : v.split(/[\s,]+/)).map((c) => c.trim().toUpperCase()).filter(Boolean))
+  .refine((list) => list.every((c) => /^[A-Z]{2}$/.test(c)), 'Countries: 2-letter codes like GB, IE')
+  .refine((list) => list.length <= 60, 'Too many countries');
+const currency = z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, 'Currency like USD');
+const optionalUuid = z
+  .string()
+  .default('')
+  .transform((v) => v || null)
+  .refine((v) => v === null || /^[0-9a-f-]{36}$/i.test(v), 'Invalid id');
 
 export const planSchema = z
   .object({
     name: z.string().trim().min(1).max(60),
     description: z.string().trim().max(200).transform((v) => v || null),
-    duration_days: z.number().int().min(1).max(3660),
-    price_in: minor,
-    price_t1: minor,
-    price_t2: minor,
-    price_t3: minor,
+    kind: z.enum(['monthly', 'contract', 'category', 'business']),
+    term_months: z.number().int().min(1).max(36),
     download_limit: z.number().int().min(1).max(100000),
     includes_commercial: z.boolean(),
+    category_id: optionalUuid,
+    badge,
     perks: z.array(z.string().max(80)).max(10),
     active: z.boolean(),
     sort_order: z.number().int().min(0).max(1000),
   })
-  .transform(({ price_in, price_t1, price_t2, price_t3, ...rest }) => {
-    const prices: Record<string, number> = {};
-    if (price_in) prices.IN = price_in;
-    if (price_t1) prices.T1 = price_t1;
-    if (price_t2) prices.T2 = price_t2;
-    if (price_t3) prices.T3 = price_t3;
-    return { ...rest, prices };
-  });
+  .refine((p) => p.kind !== 'category' || p.category_id, { message: 'Category passes need a category', path: ['category_id'] })
+  // A plan lasts term_months × 30 days; the allowance refreshes every 30 days.
+  .transform((p) => ({ ...p, duration_days: p.term_months * 30 }));
+
+/**
+ * One price for a plan in a tier (optionally only for some countries).
+ * prepaid = the whole term, paid once; autopay = charged every month.
+ * Saving clears the cached Razorpay plan id (Razorpay plans can't change
+ * price), so the next autopay checkout creates a fresh one.
+ */
+export const planPriceSchema = z
+  .object({
+    plan_id: z.string().uuid(),
+    billing: z.enum(['prepaid', 'autopay']),
+    region_code: regionCode,
+    country_codes: countryList,
+    currency,
+    amount_minor: z.number().int().positive(),
+    active: z.boolean(),
+  })
+  .transform((p) => ({ ...p, provider_plan_id: null }));
 
 export const packSchema = z.object({
-  region_code: z.enum(['IN', 'T1', 'T2', 'T3']),
-  currency: z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, 'Currency like USD'),
+  name: z.string().trim().min(1).max(40),
+  region_code: regionCode,
+  country_codes: countryList,
+  currency,
   amount_minor: z.number().int().positive(),
   credits: z.number().int().positive().max(100000),
+  bonus_credits: z.number().int().min(0).max(100000).nullable().transform((v) => v ?? 0),
+  badge,
+  sort_order: z.number().int().min(0).max(1000).nullable().transform((v) => v ?? 0),
   active: z.boolean(),
 });
 

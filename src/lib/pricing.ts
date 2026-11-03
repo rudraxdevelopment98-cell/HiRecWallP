@@ -1,11 +1,10 @@
 import 'server-only';
 
 import { createServiceClient } from '@/lib/supabase/service';
-import { REGION_PRICING_UNIT, isRegionCode, chargeRegionFor, type RegionCode } from '@/lib/geo';
+import { isRegionCode, chargeRegionFor, type RegionCode } from '@/lib/geo';
 
 /**
- * Current price of a wallpaper in a region, in the region's unit
- * (rupees for money regions, whole credits for credit regions).
+ * Current price of a wallpaper in a region, in whole credits.
  *
  * Resolution order: the `prices` row for this wallpaper+region, else the
  * global `price_rules` base price for the region. Returns null if nothing
@@ -32,14 +31,6 @@ export async function getRegionPrice(
     .eq('scope', 'global')
     .maybeSingle();
   return rule?.base_price != null ? Number(rule.base_price) : null;
-}
-
-/** Convert a region price to the currency's MINOR unit for a money region. */
-export function toMinorUnits(price: number, region: RegionCode): number {
-  if (REGION_PRICING_UNIT[region] !== 'money') {
-    throw new Error('toMinorUnits is only valid for money regions');
-  }
-  return Math.round(price * 100);
 }
 
 /** Commercial licence price multiplier for a region (default 5). */
@@ -85,7 +76,6 @@ export async function resolveCreditRegion(
     .select('order_items(credit_packs(region_code))')
     .eq('user_id', userId)
     .eq('status', 'paid')
-    .eq('provider', 'razorpay_intl')
     .returns<{ order_items: { credit_packs: { region_code: string } | null }[] }[]>();
 
   let region = displayRegion;
@@ -102,7 +92,7 @@ export type Licence = 'personal' | 'commercial';
 
 /**
  * Price each (wallpaper, licence) pair in `region`, applying the commercial
- * multiplier. Credit regions round up to whole credits. Returns null if any
+ * multiplier, rounded up to whole credits. Returns null if any
  * item has no applicable price.
  */
 export async function priceItems<T extends { wallpaperId: string; licence: Licence }>(
@@ -110,12 +100,11 @@ export async function priceItems<T extends { wallpaperId: string; licence: Licen
   region: RegionCode,
 ): Promise<(T & { price: number })[] | null> {
   const mult = items.some((i) => i.licence === 'commercial') ? await commercialMultiplier(region) : 1;
-  const round = REGION_PRICING_UNIT[region] === 'money' ? Math.round : Math.ceil;
   const out: (T & { price: number })[] = [];
   for (const i of items) {
     const base = await getRegionPrice(i.wallpaperId, region);
     if (base == null) return null;
-    out.push({ ...i, price: i.licence === 'commercial' ? round(base * mult) : base });
+    out.push({ ...i, price: i.licence === 'commercial' ? Math.ceil(base * mult) : base });
   }
   return out;
 }

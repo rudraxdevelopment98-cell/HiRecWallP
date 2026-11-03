@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Heart, Mountain, Search, User } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
-import { getDisplayRegion } from '@/lib/catalogue';
-import { RegionSwitcher } from '@/components/region-switcher';
+import { getDisplayCountry } from '@/lib/catalogue';
+import { CountrySwitcher } from '@/components/country-switcher';
 import { CartCount } from '@/components/cart-count';
 
 const NAV = [
@@ -14,7 +14,6 @@ const NAV = [
 ];
 
 export async function SiteHeader() {
-  const region = (await getDisplayRegion());
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/85 backdrop-blur">
       <div className="container flex h-16 items-center gap-4">
@@ -50,7 +49,7 @@ export async function SiteHeader() {
             <Search className="h-4 w-4" />
           </Link>
           <div className="mr-1 hidden sm:block">
-            <RegionSwitcher current={region} />
+            <CountrySwitcher current={await getDisplayCountry()} />
           </div>
           <Link href="/library" aria-label="My account" className="grid h-9 w-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground">
             <User className="h-4 w-4" />

@@ -4,55 +4,22 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CreditCard, Landmark, Lock, Wallet } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { clearCart, getCart, type CartItem } from '@/lib/cart';
 import { formatMoneyMinor, formatRegionPrice } from '@/lib/format';
-import {
-  REGION_PRICING_UNIT,
-  chargeRegionFor,
-  isRegionCode,
-  regionForCountry,
-  type RegionCode,
-} from '@/lib/geo';
+import { allCountries, normaliseCountry } from '@/lib/geo';
 import { payWithRazorpay } from '@/lib/razorpay-client';
 import { track } from '@/lib/track';
 import { cn } from '@/lib/utils';
 
-function regionFromCookie(): RegionCode {
-  if (typeof document === 'undefined') return 'T3';
-  const m = document.cookie.match(/(?:^|; )region=([^;]+)/);
-  return isRegionCode(m?.[1]) ? (m![1] as RegionCode) : 'T3';
+function countryFromCookie(): string {
+  if (typeof document === 'undefined') return '';
+  const m = document.cookie.match(/(?:^|; )country=([^;]+)/);
+  return normaliseCountry(m?.[1]) ?? '';
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-const METHODS = [
-  { key: 'upi', label: 'UPI', icon: Wallet },
-  { key: 'card', label: 'Card', icon: CreditCard },
-  { key: 'netbanking', label: 'Netbanking', icon: Landmark },
-] as const;
-
-const COUNTRIES: [string, string][] = [
-  ['IN', 'India'],
-  ['GB', 'United Kingdom'],
-  ['US', 'United States'],
-  ['CA', 'Canada'],
-  ['AU', 'Australia'],
-  ['IE', 'Ireland'],
-  ['DE', 'Germany'],
-  ['FR', 'France'],
-  ['ES', 'Spain'],
-  ['IT', 'Italy'],
-  ['NL', 'Netherlands'],
-  ['AE', 'United Arab Emirates'],
-  ['SA', 'Saudi Arabia'],
-  ['SG', 'Singapore'],
-  ['JP', 'Japan'],
-  ['KR', 'South Korea'],
-  ['HK', 'Hong Kong'],
-  ['ZZ', 'Other'],
-];
 
 interface Status {
   payments: boolean;
@@ -62,7 +29,9 @@ interface Status {
 
 interface Pack {
   id: string;
+  name: string | null;
   credits: number;
+  bonus_credits: number;
   amount_minor: number;
   currency: string;
 }
@@ -78,18 +47,15 @@ export default function CheckoutPage() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [status, setStatus] = useState<Status | null>(null);
   const [mode, setMode] = useState<'loading' | 'demo' | 'real'>('loading');
-  const [method, setMethod] = useState(0);
   const [country, setCountry] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shortfall, setShortfall] = useState<Shortfall | null>(null);
-  const [displayRegion, setDisplayRegion] = useState<RegionCode>('T3');
+  const countries = useMemo(() => allCountries(), []);
 
   useEffect(() => {
     setItems(getCart());
-    const region = regionFromCookie();
-    setDisplayRegion(region);
-    setCountry(region === 'IN' ? 'IN' : '');
+    setCountry(countryFromCookie());
     fetch('/api/checkout/status', { cache: 'no-store' })
       .then((r) => r.json() as Promise<Status>)
       .then((s) => {
@@ -105,38 +71,12 @@ export default function CheckoutPage() {
     [items, mode],
   );
   const skipped = items.length - payable.length;
-  const chargeRegion = country ? chargeRegionFor(displayRegion, regionForCountry(country)) : displayRegion;
-  const payInCredits = REGION_PRICING_UNIT[chargeRegion] === 'credits';
   const subtotal = payable.reduce((s, i) => s + (i.price ?? 0), 0);
   const cartPayload = payable.map((i) => ({ wallpaperId: i.id, licence: i.licence ?? 'personal' }));
 
   function done(query: string) {
     clearCart();
     router.push(`/checkout/success?${query}`);
-  }
-
-  async function payMoney() {
-    const res = await fetch('/api/checkout/create-order', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type: 'cart', items: cartPayload, billingCountry: country }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.status === 409 && data.code === 'use_credits') {
-      setError('Your billing country uses international pricing — pay with credits below.');
-      return;
-    }
-    if (!res.ok) throw new Error(data.error ?? 'Checkout unavailable');
-
-    const outcome = await payWithRazorpay({
-      checkout: data.checkout,
-      name: 'HirecWallp',
-      description: `${payable.length} wallpaper${payable.length === 1 ? '' : 's'}`,
-      email: status?.email,
-      method: METHODS[method]?.key,
-    });
-    if (outcome.status === 'success') done(`order=${data.orderId}`);
-    else if (outcome.reason) router.push(`/checkout/failure?reason=${encodeURIComponent(outcome.reason)}`);
   }
 
   async function unlockWithCredits(): Promise<boolean> {
@@ -174,7 +114,7 @@ export default function CheckoutPage() {
       const outcome = await payWithRazorpay({
         checkout: data.checkout,
         name: 'HirecWallp',
-        description: `${pack.credits} credits`,
+        description: `${pack.credits + (pack.bonus_credits ?? 0)} credits`,
         email: status?.email,
       });
       if (outcome.status !== 'success') {
@@ -215,8 +155,7 @@ export default function CheckoutPage() {
     track('checkout_start');
     setBusy(true);
     try {
-      if (payInCredits) await unlockWithCredits();
-      else await payMoney();
+      await unlockWithCredits();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -274,41 +213,19 @@ export default function CheckoutPage() {
               aria-label="Billing country"
             >
               <option value="">Select the country your card or account is from</option>
-              {COUNTRIES.map(([code, name]) => (
+              {countries.map(({ code, name }) => (
                 <option key={code} value={code}>
                   {name}
                 </option>
               ))}
             </select>
             <p className="mt-2 text-xs text-muted-foreground">
-              Prices follow your billing country. India pays per item in INR; elsewhere you unlock
-              with credits.
+              Wallpapers are unlocked with credits. If you need more, credit packs are priced for your
+              billing country.
             </p>
           </Section>
 
-          {!payInCredits ? (
-            <Section title="Payment Method">
-              <div className="grid gap-2 sm:grid-cols-3">
-                {METHODS.map((m, i) => (
-                  <button
-                    key={m.key}
-                    type="button"
-                    onClick={() => setMethod(i)}
-                    className={cn(
-                      'flex items-center gap-2 rounded-xl border p-3 text-sm transition-colors',
-                      i === method ? 'border-foreground bg-secondary' : 'hover:border-foreground/40',
-                    )}
-                  >
-                    <m.icon className="h-4 w-4" /> {m.label}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Lock className="h-3 w-3" /> Card and UPI details are entered in Razorpay’s secure
-                window — we never see or store them.
-              </p>
-            </Section>
-          ) : (
+          <>
             <Section title="Pay with Credits">
               <p className="text-sm text-muted-foreground">
                 Your credit balance is used first. If it’s short, you can top up with a credit pack
@@ -332,10 +249,13 @@ export default function CheckoutPage() {
                           onClick={() => buyPack(p)}
                           className={cn(
                             'rounded-xl border p-3 text-left text-sm transition-colors hover:border-foreground/40',
-                            p.credits + shortfall.balance < shortfall.needed && 'opacity-60',
+                            p.credits + (p.bonus_credits ?? 0) + shortfall.balance < shortfall.needed && 'opacity-60',
                           )}
                         >
-                          <span className="block font-semibold">{p.credits} credits</span>
+                          <span className="block font-semibold">
+                            {p.credits + (p.bonus_credits ?? 0)} credits
+                            {p.bonus_credits > 0 && <span className="ml-1 text-xs font-normal text-emerald-600">incl. {p.bonus_credits} bonus</span>}
+                          </span>
                           <span className="text-muted-foreground">{formatMoneyMinor(p.amount_minor, p.currency)}</span>
                         </button>
                       ))}
@@ -344,7 +264,7 @@ export default function CheckoutPage() {
                 </div>
               )}
             </Section>
-          )}
+          </>
         </div>
 
         <div className="h-fit rounded-2xl border bg-card p-6">
@@ -371,20 +291,15 @@ export default function CheckoutPage() {
           <dl className="mt-4 space-y-2 border-t pt-4 text-sm">
             <div className="flex justify-between font-semibold">
               <dt>Total</dt>
-              <dd>{formatRegionPrice(subtotal, displayRegion)}</dd>
+              <dd>{formatRegionPrice(subtotal)}</dd>
             </div>
           </dl>
-          {mode === 'real' && chargeRegion !== displayRegion && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Final price is recalculated for your billing country.
-            </p>
-          )}
           <Button
             type="submit"
             className="mt-5 w-full"
             disabled={busy || mode === 'loading' || payable.length === 0}
           >
-            {busy ? 'Processing…' : payInCredits && mode === 'real' ? 'Unlock with Credits' : 'Proceed to Payment'}
+            {busy ? 'Processing…' : mode === 'real' ? 'Unlock with Credits' : 'Proceed to Payment'}
           </Button>
           {error && (
             <p className="mt-3 text-sm text-rose-600" role="alert">

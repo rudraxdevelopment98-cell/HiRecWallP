@@ -2,8 +2,9 @@
  * PaymentProvider adapter interface.
  *
  * Business logic depends ONLY on this interface, never on a concrete gateway.
- * Phase 1 ships a Razorpay implementation (INR per-item + International cards
- * for credit packs). Stripe / PayPal / a Merchant-of-Record can be added later
+ * Razorpay implementation (INR in India + international cards; credit packs,
+ * memberships and autopay
+ * subscriptions). Stripe / PayPal / a Merchant-of-Record can be added later
  * by implementing this interface without touching order/entitlement logic.
  *
  * Security rules this interface exists to enforce:
@@ -45,6 +46,38 @@ export interface WebhookVerificationResult {
   paymentId: string | null;
   /** True when the card used was issued outside the business's country. */
   international: boolean;
+  /** Payment amount/currency when present (subscription charges). */
+  amountMinor?: number | null;
+  currency?: string | null;
+  /** Present on subscription.* events. */
+  subscription?: WebhookSubscription | null;
+}
+
+export interface WebhookSubscription {
+  providerSubscriptionId: string;
+  status: string | null;
+  paidCount: number | null;
+  /** End of the current billing cycle (ISO), when known. */
+  currentEnd: string | null;
+  notes: Record<string, string>;
+}
+
+/** Recurring billing (autopay). Optional: only some providers support it. */
+export interface SubscriptionCapable {
+  /** Create (or reuse) a monthly provider plan for this price; returns its id. */
+  ensureMonthlyPlan(input: { amountMinor: number; currency: string; name: string; existingPlanId?: string | null }): Promise<string>;
+  /** Create a subscription the customer then authorises in checkout. */
+  createSubscription(input: {
+    planId: string;
+    totalCount: number;
+    notes: Record<string, string>;
+  }): Promise<{ providerSubscriptionId: string; checkout: Record<string, string> }>;
+  /** Cancel; `atCycleEnd` keeps the paid month running. */
+  cancelSubscription(providerSubscriptionId: string, atCycleEnd: boolean): Promise<void>;
+}
+
+export function supportsSubscriptions(p: PaymentProvider): p is PaymentProvider & SubscriptionCapable {
+  return typeof (p as Partial<SubscriptionCapable>).createSubscription === 'function';
 }
 
 export interface PaymentProvider {

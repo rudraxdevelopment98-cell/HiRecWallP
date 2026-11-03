@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { createClient as createSupabase } from '@supabase/supabase-js';
+import type { RegionCode } from '@/lib/geo';
 
 /**
  * Admin-controlled switches (table `site_settings`, edited at /admin/settings).
@@ -25,6 +26,10 @@ export interface SiteSettings {
   google_login: boolean;
   /** Seller details printed on receipts / tax invoices (env vars are the fallback). */
   business: { legal_name: string; address: string; gstin: string; gst_rate: number; support_email: string };
+  /** What one credit is worth (₹) when paying creators for credit spends / membership claims. */
+  creator_credit_value_inr: number;
+  /** Move a country to another pricing tier, e.g. { "BR": "T4" } (Admin → Pricing by country). */
+  country_tiers: Record<string, RegionCode>;
   /** Footer social links (icons appear only when a URL is set). */
   social: { instagram: string; youtube: string; x: string; facebook: string; pinterest: string };
 }
@@ -40,6 +45,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   google_login: false,
   business: { legal_name: '', address: '', gstin: '', gst_rate: 18, support_email: '' },
   social: { instagram: '', youtube: '', x: '', facebook: '', pinterest: '' },
+  country_tiers: {},
+  creator_credit_value_inr: 5,
 };
 
 export type SettingKey = keyof SiteSettings;
@@ -67,6 +74,7 @@ export async function getSettings(): Promise<SiteSettings> {
     value.announcement = { ...DEFAULT_SETTINGS.announcement, ...(value.announcement ?? {}) };
     value.business = { ...DEFAULT_SETTINGS.business, ...(value.business ?? {}) };
     value.social = { ...DEFAULT_SETTINGS.social, ...(value.social ?? {}) };
+    value.country_tiers = value.country_tiers && typeof value.country_tiers === 'object' ? value.country_tiers : {};
     cache = { at: Date.now(), value };
     return value;
   } catch {

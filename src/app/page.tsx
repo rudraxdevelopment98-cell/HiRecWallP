@@ -10,7 +10,6 @@ import { NewsletterCard } from '@/components/newsletter-card';
 import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listCategories, listPublishedWallpapers, listSets } from '@/lib/catalogue';
 import { getSettings } from '@/lib/settings';
-import { REGION_PRICING_UNIT } from '@/lib/geo';
 
 export default async function HomePage() {
   const region = (await getDisplayRegion());
@@ -21,7 +20,6 @@ export default async function HomePage() {
     listPublishedWallpapers({ free: true, sort: 'newest' }, region, 5),
     getSettings(),
   ]);
-  const money = REGION_PRICING_UNIT[region] === 'money';
   const set = sets[0];
 
   return (
@@ -101,7 +99,7 @@ export default async function HomePage() {
                 </div>
                 <div className="mt-auto">
                   <p className="font-semibold">Free wallpapers</p>
-                  <p className="text-xs text-muted-foreground">Download in HD · {money ? 'paid sizes from ₹9' : 'paid sizes from 1 credit'}</p>
+                  <p className="text-xs text-muted-foreground">Download in HD · paid sizes from 1 credit</p>
                   <Link href="/free" className={buttonVariants({ size: 'sm', variant: 'outline', className: 'mt-3' })}>
                     Browse free →
                   </Link>

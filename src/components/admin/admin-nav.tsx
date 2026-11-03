@@ -8,6 +8,7 @@ import {
   Coins,
   Crown,
   FolderTree,
+  Globe2,
   History,
   Images,
   Inbox,
@@ -42,6 +43,7 @@ export const ADMIN_NAV = [
       { href: '/admin/customers', label: 'Customers', icon: Users },
       { href: '/admin/membership', label: 'Membership', icon: Crown },
       { href: '/admin/credit-packs', label: 'Credit packs', icon: Coins },
+      { href: '/admin/countries', label: 'Pricing by country', icon: Globe2 },
     ],
   },
   {

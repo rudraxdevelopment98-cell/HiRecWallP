@@ -1,4 +1,4 @@
-import { REGION_PRICING_UNIT, type RegionCode } from '@/lib/geo';
+import type { RegionCode } from '@/lib/geo';
 import type { Category, WallpaperCard } from '@/types/catalogue';
 
 /**
@@ -47,9 +47,9 @@ export const DEMO_CATEGORIES: Category[] = [
   { id: 'cat-desert', slug: 'desert', name: 'Desert', parent_id: null, sort_order: 80, thumbUrl: '/demo/scene-1084.jpg' },
 ];
 
-function priceFor(def: DemoDef, region: RegionCode): number | null {
+function priceFor(def: DemoDef, _region: RegionCode): number | null {
   if (def.free) return null;
-  return REGION_PRICING_UNIT[region] === 'money' ? def.inr : def.credits;
+  return def.credits;
 }
 
 const CAT_NAME = new Map(DEMO_CATEGORIES.map((c) => [c.slug, c.name]));

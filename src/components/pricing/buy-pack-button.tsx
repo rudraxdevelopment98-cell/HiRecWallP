@@ -22,12 +22,14 @@ export function BuyButton({
   description,
   successUrl,
   next = '/pricing',
+  variant = 'default',
 }: {
   body: Record<string, unknown>;
   label: string;
   description: string;
   successUrl: string;
   next?: string;
+  variant?: 'default' | 'outline';
 }) {
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);
@@ -40,17 +42,17 @@ export function BuyButton({
       .catch(() => setStatus({ payments: false, signedIn: false, email: null }));
   }, []);
 
-  if (!status) return <Button className="mt-4 w-full" disabled>…</Button>;
+  if (!status) return <Button className="w-full" variant={variant} disabled>…</Button>;
   if (!status.payments) {
     return (
-      <Button className="mt-4 w-full" variant="outline" disabled>
-        Payments opening soon
+      <Button className="w-full" variant="outline" disabled>
+        {variant === 'outline' ? 'Autopay opening soon' : 'Payments opening soon'}
       </Button>
     );
   }
   if (!status.signedIn) {
     return (
-      <Link href={`/login?next=${encodeURIComponent(next)}`} className={buttonVariants({ className: 'mt-4 w-full' })}>
+      <Link href={`/login?next=${encodeURIComponent(next)}`} className={buttonVariants({ variant, className: 'w-full' })}>
         Sign in to buy
       </Link>
     );
@@ -84,7 +86,7 @@ export function BuyButton({
 
   return (
     <>
-      <Button className="mt-4 w-full" onClick={buy} disabled={busy}>
+      <Button className="w-full" variant={variant} onClick={buy} disabled={busy}>
         {busy ? 'Opening…' : label}
       </Button>
       {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}

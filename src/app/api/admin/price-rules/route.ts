@@ -3,12 +3,13 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
+import { REGION_CODES } from '@/lib/geo';
 
 export const runtime = 'nodejs';
 
 const schema = z
   .object({
-    region_code: z.enum(['IN', 'T1', 'T2', 'T3']),
+    region_code: z.enum(REGION_CODES),
     base_price: z.number().positive(),
     min_price: z.number().positive(),
     max_price: z.number().positive(),

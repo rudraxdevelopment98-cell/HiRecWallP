@@ -21,15 +21,16 @@ test('free page renders', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Free wallpapers' })).toBeVisible();
 });
 
-test('pricing page renders', async ({ page }) => {
+test('pricing page renders with plan-type tabs', async ({ page }) => {
   await page.goto('/pricing');
-  await expect(page.getByRole('heading', { name: 'Simple, fair pricing' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Pick how you want to pay' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Plan types' }).getByRole('link', { name: 'Credit packs' })).toBeVisible();
 });
 
-test('region switcher changes the pricing cookie', async ({ page, context }) => {
-  await page.goto('/');
+test('country picker sets the country cookie and prices follow it', async ({ page, context }) => {
+  await page.goto('/pricing');
   // Header on desktop, footer on mobile — exactly one is visible.
-  await page.locator('select[aria-label="Change region"]:visible').selectOption('IN');
-  const cookies = await context.cookies();
-  expect(cookies.find((c) => c.name === 'region')?.value).toBe('IN');
+  await page.locator('select[aria-label="Change country"]:visible').selectOption('IN');
+  await expect.poll(async () => (await context.cookies()).find((c) => c.name === 'country')?.value).toBe('IN');
+  await expect(page.getByText('Prices for', { exact: false }).getByText('India')).toBeVisible();
 });

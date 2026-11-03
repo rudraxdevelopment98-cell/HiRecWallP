@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getCreator } from '@/lib/creator';
 import { createClient } from '@/lib/supabase/server';
 import { Badge } from '@/components/ui/badge';
-import { formatRegionPrice } from '@/lib/format';
+import { formatRupees } from '@/lib/format';
 
 export const metadata: Metadata = { title: 'Creator payouts' };
 
@@ -66,7 +66,7 @@ export default async function CreatorPayoutsPage() {
             {rows.map((r) => (
               <tr key={r.id} className="border-b">
                 <td className="py-2">{r.period}</td>
-                <td>{formatRegionPrice(Number(r.net), 'IN')}</td>
+                <td>{formatRupees(Number(r.net))}</td>
                 <td>
                   <Badge variant={variant(r.status)}>{r.status}</Badge>
                 </td>

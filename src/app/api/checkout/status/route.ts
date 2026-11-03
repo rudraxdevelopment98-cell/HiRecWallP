@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/auth';
-import { getDisplayRegion } from '@/lib/catalogue';
-import { REGION_PRICING_UNIT } from '@/lib/geo';
+import { getDisplayCountry, getDisplayRegion } from '@/lib/catalogue';
 import { createServiceClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -27,7 +26,7 @@ export async function GET() {
       db = false;
     }
   }
-  const region = (await getDisplayRegion());
+  const [region, country] = await Promise.all([getDisplayRegion(), getDisplayCountry()]);
   const payments = supabase && db && paymentsKeys;
   return NextResponse.json({
     payments,
@@ -36,6 +35,7 @@ export async function GET() {
     signedIn: Boolean(user),
     email: user?.email ?? null,
     region,
-    unit: REGION_PRICING_UNIT[region],
+    country,
+    unit: 'credits',
   });
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getProvider } from '@/lib/payments';
 import { getSettings } from '@/lib/settings';
+import { handleSubscriptionEvent } from '@/lib/subscriptions';
 
 export const runtime = 'nodejs';
 
@@ -23,12 +24,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
+  const supabase = createServiceClient();
+
+  // Autopay: subscription.* events (monthly charges grant one month each).
+  if (result.subscription) {
+    const subEventId = result.providerEventId ?? `${result.subscription.providerSubscriptionId}:${result.eventType}:${result.paymentId ?? ''}`;
+    const { error: subDupe } = await supabase.from('webhook_events').insert({ provider: 'razorpay', event_id: subEventId });
+    if (subDupe) return NextResponse.json({ ok: true, duplicate: true });
+    try {
+      return NextResponse.json({ ok: true, ...(await handleSubscriptionEvent(result)) });
+    } catch (err) {
+      await supabase.from('webhook_events').delete().eq('provider', 'razorpay').eq('event_id', subEventId);
+      console.error('[webhook] subscription processing failed', err);
+      return NextResponse.json({ error: 'Processing failed' }, { status: 500 });
+    }
+  }
+
   // Acknowledge non-payment events without side effects.
   if (!result.paid || !result.providerOrderId) {
     return NextResponse.json({ ok: true, ignored: true });
   }
-
-  const supabase = createServiceClient();
 
   // Idempotency: record the event first; a duplicate insert means we already
   // handled it.
@@ -51,7 +66,7 @@ export async function POST(request: Request) {
     if (!order) return NextResponse.json({ ok: true, unknownOrder: true });
     if (order.status !== 'created') return NextResponse.json({ ok: true, alreadyHandled: true });
 
-    // INR per-item prices are for India only. A foreign-issued card on an INR
+    // INR prices are for India only. A foreign-issued card on an INR
     // order means someone bypassed region pricing: refund and grant nothing.
     if (order.provider === 'razorpay' && result.international) {
       if (result.paymentId) {
@@ -121,15 +136,19 @@ export async function POST(request: Request) {
       } else if (item.credit_pack_id) {
         const { data: pack } = await supabase
           .from('credit_packs')
-          .select('credits')
+          .select('credits, bonus_credits')
           .eq('id', item.credit_pack_id)
           .maybeSingle();
         if (pack) {
-          await supabase.rpc('add_credits', {
+          // Paid credits never expire; bonus credits expire after 12 months.
+          const { error: cErr } = await supabase.rpc('add_pack_credits', {
             p_user: order.user_id,
-            p_credits: pack.credits,
             p_order: order.id,
+            p_credits: pack.credits,
+            p_bonus: pack.bonus_credits ?? 0,
+            p_bonus_days: 365,
           });
+          if (cErr) throw cErr;
         }
       }
     }
