@@ -90,6 +90,13 @@ export function BuyButton({
         {busy ? 'Opening…' : label}
       </Button>
       {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
+      <p className="mt-1 text-center text-[11px] text-muted-foreground">
+        By paying you agree to the{' '}
+        <Link href="/refunds" className="underline">
+          Refund policy
+        </Link>
+        .
+      </p>
     </>
   );
 }

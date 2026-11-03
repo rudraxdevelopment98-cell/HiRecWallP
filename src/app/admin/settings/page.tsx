@@ -99,6 +99,28 @@ export default async function AdminSettingsPage() {
       </section>
 
       <section className="rounded-2xl border bg-card p-6">
+        <h2 className="mb-1 font-semibold">Grievance officer &amp; legal</h2>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Required by the Consumer Protection (E-Commerce) Rules 2020 — shown on the Grievance, Privacy and Terms pages. Leave blank to use the
+          business name and support email.
+        </p>
+        <AdminForm
+          action="/api/admin/settings"
+          method="PUT"
+          fields={[
+            { name: 'grievance_name', label: 'Grievance officer name', span: 2 },
+            { name: 'grievance_designation', label: 'Designation', span: 2 },
+            { name: 'grievance_email', label: 'Grievance email', span: 2 },
+            { name: 'grievance_phone', label: 'Phone (optional)' },
+            { name: 'jurisdiction_city', label: 'Courts at (city)', placeholder: 'e.g. Ahmedabad' },
+          ]}
+          initial={settings.legal}
+          submitLabel="Save legal details"
+          wrapAs="legal"
+        />
+      </section>
+
+      <section className="rounded-2xl border bg-card p-6">
         <h2 className="mb-1 font-semibold">Exchange rates for creator payouts</h2>
         <p className="mb-3 text-xs text-muted-foreground">Rupees per 1 unit. Used to pay creators for foreign-currency affiliate sales. ⚠️ Update monthly.</p>
         <AdminForm

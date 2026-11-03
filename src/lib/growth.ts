@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { createClient } from '@/lib/supabase/server';
 import { hashIp } from '@/lib/request';
 import { getSettings } from '@/lib/settings';
+import { recordAcceptance } from '@/lib/consent';
 
 export const REF_COOKIE = 'ref';
 export const REF_CODE = /^[A-Z0-9]{6,12}$/;
@@ -21,6 +22,8 @@ function ipFrom(h: Headers): string | null {
  * (2 per network per 30 days, no self-referral, new accounts only).
  */
 export async function claimWelcomeBonus(userId: string): Promise<{ status: string; credits?: number; referred?: boolean }> {
+  // Signing in = accepting the current Terms and Privacy Policy (shown on the sign-in page).
+  await recordAcceptance(userId, ['terms', 'privacy'], 'signup');
   try {
     const settings = await getSettings();
     const g = settings.growth;

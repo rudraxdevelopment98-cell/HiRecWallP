@@ -52,6 +52,8 @@ export interface SiteSettings {
   fx_to_inr: Record<string, number>;
   /** When/where the rates came from. */
   fx_meta: { updated_at: string | null; source: string };
+  /** Legal contacts shown on policy pages (Consumer Protection (E-Commerce) Rules 2020). */
+  legal: { grievance_name: string; grievance_designation: string; grievance_email: string; grievance_phone: string; jurisdiction_city: string };
   /** GST / TDS / income-tax switches and rates (Admin → Tax centre). */
   tax: TaxSettings;
   /** Move a country to another pricing tier, e.g. { "BR": "T4" } (Admin → Pricing by country). */
@@ -91,6 +93,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   fx_to_inr: { USD: 84, GBP: 107, EUR: 91, AUD: 55, CAD: 61 },
   fx_meta: { updated_at: null, source: 'default' },
   tax: DEFAULT_TAX,
+  legal: { grievance_name: '', grievance_designation: 'Grievance Officer', grievance_email: '', grievance_phone: '', jurisdiction_city: '' },
 };
 
 export type SettingKey = keyof SiteSettings;
@@ -122,6 +125,7 @@ export async function getSettings(): Promise<SiteSettings> {
     value.fx_to_inr = { ...DEFAULT_SETTINGS.fx_to_inr, ...(value.fx_to_inr ?? {}) };
     value.fx_meta = { ...DEFAULT_SETTINGS.fx_meta, ...(value.fx_meta ?? {}) };
     value.tax = { ...DEFAULT_TAX, ...(value.tax ?? {}) };
+    value.legal = { ...DEFAULT_SETTINGS.legal, ...(value.legal ?? {}) };
     value.country_tiers = value.country_tiers && typeof value.country_tiers === 'object' ? value.country_tiers : {};
     cache = { at: Date.now(), value };
     return value;

@@ -44,3 +44,20 @@ test('tax centre and registers are admin-only', async ({ page, request }) => {
   expect([401, 403]).toContain((await request.get('/api/admin/tax/tds-register')).status());
   expect((await request.get('/api/jobs/fx-rates')).status()).toBe(401);
 });
+
+test('all policy pages Razorpay checks for exist, with versions and grievance contact', async ({ page }) => {
+  for (const [path, title] of [
+    ['/terms', 'Terms of Service'],
+    ['/privacy', 'Privacy Policy'],
+    ['/refunds', 'Refund & Cancellation Policy'],
+    ['/delivery', 'Shipping & Delivery Policy'],
+    ['/licence', 'Licence'],
+    ['/grievance', 'Grievance Redressal'],
+  ] as const) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
+    await expect(page.getByText('version 2026-11-03', { exact: false })).toBeVisible();
+  }
+  await page.goto('/grievance');
+  await expect(page.getByText('48 hours', { exact: false }).first()).toBeVisible();
+});

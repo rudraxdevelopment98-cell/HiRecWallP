@@ -4,6 +4,7 @@ import { LoginForm } from '@/components/auth/login-form';
 import { getUser } from '@/lib/auth';
 import { safeNextPath } from '@/lib/http';
 import { getSettings } from '@/lib/settings';
+import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { REF_COOKIE } from '@/lib/growth';
 
@@ -46,6 +47,10 @@ export default async function LoginPage(
       {configured ? (
         <div className="w-full rounded-2xl border bg-card p-6">
           <LoginForm next={next} google={settings.google_login} />
+          <p className="mt-4 text-xs text-muted-foreground">
+            By continuing you agree to our <Link href="/terms" className="underline">Terms</Link> and{' '}
+            <Link href="/privacy" className="underline">Privacy Policy</Link>.
+          </p>
         </div>
       ) : (
         <p className="w-full rounded-2xl border bg-card p-6 text-sm text-muted-foreground">

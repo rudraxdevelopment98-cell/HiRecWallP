@@ -85,7 +85,9 @@ seed/                     # Local sample wallpaper source assets (gitignored ori
   (India too, since 2026-11-03); wallpapers are priced in credits, credit packs/plans in money.
 - Money/tax logic is **configurable and flagged for CA review** (GST India, VAT UK/EU).
 - Every wallpaper is `is_ai_generated` and shows an "AI-generated" label on detail pages.
-- Legal page text is **placeholder only** — clearly marked for lawyer/accountant review.
+- Legal pages (`/terms`, `/privacy`, `/refunds`, `/delivery`, `/licence`, `/grievance`) are full drafts matching real
+  behaviour (shared `LegalDoc`, versions in `src/lib/policies.ts`; bump the version on material changes). Owner has no
+  lawyer — keep them accurate to the code when features change.
 - Small, focused commits. Conventional-commit style prefixes (`feat:`, `chore:`, `docs:`, `fix:`).
 
 ## Security requirements (mandatory acceptance criteria — `security_requirements` in spec)
@@ -350,6 +352,12 @@ Key Phase 3 decisions:
   Onboarding collects PAN, residency, entity type.
 - FX: `refreshFxRates()` (ECB via Frankfurter, free, no key; sanity-checked) monthly cron `/api/jobs/fx-rates`
   (05:15 UTC on the 1st, before payouts) + Tax centre button; `fx_meta` records source/date.
+
+## Policies & consent (2026-11-03) — migration 0020, docs/SITE_AUDIT_2.md
+
+- Grievance officer details: `site_settings.legal` (Admin → Settings), shown via `getLegalContext()`.
+- `recordAcceptance()` writes `policy_acceptances` (terms+privacy on sign-in, terms+refunds at checkout, creator at onboarding).
+- `housekeeping()` strips hashed IP / user agent from download logs older than 12 months (watermark trace kept).
 
 ## Manual setup owner must do (grows as we go)
 

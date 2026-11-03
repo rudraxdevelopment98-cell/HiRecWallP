@@ -52,6 +52,16 @@ const schema = z.discriminatedUnion('key', [
       tan: z.string().trim().toUpperCase().refine((v) => v === '' || /^[A-Z]{4}[0-9]{5}[A-Z]$/.test(v), 'TAN looks like ABCD12345E'),
     }),
   }),
+  z.object({
+    key: z.literal('legal'),
+    value: z.object({
+      grievance_name: z.string().trim().max(80),
+      grievance_designation: z.string().trim().max(80),
+      grievance_email: z.string().trim().max(200).refine((e) => e === '' || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e), 'Enter a valid email'),
+      grievance_phone: z.string().trim().max(30),
+      jurisdiction_city: z.string().trim().max(60),
+    }),
+  }),
   z.object({ key: z.literal('fx_to_inr'), value: z.record(z.string().regex(/^[A-Z]{3}$/), z.number().positive().max(10000)) }),
   z.object({
     key: z.literal('country_tiers'),

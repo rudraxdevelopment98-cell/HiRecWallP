@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSettings } from '@/lib/settings';
+import { recordAcceptance } from '@/lib/consent';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
 import { isSameOrigin } from '@/lib/http';
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     await supabase.from('profiles').update({ role: 'creator' }).eq('id', user.id);
+    await recordAcceptance(user.id, ['creator'], 'creator_onboarding');
 
     return NextResponse.json({ ok: true, kycStatus: kyc.status, kycUrl: kyc.url ?? null });
   } catch {

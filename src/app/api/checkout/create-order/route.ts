@@ -10,6 +10,7 @@ import { getSettings } from '@/lib/settings';
 import { getPlanOffer } from '@/lib/membership';
 import { startAutopay } from '@/lib/subscriptions';
 import { resolveAffiliate } from '@/lib/growth';
+import { recordAcceptance } from '@/lib/consent';
 import type { CreditPack } from '@/lib/catalogue';
 
 export const runtime = 'nodejs';
@@ -74,6 +75,8 @@ export async function POST(request: Request) {
   const billingCountry = body.billingCountry ?? null;
   const ctx: PriceContext = await getChargeContext(billingCountry);
   const supabase = createServiceClient();
+  // Paying = accepting the Refund & Cancellation Policy and Terms (shown beside the pay button).
+  await recordAcceptance(user.id, ['terms', 'refunds'], 'checkout');
   // Creator who sent this buyer (?via= link, last 30 days), if any.
   const affiliateId = await resolveAffiliate(user.id);
 

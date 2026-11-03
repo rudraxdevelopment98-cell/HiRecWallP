@@ -1,29 +1,87 @@
 import type { Metadata } from 'next';
-import { LegalNotice } from '@/components/legal-notice';
-import { publicEnv } from '@/lib/env';
+import { LegalDoc } from '@/components/legal/legal-doc';
+import { getLegalContext } from '@/lib/legal';
 
 export const metadata: Metadata = { title: 'Licence' };
+export const dynamic = 'force-dynamic';
 
-export default function LicencePage() {
-  const brand = publicEnv.NEXT_PUBLIC_BRAND_NAME;
+export default async function LicencePage() {
+  const c = await getLegalContext();
   return (
-    <main className="container max-w-3xl space-y-4 py-10">
-      <h1 className="text-2xl font-semibold">Licence</h1>
-      <LegalNotice />
-      <section className="space-y-3 text-sm leading-6 text-muted-foreground">
+    <LegalDoc
+      policy="licence"
+      intro={
         <p>
-          Each purchase grants a <strong>personal-use licence</strong> to the buyer for the
-          wallpaper(s) bought. You may use the file on your own devices. You may not resell,
-          redistribute, sublicense or use it commercially without a separate commercial licence.
+          When you add a wallpaper to your library you get a licence to use it — you don&rsquo;t buy the artwork itself. There are two licences:
+          <strong> Personal</strong> (standard) and <strong>Commercial</strong> (5 credits, or included in Business plans).
         </p>
-        <p>
-          Wallpapers are AI-generated (and some are human-edited). Downloads carry a per-buyer
-          forensic watermark and are traceable to the originating order. Sharing or leaking a
-          purchased file breaches this licence.
-        </p>
-        <p>A commercial licence is offered as a separate, higher-priced SKU (Phase 2).</p>
-        <p>© {new Date().getFullYear()} {brand}.</p>
-      </section>
-    </main>
+      }
+      sections={[
+        {
+          id: 'personal',
+          heading: 'Personal licence',
+          body: (
+            <>
+              <p>You may:</p>
+              <ul>
+                <li>use the wallpaper as a background on your own phones, tablets, computers, TVs and watches;</li>
+                <li>use it as a profile banner or background on your own non-commercial social accounts;</li>
+                <li>print it for your own home, not for sale.</li>
+              </ul>
+              <p>You may not resell, share, upload or give away the file (or an edited version), or use it to promote a business.</p>
+            </>
+          ),
+        },
+        {
+          id: 'commercial',
+          heading: 'Commercial licence',
+          body: (
+            <>
+              <p>Everything in the personal licence, plus:</p>
+              <ul>
+                <li>ads, marketing, presentations, websites, apps and videos for your business or your clients;</li>
+                <li>business social-media posts and thumbnails;</li>
+                <li>physical products you sell (prints, cases, apparel) up to 5,000 units per wallpaper.</li>
+              </ul>
+              <p>
+                Still not allowed: selling or giving away the image as a standalone file, wallpaper pack, stock image or NFT; registering it as a
+                trademark or logo; using it in ways that are illegal, hateful, misleading or that suggest a person or brand endorses you.
+              </p>
+            </>
+          ),
+        },
+        {
+          id: 'ai',
+          heading: 'AI-generated artwork',
+          body: (
+            <p>
+              Every wallpaper is AI-generated (some are edited by people) and labelled as such. Copyright in AI-generated images is unsettled in
+              many countries, so your rights come from this licence — a contract with {c.legalName} — rather than from a transfer of copyright.
+              Licences are non-exclusive: other customers can license the same wallpaper.
+            </p>
+          ),
+        },
+        {
+          id: 'protection',
+          heading: 'How files are protected',
+          body: (
+            <p>
+              Previews carry a visible watermark. Purchased files carry an invisible mark linked to your order, so leaked copies can be traced. Sharing
+              a purchased file ends your licence and may close your account.
+            </p>
+          ),
+        },
+        {
+          id: 'duration',
+          heading: 'How long it lasts',
+          body: (
+            <p>
+              The licence is permanent for the uses above, including after a membership ends. If a wallpaper is removed (for example after a valid
+              rights complaint), you can keep using copies you already downloaded for personal use, and we will offer a replacement or credit.
+            </p>
+          ),
+        },
+      ]}
+    />
   );
 }
