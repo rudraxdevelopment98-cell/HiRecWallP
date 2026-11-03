@@ -6,12 +6,14 @@ import { formatMoneyMinor } from '@/lib/format';
 import { getMyOrder } from '@/lib/orders';
 import { PrintButton } from '@/components/account/print-button';
 import { publicEnv } from '@/lib/env';
+import { getSettings, sellerDetails } from '@/lib/settings';
 
 export const metadata: Metadata = { title: 'Receipt' };
 
 /**
- * Printable receipt / tax invoice. Seller details and GST rate come from env
- * (BUSINESS_LEGAL_NAME, BUSINESS_ADDRESS, BUSINESS_GSTIN, GST_RATE_PERCENT).
+ * Printable receipt / tax invoice. Seller details and GST rate come from
+ * Admin → Settings → Business details (falling back to the BUSINESS_* /
+ * GST_RATE_PERCENT env vars).
  * Prices are treated as GST-inclusive. ⚠️ Invoice format and tax treatment
  * (CGST/SGST vs IGST, exports of services) must be confirmed by a CA.
  */
@@ -22,12 +24,8 @@ export default async function ReceiptPage(props: { params: Promise<{ id: string 
   const order = await getMyOrder(params.id);
   if (!order || order.status !== 'paid') notFound();
 
-  const seller = {
-    name: process.env.BUSINESS_LEGAL_NAME || publicEnv.NEXT_PUBLIC_BRAND_NAME,
-    address: process.env.BUSINESS_ADDRESS || '',
-    gstin: process.env.BUSINESS_GSTIN || '',
-  };
-  const rate = Number(process.env.GST_RATE_PERCENT ?? 18);
+  const seller = sellerDetails(await getSettings(), publicEnv.NEXT_PUBLIC_BRAND_NAME);
+  const rate = seller.rate;
   const showGst = Boolean(seller.gstin) && order.currency === 'INR';
   const taxable = showGst ? Math.round(order.amount_minor / (1 + rate / 100)) : order.amount_minor;
   const tax = order.amount_minor - taxable;

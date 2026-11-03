@@ -8,12 +8,28 @@ import { clearSettingsCache } from '@/lib/settings';
 export const runtime = 'nodejs';
 
 const bool = z.boolean();
+const httpsUrl = z.string().trim().max(300).refine((h) => h === '' || /^https:\/\//.test(h), 'Links must start with https://');
 const schema = z.discriminatedUnion('key', [
   z.object({ key: z.literal('store_open'), value: bool }),
   z.object({ key: z.literal('membership_enabled'), value: bool }),
   z.object({ key: z.literal('creator_signups'), value: bool }),
   z.object({ key: z.literal('free_downloads'), value: bool }),
   z.object({ key: z.literal('newsletter_enabled'), value: bool }),
+  z.object({ key: z.literal('google_login'), value: bool }),
+  z.object({
+    key: z.literal('business'),
+    value: z.object({
+      legal_name: z.string().trim().max(160),
+      address: z.string().trim().max(500),
+      gstin: z.string().trim().toUpperCase().refine((g) => g === '' || /^[0-9]{2}[A-Z0-9]{10}[0-9A-Z]Z[0-9A-Z]$/.test(g), 'GSTIN should be 15 characters, e.g. 24ABCDE1234F1Z5'),
+      gst_rate: z.number().min(0).max(40).nullable().transform((n) => n ?? 18),
+      support_email: z.string().trim().max(200).refine((e) => e === '' || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e), 'Enter a valid email'),
+    }),
+  }),
+  z.object({
+    key: z.literal('social'),
+    value: z.object({ instagram: httpsUrl, youtube: httpsUrl, x: httpsUrl, facebook: httpsUrl, pinterest: httpsUrl }),
+  }),
   z.object({ key: z.literal('downloads_per_purchase'), value: z.number().int().min(1).max(50) }),
   z.object({
     key: z.literal('announcement'),

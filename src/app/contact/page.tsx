@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { Clock, Mail } from 'lucide-react';
 import { ContactForm } from '@/components/contact-form';
+import { getSettings } from '@/lib/settings';
 
 export const metadata: Metadata = { title: 'Contact us' };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const email = (await getSettings()).business.support_email || 'support@hirecwallp.com';
   return (
     <main className="container grid gap-10 py-12 lg:grid-cols-2">
       <div>
@@ -13,7 +15,7 @@ export default function ContactPage() {
           Have a question, licensing need, or feedback? We’d love to hear from you.
         </p>
         <div className="mt-8 space-y-5 text-sm">
-          <Info icon={<Mail className="h-5 w-5" />} title="Email" value="support@hirecwallp.com" />
+          <Info icon={<Mail className="h-5 w-5" />} title="Email" value={email} />
           <Info icon={<Clock className="h-5 w-5" />} title="Response time" value="Usually within 1–2 business days (IST)" />
         </div>
         <p className="mt-8 text-xs text-muted-foreground">
@@ -25,7 +27,7 @@ export default function ContactPage() {
         </p>
       </div>
       <div className="rounded-2xl border bg-card p-6">
-        <ContactForm />
+        <ContactForm email={email} />
       </div>
     </main>
   );

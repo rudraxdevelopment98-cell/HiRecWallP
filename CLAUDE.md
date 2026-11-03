@@ -254,6 +254,16 @@ Key Phase 3 decisions:
 - Funnel events: view, detail_view, add_to_cart, checkout_start (client `track()`), purchase (webhook).
 - Migration 0013: `rate_limit_hit()` + `allowRequest()`; honeypot field `website` on public forms.
 
+## Settings polish + DB tuning (2026-11-03)
+
+- `site_settings` keys `business` (legal name, address, GSTIN, GST %, support email), `social`
+  (instagram/pinterest/youtube/x/facebook) and `google_login` — edited at /admin/settings.
+  Read via `sellerDetails()` / `socialLinks()` (settings first, `BUSINESS_*` / `NEXT_PUBLIC_SOCIAL_*`
+  env as fallback). Google button hidden until `google_login` is on (enable the provider in Supabase first).
+- FAQ shows membership answers only while membership is on; download count follows the setting.
+- Migration 0014: RLS policies use `(select auth.uid())` (evaluated once per query) + hot FK indexes.
+  Remaining advisor notes are intentional (see migration header); leaked-password check n/a (no passwords).
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

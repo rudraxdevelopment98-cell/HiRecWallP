@@ -1,5 +1,5 @@
 -- HirecWallp: ONE-PASTE database setup for the Supabase SQL Editor.
--- Generated from supabase/migrations/0001..0013 + supabase/seed/seed.sql (in order).
+-- Generated from supabase/migrations/0001..0014 + supabase/seed/seed.sql (in order).
 -- Run ONCE on a NEW, empty project. Do not edit here; edit the source files.
 
 -- ================================================================
@@ -358,7 +358,6 @@ begin
 end;
 $$;
 
-
 -- ================================================================
 -- >>> supabase/migrations/0002_phase1_rls.sql
 -- ================================================================
@@ -507,7 +506,6 @@ create policy "takedowns: admin update" on takedown_reports
 
 -- webhook_events: service_role only — no policies, RLS denies all other roles.
 
-
 -- ================================================================
 -- >>> supabase/migrations/0003_phase1_payments_fns.sql
 -- ================================================================
@@ -652,7 +650,6 @@ as $$
   where ip_hash = p_ip_hash and created_at > now() - interval '1 hour';
 $$;
 
-
 -- ================================================================
 -- >>> supabase/migrations/0004_phase2_automation.sql
 -- ================================================================
@@ -765,7 +762,6 @@ create trigger generation_jobs_touch
   before update on generation_jobs
   for each row execute function public.touch_generation_job();
 
-
 -- ================================================================
 -- >>> supabase/migrations/0005_phase2_commercial.sql
 -- ================================================================
@@ -779,7 +775,6 @@ create trigger generation_jobs_touch
 
 alter table order_items
   add column licence licence_type not null default 'personal';
-
 
 -- ================================================================
 -- >>> supabase/migrations/0006_phase3_marketplace.sql
@@ -853,7 +848,6 @@ as $$
   select exists (select 1 from public.creators where user_id = auth.uid());
 $$;
 
-
 -- ================================================================
 -- >>> supabase/migrations/0007_security_hardening.sql
 -- ================================================================
@@ -914,7 +908,6 @@ grant update (display_name, country_code, gstin) on table public.profiles to aut
 -- Trigger-only function; never callable over the API.
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
-
 -- ================================================================
 -- >>> supabase/migrations/0008_housekeeping.sql
 -- ================================================================
@@ -972,7 +965,6 @@ $$;
 
 revoke execute on function public.housekeeping(int) from public, anon, authenticated;
 grant execute on function public.housekeeping(int) to service_role;
-
 
 -- ================================================================
 -- >>> supabase/migrations/0009_site_completion.sql
@@ -1062,7 +1054,6 @@ grant execute on function public.assign_invoice(uuid) to service_role;
 -- --- Global base prices are shown on the storefront, so they are public -------
 create policy "price_rules: public read global" on price_rules
   for select using (scope = 'global');
-
 
 -- ================================================================
 -- >>> supabase/migrations/0010_membership_and_settings.sql
@@ -1210,7 +1201,6 @@ insert into membership_plans (name, description, duration_days, prices, download
   ('Yearly Pass', '365 days of access', 365, '{"IN": 149900, "T1": 4999, "T2": 3499, "T3": 1999}', 400, false,
    array['Add up to 400 wallpapers to your library', 'Every size of each wallpaper', 'Keep them forever', 'Best value'], false, 20);
 
-
 -- ================================================================
 -- >>> supabase/migrations/0011_storage_buckets.sql
 -- ================================================================
@@ -1235,7 +1225,6 @@ on conflict (id) do update
   set public = excluded.public,
       file_size_limit = excluded.file_size_limit,
       allowed_mime_types = excluded.allowed_mime_types;
-
 
 -- ================================================================
 -- >>> supabase/migrations/0012_admin_pro.sql
@@ -1409,7 +1398,6 @@ grant execute on function public.admin_funnel(timestamptz) to service_role;
 grant execute on function public.admin_sales_by_country(timestamptz) to service_role;
 grant execute on function public.admin_customers(text, int, int) to service_role;
 
-
 -- ================================================================
 -- >>> supabase/migrations/0013_rate_limits.sql
 -- ================================================================
@@ -1476,6 +1464,55 @@ begin
 end;
 $$;
 
+-- ================================================================
+-- >>> supabase/migrations/0014_perf_tuning.sql
+-- ================================================================
+-- =============================================================================
+-- HirecWallp — performance tuning from the Supabase advisors (pre-launch).
+-- * RLS: wrap auth.uid() in (select …) so Postgres evaluates it once per
+--   query instead of once per row (same rules, same roles — only faster).
+-- * Indexes on hot foreign keys (refunds, library, downloads, creator pages,
+--   deletes that cascade/check references).
+-- Security advisor notes reviewed and intentionally kept:
+--   is_admin()/is_creator()/my_credit_balance() are callable because RLS and
+--   the browser use them; they only ever answer about the caller.
+--   rate_hits / webhook_events have RLS on with no policies = service role only.
+-- =============================================================================
+
+alter policy "creator_payouts: read own" on creator_payouts using (creator_id = (select auth.uid()));
+alter policy "creators: read own"        on creators        using (user_id = (select auth.uid()));
+alter policy "credit_ledger: read own"   on credit_ledger   using (user_id = (select auth.uid()));
+alter policy "downloads: read own"       on downloads       using (user_id = (select auth.uid()));
+alter policy "entitlements: read own"    on entitlements    using (user_id = (select auth.uid()));
+alter policy "favourites: add own"       on favourites      with check (user_id = (select auth.uid()));
+alter policy "favourites: read own"      on favourites      using (user_id = (select auth.uid()));
+alter policy "favourites: remove own"    on favourites      using (user_id = (select auth.uid()));
+alter policy "memberships: read own"     on memberships     using (user_id = (select auth.uid()));
+alter policy "orders: read own"          on orders          using (user_id = (select auth.uid()));
+alter policy "price_quotes: read own"    on price_quotes    using (user_id = (select auth.uid()));
+alter policy "profiles: read own"        on profiles        using (id = (select auth.uid()));
+alter policy "profiles: update own (not role)" on profiles
+  using (id = (select auth.uid())) with check (id = (select auth.uid()));
+alter policy "order_items: read own via order" on order_items using (
+  exists (select 1 from orders o where o.id = order_items.order_id and o.user_id = (select auth.uid()))
+);
+
+create index if not exists entitlements_order_idx      on entitlements (order_id);
+create index if not exists entitlements_wallpaper_idx  on entitlements (wallpaper_id);
+create index if not exists downloads_entitlement_idx   on downloads (entitlement_id);
+create index if not exists downloads_wallpaper_idx     on downloads (wallpaper_id);
+create index if not exists order_items_wallpaper_idx   on order_items (wallpaper_id);
+create index if not exists order_items_pack_idx        on order_items (credit_pack_id) where credit_pack_id is not null;
+create index if not exists order_items_set_idx         on order_items (set_id) where set_id is not null;
+create index if not exists order_items_plan_idx        on order_items (membership_plan_id) where membership_plan_id is not null;
+create index if not exists wallpapers_creator_idx      on wallpapers (creator_id) where creator_id is not null;
+create index if not exists favourites_wallpaper_idx    on favourites (wallpaper_id);
+create index if not exists events_user_idx             on events (user_id) where user_id is not null;
+create index if not exists memberships_plan_idx        on memberships (plan_id);
+create index if not exists price_quotes_wallpaper_idx  on price_quotes (wallpaper_id);
+create index if not exists takedown_wallpaper_idx      on takedown_reports (wallpaper_id) where wallpaper_id is not null;
+create index if not exists social_posts_wallpaper_idx  on social_posts (wallpaper_id);
+create index if not exists generation_jobs_wallpaper_idx on generation_jobs (wallpaper_id) where wallpaper_id is not null;
 
 -- ================================================================
 -- >>> supabase/seed/seed.sql
@@ -1564,4 +1601,3 @@ insert into prompt_library (niche, festival, prompt, negative_prompt, aspect, st
   ('amoled-minimal', null, 'Pure black AMOLED minimal wallpaper with a single thin neon arc, negative space, premium', 'noise, clutter, text, watermark, busy', 'phone', 'True black for AMOLED power saving', true),
   ('amoled-minimal', null, 'Dark stone textured minimal gradient, soft fog, muted warm highlight, premium abstract', 'text, watermark, logo, oversaturated', 'desktop', 'Warm greys, understated', true)
 on conflict do nothing;
-

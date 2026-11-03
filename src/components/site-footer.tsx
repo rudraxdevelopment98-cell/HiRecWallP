@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Facebook, Heart, Instagram, Mountain, Twitter, Youtube } from 'lucide-react';
+import { Facebook, Heart, Instagram, Mountain, Pin, Twitter, Youtube } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
 import { getDisplayRegion } from '@/lib/catalogue';
 import { RegionSwitcher } from '@/components/region-switcher';
+import { getSettings, socialLinks } from '@/lib/settings';
 
 const LINKS = [
   { href: '/about', label: 'About Us' },
@@ -17,15 +18,16 @@ const LINKS = [
   { href: '/contact-takedown', label: 'Report content' },
 ];
 
-// Shown only once the account URL is configured (no dead "#" links).
-const SOCIAL = [
-  { icon: Instagram, label: 'Instagram', href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM },
-  { icon: Youtube, label: 'YouTube', href: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE },
-  { icon: Twitter, label: 'X / Twitter', href: process.env.NEXT_PUBLIC_SOCIAL_X },
-  { icon: Facebook, label: 'Facebook', href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK },
-].filter((s) => s.href);
-
 export async function SiteFooter() {
+  // Shown only once an account URL is set in Admin → Settings (no dead "#" links).
+  const links = socialLinks(await getSettings());
+  const SOCIAL = [
+    { icon: Instagram, label: 'Instagram', href: links.instagram },
+    { icon: Youtube, label: 'YouTube', href: links.youtube },
+    { icon: Twitter, label: 'X / Twitter', href: links.x },
+    { icon: Facebook, label: 'Facebook', href: links.facebook },
+    { icon: Pin, label: 'Pinterest', href: links.pinterest },
+  ].filter((s) => s.href);
   return (
     <footer className="mt-16 border-t bg-card">
       <div className="container flex flex-col gap-6 py-10 lg:flex-row lg:items-center lg:justify-between">

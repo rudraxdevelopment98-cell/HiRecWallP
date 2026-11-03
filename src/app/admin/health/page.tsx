@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { storage } from '@/lib/storage';
 import { formatMoneyMinor } from '@/lib/format';
+import { getSettings, sellerDetails } from '@/lib/settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,7 @@ const WORD: Record<Level, string> = { ok: 'OK', warn: 'Needs attention', bad: 'N
 export default async function AdminHealthPage() {
   await requireAdmin();
   const e = process.env;
+  const seller = sellerDetails(await getSettings(), '');
   const supabase = createServiceClient();
   const hourAgo = new Date(Date.now() - 3_600_000).toISOString();
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
@@ -75,8 +77,8 @@ export default async function AdminHealthPage() {
     },
     {
       label: 'Receipt seller details',
-      level: e.BUSINESS_LEGAL_NAME && e.BUSINESS_ADDRESS ? 'ok' : 'warn',
-      detail: e.BUSINESS_LEGAL_NAME && e.BUSINESS_ADDRESS ? `${e.BUSINESS_LEGAL_NAME}${e.BUSINESS_GSTIN ? ' · GSTIN set' : ' · no GSTIN'}` : 'Set BUSINESS_LEGAL_NAME / BUSINESS_ADDRESS (and BUSINESS_GSTIN once registered)',
+      level: seller.name && seller.address ? 'ok' : 'warn',
+      detail: seller.name && seller.address ? `${seller.name}${seller.gstin ? ' · GSTIN set' : ' · no GSTIN'}` : 'Add your legal name and address in Settings → Business details (GSTIN once registered)',
     },
   ];
 

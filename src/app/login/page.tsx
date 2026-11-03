@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { LoginForm } from '@/components/auth/login-form';
 import { getUser } from '@/lib/auth';
 import { safeNextPath } from '@/lib/http';
+import { getSettings } from '@/lib/settings';
 
 export const metadata: Metadata = { title: 'Sign in' };
 export const dynamic = 'force-dynamic';
@@ -32,7 +33,7 @@ export default async function LoginPage(
       )}
       {configured ? (
         <div className="w-full rounded-2xl border bg-card p-6">
-          <LoginForm next={next} />
+          <LoginForm next={next} google={(await getSettings()).google_login} />
         </div>
       ) : (
         <p className="w-full rounded-2xl border bg-card p-6 text-sm text-muted-foreground">

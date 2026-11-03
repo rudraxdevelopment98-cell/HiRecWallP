@@ -56,8 +56,9 @@ Legend: ✅ done · ⏳ in progress · ⬜ to do · 🧑‍⚖️ needs owner/pr
 
 ## Owner decisions still open
 - ✅ Membership built as prepaid passes, fully managed from Admin → Membership (plans start switched off — set prices, then turn on in Admin → Settings).
-- Fill seller details for receipts in Vercel env: `BUSINESS_LEGAL_NAME`, `BUSINESS_ADDRESS`, `BUSINESS_GSTIN`, `GST_RATE_PERCENT` (default 18).
-- Social links (footer icons appear when set): `NEXT_PUBLIC_SOCIAL_INSTAGRAM`, `_YOUTUBE`, `_X`, `_FACEBOOK`.
+- Fill seller details for receipts in **Admin → Settings → Business details** (legal name, address, GSTIN once registered, GST %, support email).
+- Social links in **Admin → Settings → Social links** (footer icons appear when set).
+- Google sign-in: enable the Google provider in Supabase Auth, then switch on **Admin → Settings → Google sign-in**.
 
 ## Not in scope here (owner decisions / later)
 - 🧑‍⚖️ Legal pages are placeholder text — lawyer review before launch

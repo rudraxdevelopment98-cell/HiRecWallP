@@ -12,9 +12,10 @@ const EMAIL_CODE_ENABLED = process.env.NEXT_PUBLIC_AUTH_EMAIL_CODE === '1';
 
 /**
  * Email magic link (works with Supabase's default template) with an optional
- * 6-digit code when the template includes {{ .Token }}, plus Google sign-in.
+ * 6-digit code when the template includes {{ .Token }}, plus Google sign-in
+ * (shown when Admin → Settings → "Google sign-in" is on).
  */
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, google: showGoogle = true }: { next: string; google?: boolean }) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -122,12 +123,16 @@ export function LoginForm({ next }: { next: string }) {
         </div>
       )}
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
-      </div>
-      <Button type="button" variant="outline" className="w-full" onClick={google}>
-        Continue with Google
-      </Button>
+      {showGoogle && (
+        <>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+          </div>
+          <Button type="button" variant="outline" className="w-full" onClick={google}>
+            Continue with Google
+          </Button>
+        </>
+      )}
       {error && (
         <p className="text-sm text-rose-600" role="alert">
           {error}
