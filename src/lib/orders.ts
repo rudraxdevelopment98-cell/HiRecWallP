@@ -27,20 +27,24 @@ type Row = Omit<OrderSummary, 'lines'> & {
     licence: string | null;
     wallpapers: { title: string; slug: string } | null;
     credit_packs: { credits: number } | null;
+    membership_plans: { name: string } | null;
   }[];
+  gift_email: string | null;
 };
 
 const SELECT =
-  'id, status, currency, amount_minor, created_at, paid_at, invoice_no, buyer_gstin, billing_country, order_items(unit_price, licence, wallpapers(title, slug), credit_packs(credits))';
+  'id, status, currency, amount_minor, created_at, paid_at, invoice_no, buyer_gstin, billing_country, gift_email, order_items(unit_price, licence, wallpapers(title, slug), credit_packs(credits), membership_plans(name))';
 
 function toSummary(r: Row): OrderSummary {
-  const { order_items, ...rest } = r;
+  const { order_items, gift_email, ...rest } = r;
   return {
     ...rest,
     lines: (order_items ?? []).map((i) =>
       i.credit_packs
-        ? { label: `${i.credit_packs.credits} credits`, detail: 'Credit pack', amount: null }
-        : {
+        ? { label: `${i.credit_packs.credits} credits${gift_email ? ' (gift)' : ''}`, detail: gift_email ? 'Gift credits' : 'Credit pack', amount: null }
+        : i.membership_plans
+          ? { label: i.membership_plans.name, detail: 'Membership pass', amount: null }
+          : {
             label: i.wallpapers?.title ?? 'Wallpaper',
             detail: `${i.licence === 'commercial' ? 'Commercial' : 'Personal'} licence`,
             amount: i.unit_price != null ? Number(i.unit_price) : null,

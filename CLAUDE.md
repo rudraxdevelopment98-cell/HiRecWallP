@@ -368,6 +368,17 @@ Key Phase 3 decisions:
   `EmptyState`, `DetailList`) and the CSS classes `.admin-card`, `.admin-table`, `.admin-btn`, `.admin-btn-primary`.
 - Settings tabs: `/admin/settings?tab=general|business|growth|prices` — deep-link to the right tab.
 
+## Support & self-serve refunds (2026-11-03) — migration 0021
+
+- `support_tickets` (number → `ticketRef()` HW-T1001, SLA `ack_due_at` +48 h / `resolve_due_at` +30 d, priority high for
+  refund/wrong_charge) + `support_messages` (`internal` notes hidden by RLS). Writes only via API (service role).
+- Customer: `/account/support`, `/new?order=&category=`, `/[id]`; "Get help" on each order. APIs `/api/support/tickets`, `/[id]/reply`.
+- Admin: `/admin/support` (tabs needs reply / overdue / waiting / resolved) + `/admin/support/[id]` → `/api/admin/support/[id]`
+  (reply, note, status, assign, priority, refund, credits, restore_downloads); every action audited + noted in the thread.
+- Self-serve refund: `refund_facts()` SQL → pure `selfRefundDecision()` (`src/lib/refund-rules.ts`, mirrors /refunds) →
+  `selfRefund()` → `refundOrder()` + a resolved ticket. Max 2 per 90 days. Keep rules and policy text in sync.
+- `support_retention()` (housekeeping) deletes resolved tickets without an order after 3 years (Privacy Policy).
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

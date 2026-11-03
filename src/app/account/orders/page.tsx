@@ -4,6 +4,9 @@ import type { Metadata } from 'next';
 import { Badge } from '@/components/ui/badge';
 import { formatMoneyMinor } from '@/lib/format';
 import { listMyOrders } from '@/lib/orders';
+import { selfRefundOption } from '@/lib/self-refund';
+import { RefundButton } from '@/components/support/refund-button';
+import type { RefundDecision } from '@/lib/refund-rules';
 
 export const metadata: Metadata = { title: 'Orders & receipts' };
 
@@ -15,13 +18,21 @@ const STATUS: Record<string, { label: string; variant: 'default' | 'secondary' |
 };
 
 export default async function OrdersPage() {
-  await requireUser('/account/orders');
+  const user = await requireUser('/account/orders');
   const orders = await listMyOrders();
+  // Instant-refund options for recent paid orders (the longest self-serve window is 14 days).
+  const recent = orders.filter((o) => o.status === 'paid' && Date.now() - new Date(o.paid_at ?? o.created_at).getTime() < 15 * 86_400_000);
+  const options = new Map<string, RefundDecision | null>(
+    await Promise.all(recent.map(async (o) => [o.id, await selfRefundOption(o.id, user.id).catch(() => null)] as const)),
+  );
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-semibold">Orders &amp; receipts</h1>
-        <p className="text-sm text-muted-foreground">Every purchase, with a printable receipt for paid orders.</p>
+        <p className="text-sm text-muted-foreground">
+          Every purchase, with a printable receipt for paid orders. Problem with one? Use <strong>Get help</strong> — see the{' '}
+          <Link href="/refunds" className="underline">Refund Policy</Link>.
+        </p>
       </div>
       {orders.length === 0 ? (
         <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
@@ -31,6 +42,7 @@ export default async function OrdersPage() {
         <ul className="divide-y rounded-2xl border bg-card">
           {orders.map((o) => {
             const s = STATUS[o.status] ?? STATUS.created!;
+            const refund = options.get(o.id);
             return (
               <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
                 <div className="min-w-0">
@@ -50,7 +62,17 @@ export default async function OrdersPage() {
                       Receipt
                     </Link>
                   )}
+                  {o.status !== 'created' && (
+                    <Link href={`/account/support/new?order=${o.id}`} className="underline">
+                      Get help
+                    </Link>
+                  )}
                 </div>
+                {refund?.eligible && (
+                  <div className="flex w-full justify-end">
+                    <RefundButton orderId={o.id} summary={refund.summary} />
+                  </div>
+                )}
               </li>
             );
           })}

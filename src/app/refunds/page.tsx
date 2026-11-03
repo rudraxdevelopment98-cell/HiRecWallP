@@ -93,8 +93,16 @@ export default async function RefundsPage() {
           body: (
             <>
               <p>
-                Write to <strong>{c.email}</strong> from the email on your account, with your order number (shown in Account → Orders and on your
-                receipt). We acknowledge within 48 hours and decide within 7 days.
+                <strong>Instant:</strong> unused credit packs, unused pay-once passes and unredeemed gifts within the time limits above show a{' '}
+                <strong>Refund</strong> button in <Link href="/account/orders" className="underline">Account → Orders</Link>. It refunds in full
+                straight away. (After a few instant refunds in a short time, the next one is checked by a person instead.)
+              </p>
+              <p>
+                <strong>Everything else</strong> (faulty or wrong-resolution files, double charges, autopay months, anything you&rsquo;re unsure
+                about): press <strong>Get help</strong> next to the order, or open a request in{' '}
+                <Link href="/account/support" className="underline">Account → Help &amp; support</Link>. You can also write to{' '}
+                <strong>{c.email}</strong> from the email on your account. You get a reference number (HW-T…), we reply within 48 hours and
+                decide within 7 days.
               </p>
               <p>
                 Approved refunds go back to the original payment method (card, UPI or bank) through Razorpay. Banks usually show them within 5–7

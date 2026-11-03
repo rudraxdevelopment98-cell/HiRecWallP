@@ -9,5 +9,7 @@ export async function runHousekeeping(): Promise<Record<string, unknown>> {
   if (error) throw error;
   // Supabase Storage has no lifecycle rules: delete expired temp files here.
   const tempFilesRemoved = await storage().cleanupTemporary();
-  return { eventsRolledUp: Number(data ?? 0), tempFilesRemoved, storage: storage().id };
+  // Privacy Policy retention: old resolved support requests (not tied to an order).
+  const { data: tickets } = await createServiceClient().rpc('support_retention');
+  return { eventsRolledUp: Number(data ?? 0), tempFilesRemoved, supportTicketsDeleted: Number(tickets ?? 0), storage: storage().id };
 }

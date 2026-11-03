@@ -9,6 +9,7 @@ import {
   Images,
   Inbox,
   Landmark,
+  LifeBuoy,
   ListChecks,
   Palette,
   Receipt,
@@ -136,6 +137,8 @@ export default async function AdminOverviewPage() {
 
   // Work waiting on the owner, most urgent first.
   const todos: Todo[] = [];
+  if (counts._supportOverdue > 0) todos.push({ href: '/admin/support?tab=overdue', label: 'Support requests overdue', detail: 'Past the 48-hour reply or 1-month resolution deadline.', icon: LifeBuoy, n: counts._supportOverdue, urgent: true });
+  if (counts._support > 0) todos.push({ href: '/admin/support', label: 'Support requests to answer', detail: 'Customers waiting for a reply.', icon: LifeBuoy, n: counts._support });
   if (counts._takedowns > 0) todos.push({ href: '/admin/messages', label: 'Takedown reports open', detail: 'Copyright/abuse reports — review quickly.', icon: ShieldAlert, n: counts._takedowns, urgent: true });
   if (o && o.failedJobs > 0) todos.push({ href: '/admin/health', label: 'Background jobs failed', detail: 'In the last 7 days — see System health.', icon: AlertTriangle, n: o.failedJobs, urgent: true });
   if (counts._messages > 0) todos.push({ href: '/admin/messages', label: 'New messages', detail: 'Customer contact form — reply within 48 hours.', icon: Inbox, n: counts._messages });

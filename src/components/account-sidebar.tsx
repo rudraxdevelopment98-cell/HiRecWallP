@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Coins, Crown, Gift, Heart, UserPlus, LayoutDashboard, LogOut, Palette, Receipt, Settings } from 'lucide-react';
+import { Coins, Crown, Gift, Heart, LifeBuoy, UserPlus, LayoutDashboard, LogOut, Palette, Receipt, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { href: '/account/credits', label: 'Credits', icon: Coins },
   { href: '/account/gifts', label: 'Gifts', icon: Gift },
   { href: '/account/referrals', label: 'Invite friends', icon: UserPlus },
+  { href: '/account/support', label: 'Help & support', icon: LifeBuoy },
   { href: '/account', label: 'Settings', icon: Settings },
   { href: '/creator', label: 'Sell your art', icon: Palette },
 ];

@@ -27,7 +27,7 @@ export default async function PrivacyPage() {
               <li><strong>Purchases:</strong> what you bought, amount, currency, billing country, invoice details, payment reference. Card and UPI details stay with Razorpay; we never see or store them.</li>
               <li><strong>Usage:</strong> wallpapers you add, favourite and download (with a hashed — not raw — IP address), and anonymous page events.</li>
               <li><strong>Location signals:</strong> the country of your connection and your device time zone, to show the right prices.</li>
-              <li><strong>Support:</strong> messages you send us.</li>
+              <li><strong>Support:</strong> messages and requests you send us, and our replies.</li>
               <li><strong>Creators:</strong> payout details, PAN and tax residency for paying you and deducting tax.</li>
             </ul>
           ),
@@ -78,6 +78,7 @@ export default async function PrivacyPage() {
               <li>Account data: while your account is open; deleted within 30 days of closing it.</li>
               <li>Orders, invoices and tax records: 8 years, as tax law requires (kept even if you close your account).</li>
               <li>Download logs (hashed IP): 12 months. Raw page events: 30 days, then only daily totals.</li>
+              <li>Support requests: 3 years after they are resolved (for follow-ups and disputes); requests about an order are kept with that order&rsquo;s records.</li>
             </ul>
           ),
         },

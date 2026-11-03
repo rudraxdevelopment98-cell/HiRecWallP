@@ -16,6 +16,7 @@ import {
   Inbox,
   Landmark,
   LayoutDashboard,
+  LifeBuoy,
   ListChecks,
   LogOut,
   Mail,
@@ -46,6 +47,7 @@ export const ADMIN_NAV = [
     group: 'Sales',
     items: [
       { href: '/admin/orders', label: 'Orders', icon: Receipt },
+      { href: '/admin/support', label: 'Support', icon: LifeBuoy },
       { href: '/admin/customers', label: 'Customers', icon: Users },
       { href: '/admin/messages', label: 'Messages', icon: Inbox },
     ],

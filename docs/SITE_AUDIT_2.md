@@ -21,11 +21,12 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 - ✅ Policy versioning: each policy has a version + date; acceptance recorded at sign-up/checkout
 
 ## B2 — Support, refunds & dispute resolution
-- ⬜ Customer "Get help with this order" → ticket (refund request, download problem, wrong charge, quality/resolution issue, other)
-- ⬜ Ticket numbers, status, threaded replies in Account → Support; emails on updates
-- ⬜ SLA timers: 48 h acknowledgement, 30-day resolution; overdue alerts in admin
-- ⬜ Self-serve instant refund for eligible orders (unused credit pack ≤14 days, unclaimed plan ≤7 days, unredeemed gift)
-- ⬜ Admin Support queue: assign, reply, resolve with actions (refund, restore downloads, add credits, replace file)
+- ✅ Customer "Get help" on every order → ticket (refund, download problem, wrong charge, quality/resolution, account, other)
+- ✅ Ticket numbers (HW-T1001…), status, threaded replies in Account → Help & support; emails on create/reply/resolve (Resend)
+- ✅ SLA timers: 48 h acknowledgement, 30-day resolution; overdue tab, sidebar badge, dashboard alert
+- ✅ Self-serve instant refund (unused pack ≤14 d, unused pay-once pass ≤7 d, unredeemed gift ≤14 d; max 2 per 90 days, then reviewed)
+- ✅ Admin Support queue: priority, assign, reply / internal note, resolve/close, refund (Razorpay or access-only), add credits, restore downloads
+- ⬜ Replace file (comes with B4 "replace master")
 
 ## B3 — Accounts & credits
 - ⬜ Delete my account (with clear consequences) + download my data (DPDP rights)
@@ -43,6 +44,7 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 - ⬜ Replace master / regenerate sizes for an existing wallpaper
 
 ## B5 — Resolution
+- ⬜ Device preview on the wallpaper page: see it on your own phone/tablet/desktop (owner idea, 2026-11-03)
 - ⬜ Exact-fit downloads: choose your device (or auto-detect) → exact resolution crop from the master, cached
 - ⬜ Device catalogue (popular phones, tablets, monitors) and per-wallpaper "fits" list
 - ⬜ Quality badge from source resolution; AI upscale path for slightly-small uploads (adapter)
