@@ -110,9 +110,9 @@ export default async function AdminMembershipPage() {
   const activeCount = rows.filter((m) => m.status === 'active' && new Date(m.ends_at).getTime() > now).length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">Membership</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Membership</h1>
         <p className="text-sm text-muted-foreground">
           Plans appear on the Pricing page in tabs (Monthly, Long-term, Category passes, Business). Each gives a monthly
           allowance that refreshes every 30 days. Each plan can be sold as <strong>pay once</strong> (whole term) and/or
@@ -121,7 +121,7 @@ export default async function AdminMembershipPage() {
         </p>
       </div>
 
-      <section className="rounded-2xl border bg-card px-6 py-2">
+      <section className="admin-card px-6 py-2">
         <SettingToggle
           settingKey="membership_enabled"
           value={settings.membership_enabled}
@@ -135,7 +135,7 @@ export default async function AdminMembershipPage() {
         {((plans ?? []) as Plan[]).map((p) => {
           const planPrices = pricesBy.get(p.id) ?? [];
           return (
-            <details key={p.id} className="rounded-2xl border bg-card p-5">
+            <details key={p.id} className="admin-card p-5">
               <summary className="flex cursor-pointer flex-wrap items-center gap-2">
                 <span className="font-medium">{p.name}</span>
                 <Badge variant="secondary">{KINDS.find((k) => k.value === p.kind)?.label ?? p.kind}</Badge>
@@ -193,7 +193,7 @@ export default async function AdminMembershipPage() {
             </details>
           );
         })}
-        <details className="rounded-2xl border border-dashed bg-card p-5">
+        <details className="rounded-xl border border-dashed bg-card p-5">
           <summary className="cursor-pointer font-medium">+ Add a plan</summary>
           <div className="mt-4">
             <AdminForm
@@ -210,7 +210,7 @@ export default async function AdminMembershipPage() {
 
       <section className="space-y-4">
         <h2 className="font-semibold">Members</h2>
-        <details className="rounded-2xl border border-dashed bg-card p-5">
+        <details className="rounded-xl border border-dashed bg-card p-5">
           <summary className="cursor-pointer font-medium">+ Give someone a free pass</summary>
           <div className="mt-4">
             <AdminForm
@@ -232,7 +232,7 @@ export default async function AdminMembershipPage() {
         {rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No members yet.</p>
         ) : (
-          <ul className="divide-y rounded-2xl border bg-card text-sm">
+          <ul className="divide-y admin-card text-sm">
             {rows.map((m) => {
               const live = m.status === 'active' && new Date(m.ends_at).getTime() > now;
               return (

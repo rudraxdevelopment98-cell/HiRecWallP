@@ -1,4 +1,5 @@
 import { requireAdmin } from '@/lib/auth';
+import { EmptyState, FilterTabs, PageHeader } from '@/components/admin/ui';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { previewUrlFor } from '@/lib/catalogue';
@@ -63,22 +64,17 @@ export default async function AdminCataloguePage(props: { searchParams: Promise<
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold">Wallpapers</h1>
-        <Link href="/admin/upload" className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          + Upload
-        </Link>
-      </div>
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        {TABS.map((t) => (
-          <Link
-            key={t.key}
-            href={t.key === 'all' ? '/admin/catalogue' : `/admin/catalogue?status=${t.key}`}
-            className={`rounded-full border px-3 py-1 ${status === t.key ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'}`}
-          >
-            {t.label}
+      <PageHeader
+        title="Wallpapers"
+        description="Everything in the catalogue. Creator uploads arrive as “In review”; publish to put them live."
+        actions={
+          <Link href="/admin/upload" className="admin-btn-primary">
+            + Upload
           </Link>
-        ))}
+        }
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <FilterTabs items={TABS.map((t) => ({ href: t.key === 'all' ? '/admin/catalogue' : `/admin/catalogue?status=${t.key}`, label: t.label, active: status === t.key }))} />
         <form className="ml-auto" action="/admin/catalogue">
           {status !== 'all' && <input type="hidden" name="status" value={status} />}
           <input name="q" defaultValue={q} placeholder="Search titles…" className="input h-8 w-48 py-1" aria-label="Search wallpapers" />
@@ -86,7 +82,7 @@ export default async function AdminCataloguePage(props: { searchParams: Promise<
       </div>
       <p className="text-sm text-muted-foreground">{(count ?? 0).toLocaleString('en-IN')} wallpaper(s)</p>
       {rows.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">Nothing here yet.</p>
+        <EmptyState title="Nothing here yet" description={q ? 'No wallpapers match that search.' : 'Upload wallpapers to fill the catalogue.'} action={<Link href="/admin/upload" className="admin-btn">Upload wallpapers</Link>} />
       ) : (
         <CatalogueTable rows={rows} categories={(categories ?? []) as { id: string; name: string }[]} />
       )}

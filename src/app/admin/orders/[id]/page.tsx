@@ -34,7 +34,7 @@ export default async function AdminOrderPage(props: { params: Promise<{ id: stri
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold">{formatMoneyMinor(o.amount_minor as number, o.currency as string)}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{formatMoneyMinor(o.amount_minor as number, o.currency as string)}</h1>
           <p className="text-sm text-muted-foreground">
             {new Date(o.created_at as string).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })} · {o.provider as string}
             {o.invoice_no && ` · ${o.invoice_no}`}
@@ -44,7 +44,7 @@ export default async function AdminOrderPage(props: { params: Promise<{ id: stri
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">Customer</h2>
           {customer ? (
             <Link href={`/admin/customers/${customer.id}`} className="underline">
@@ -60,7 +60,7 @@ export default async function AdminOrderPage(props: { params: Promise<{ id: stri
             <div>Razorpay payment: {(o.provider_payment_id as string) ?? '—'}</div>
           </dl>
         </section>
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">Items</h2>
           <ul className="space-y-1">
             {items.map((i, n) => (
@@ -82,7 +82,7 @@ export default async function AdminOrderPage(props: { params: Promise<{ id: stri
         </section>
       </div>
 
-      <section className="rounded-2xl border bg-card p-5 text-sm">
+      <section className="admin-card p-5 text-sm">
         <h2 className="mb-2 font-semibold">What this order unlocked</h2>
         {(ents ?? []).length === 0 ? (
           <p className="text-muted-foreground">No wallpapers currently unlocked by this order.</p>
@@ -98,14 +98,14 @@ export default async function AdminOrderPage(props: { params: Promise<{ id: stri
       </section>
 
       {o.status === 'paid' && (
-        <section className="rounded-2xl border bg-card p-5">
+        <section className="admin-card p-5">
           <h2 className="mb-3 font-semibold">Refund</h2>
           <RefundForm orderId={id} canRefundAtProvider={Boolean(o.provider_payment_id)} />
         </section>
       )}
 
       {(log ?? []).length > 0 && (
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">History</h2>
           <ul className="space-y-1 text-muted-foreground">
             {(log ?? []).map((l, i) => (

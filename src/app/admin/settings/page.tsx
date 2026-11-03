@@ -3,13 +3,24 @@ import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getSettings, sellerDetails, socialLinks } from '@/lib/settings';
 import { AdminForm, SettingToggle } from '@/components/admin/admin-form';
+import { FilterTabs, PageHeader, Section } from '@/components/admin/ui';
 
 export const dynamic = 'force-dynamic';
 
 const REGION_NAME: Record<string, string> = { IN: 'India (credits)', T1: 'Tier 1 (credits)', T2: 'Tier 2 (credits)', T4: 'Tier 4 (credits)', T3: 'Tier 3 / rest of world (credits)' };
 
-export default async function AdminSettingsPage() {
+const TABS = [
+  { key: 'general', label: 'General' },
+  { key: 'business', label: 'Business & legal' },
+  { key: 'growth', label: 'Growth' },
+  { key: 'prices', label: 'Prices & FX' },
+] as const;
+type Tab = (typeof TABS)[number]['key'];
+
+export default async function AdminSettingsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   await requireAdmin();
+  const { tab: rawTab } = await searchParams;
+  const tab: Tab = TABS.some((t) => t.key === rawTab) ? (rawTab as Tab) : 'general';
   const supabase = createServiceClient();
   const [settings, { data: rules }, { data: regions }] = await Promise.all([
     getSettings(),
@@ -21,202 +32,201 @@ export default async function AdminSettingsPage() {
   const mult = new Map((regions ?? []).map((r) => [r.code as string, Number(r.commercial_multiplier)]));
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-semibold">Settings &amp; controls</h1>
-        <p className="text-sm text-muted-foreground">Switch features on or off, set default prices and the site banner. Changes apply within a minute.</p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="Settings" description="Switch features on or off and set the details shown to customers. Changes apply within a minute." />
+      <FilterTabs items={TABS.map((t) => ({ href: t.key === 'general' ? '/admin/settings' : `/admin/settings?tab=${t.key}`, label: t.label, active: t.key === tab }))} />
 
-      <section className="rounded-2xl border bg-card p-6">
-        <h2 className="mb-1 font-semibold">Store switches</h2>
-        <div className="divide-y text-sm">
-          <SettingToggle settingKey="store_open" value={settings.store_open} label="Store open (checkout)" hint="Off = nobody can pay or unlock with credits. Browsing and free downloads keep working; a notice is shown." />
-          <SettingToggle settingKey="membership_enabled" value={settings.membership_enabled} label="Sell membership passes" hint="Shows active plans on the Pricing page. Existing members keep their passes either way." />
-          <SettingToggle settingKey="free_downloads" value={settings.free_downloads} label="Free downloads" hint="Allow free wallpapers to be downloaded without an account." />
-          <SettingToggle settingKey="creator_signups" value={settings.creator_signups} label="New creator sign-ups" hint="Let new people join as creators. Existing creators can still upload." />
-          <SettingToggle settingKey="newsletter_enabled" value={settings.newsletter_enabled} label="Newsletter sign-up boxes" hint="Show the 'Stay updated' email box on the home and pricing pages." />
-          <SettingToggle settingKey="google_login" value={settings.google_login} label="Google sign-in" hint="Show 'Continue with Google' on the sign-in page. Turn on only after enabling the Google provider in Supabase → Authentication → Sign In / Providers." />
-        </div>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-3 font-semibold">Announcement bar</h2>
-          <AdminForm
-            action="/api/admin/settings"
-            method="PUT"
-            fields={[
-              { name: 'enabled', label: 'Show the bar', type: 'checkbox', span: 4 },
-              { name: 'text', label: 'Message', placeholder: 'Diwali drop is live — 20 new wallpapers', span: 4 },
-              { name: 'href', label: 'Link (optional)', placeholder: '/explore?q=diwali', span: 4 },
-            ]}
-            initial={settings.announcement}
-            submitLabel="Save banner"
-            wrapAs="announcement"
-          />
-        </div>
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-3 font-semibold">Downloads per purchase</h2>
-          <p className="mb-3 text-xs text-muted-foreground">How many times a buyer can download each wallpaper they buy (applies to new purchases).</p>
-          <AdminForm
-            action="/api/admin/settings"
-            method="PUT"
-            fields={[{ name: 'downloads_per_purchase', label: 'Downloads', type: 'number', span: 2 }]}
-            initial={{ downloads_per_purchase: settings.downloads_per_purchase }}
-            wrapAs="downloads_per_purchase"
-          />
-        </div>
-      </section>
-
-      <section className="rounded-2xl border bg-card p-6">
-        <h2 className="mb-1 font-semibold">Growth: welcome bonus &amp; referrals</h2>
-        <p className="mb-3 text-xs text-muted-foreground">
-          All of these are bonus credits (they expire). Welcome bonus: once per account, at most 2 per network per 30 days.
-          The inviter is rewarded only when their friend makes a first <strong>paid</strong> purchase, capped per month; refunds take it back.
-        </p>
-        <AdminForm
-          action="/api/admin/settings"
-          method="PUT"
-          fields={[
-            { name: 'welcome_credits', label: 'Welcome credits (everyone)', type: 'number' },
-            { name: 'welcome_days', label: 'Welcome credits valid (days)', type: 'number' },
-            { name: 'referee_bonus', label: 'Extra credits with a friend’s code', type: 'number' },
-            { name: 'referrer_reward', label: 'Inviter reward (credits)', type: 'number' },
-            { name: 'referral_monthly_cap', label: 'Max rewards per inviter / month', type: 'number' },
-            { name: 'reward_days', label: 'Reward credits valid (days)', type: 'number' },
-            { name: 'first_purchase_bonus', label: 'First-purchase bonus credits', type: 'number' },
-            { name: 'affiliate_pct', label: 'Creator affiliate commission %', type: 'number' },
-            { name: 'daily_email_cap', label: 'Daily-wallpaper emails / day', type: 'number' },
-            { name: 'referral_enabled', label: 'Referral programme on', type: 'checkbox' },
-            { name: 'gifts_enabled', label: 'Gift credits on', type: 'checkbox' },
-            { name: 'affiliate_enabled', label: 'Creator affiliate links on', type: 'checkbox' },
-            { name: 'daily_enabled', label: 'Daily free wallpaper on', type: 'checkbox' },
-          ]}
-          initial={settings.growth}
-          submitLabel="Save growth settings"
-          wrapAs="growth"
-        />
-      </section>
-
-      <section className="rounded-2xl border bg-card p-6">
-        <h2 className="mb-1 font-semibold">Grievance officer &amp; legal</h2>
-        <p className="mb-3 text-xs text-muted-foreground">
-          Required by the Consumer Protection (E-Commerce) Rules 2020 — shown on the Grievance, Privacy and Terms pages. Leave blank to use the
-          business name and support email.
-        </p>
-        <AdminForm
-          action="/api/admin/settings"
-          method="PUT"
-          fields={[
-            { name: 'grievance_name', label: 'Grievance officer name', span: 2 },
-            { name: 'grievance_designation', label: 'Designation', span: 2 },
-            { name: 'grievance_email', label: 'Grievance email', span: 2 },
-            { name: 'grievance_phone', label: 'Phone (optional)' },
-            { name: 'jurisdiction_city', label: 'Courts at (city)', placeholder: 'e.g. Ahmedabad' },
-          ]}
-          initial={settings.legal}
-          submitLabel="Save legal details"
-          wrapAs="legal"
-        />
-      </section>
-
-      <section className="rounded-2xl border bg-card p-6">
-        <h2 className="mb-1 font-semibold">Exchange rates for creator payouts</h2>
-        <p className="mb-3 text-xs text-muted-foreground">Rupees per 1 unit. Used to pay creators for foreign-currency affiliate sales. ⚠️ Update monthly.</p>
-        <AdminForm
-          action="/api/admin/settings"
-          method="PUT"
-          fields={['USD', 'GBP', 'EUR', 'AUD', 'CAD'].map((c) => ({ name: c, label: `₹ per ${c}`, type: 'number' as const }))}
-          initial={settings.fx_to_inr}
-          submitLabel="Save rates"
-          wrapAs="fx_to_inr"
-        />
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-1 font-semibold">Business details (receipts)</h2>
-          <p className="mb-3 text-xs text-muted-foreground">
-            Printed on every receipt. With a GSTIN set, Indian orders show as a Tax Invoice with GST split out.
-            ⚠️ Confirm the invoice format and rate with your CA.
-          </p>
-          <AdminForm
-            action="/api/admin/settings"
-            method="PUT"
-            fields={[
-              { name: 'legal_name', label: 'Legal / trade name', placeholder: 'HirecWallp (proprietor: …)', span: 4 },
-              { name: 'address', label: 'Registered address', type: 'textarea' },
-              { name: 'gstin', label: 'GSTIN (optional)', placeholder: '24ABCDE1234F1Z5', span: 2 },
-              { name: 'gst_rate', label: 'GST rate %', type: 'number', span: 1 },
-              { name: 'support_email', label: 'Support email', placeholder: 'support@hirecwallp.com', span: 4 },
-            ]}
-            initial={seller}
-            submitLabel="Save business details"
-            wrapAs="business"
-          />
-        </div>
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-1 font-semibold">Social links</h2>
-          <p className="mb-3 text-xs text-muted-foreground">Footer icons appear only for links you fill in. Use full https:// addresses.</p>
-          <AdminForm
-            action="/api/admin/settings"
-            method="PUT"
-            fields={[
-              { name: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/hirecwallp', span: 4 },
-              { name: 'pinterest', label: 'Pinterest', placeholder: 'https://pinterest.com/hirecwallp', span: 4 },
-              { name: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@hirecwallp', span: 4 },
-              { name: 'x', label: 'X / Twitter', placeholder: 'https://x.com/hirecwallp', span: 4 },
-              { name: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/hirecwallp', span: 4 },
-            ]}
-            initial={socialLinks(settings)}
-            submitLabel="Save links"
-            wrapAs="social"
-          />
-        </div>
-      </section>
-
-      <section className="rounded-2xl border bg-card p-6">
-        <h2 className="mb-1 font-semibold">Default prices</h2>
-        <p className="mb-4 text-xs text-muted-foreground">
-          The price a new wallpaper starts at in each region (in credits — 1 credit = 1 wallpaper; what a credit costs is set in Credit packs), the allowed range for automatic
-          pricing, and how much more the commercial licence costs. Fine-tune with the automatic job on{' '}
-          <Link href="/admin/pricing" className="underline">Pricing</Link>.
-        </p>
-        <div className="space-y-5">
-          {(rules ?? []).map((r) => (
-            <div key={r.region_code as string} className="border-t pt-4 first:border-t-0 first:pt-0">
-              <p className="mb-2 text-sm font-medium">{REGION_NAME[r.region_code as string] ?? r.region_code}</p>
-              <AdminForm
-                compact
-                action="/api/admin/price-rules"
-                fields={[
-                  { name: 'base_price', label: 'Default price', type: 'number' },
-                  { name: 'min_price', label: 'Lowest', type: 'number' },
-                  { name: 'max_price', label: 'Highest', type: 'number' },
-                  { name: 'commercial_multiplier', label: 'Commercial ×', type: 'number' },
-                ]}
-                initial={{ ...r, commercial_multiplier: mult.get(r.region_code as string) ?? 5 }}
-                extra={{ region_code: r.region_code as string }}
-              />
+      {tab === 'general' && (
+        <>
+          <Section title="Store switches" description="Turn whole features on or off.">
+            <div className="-my-3 divide-y text-sm">
+              <SettingToggle settingKey="store_open" value={settings.store_open} label="Store open (checkout)" hint="Off = nobody can pay or unlock with credits. Browsing and free downloads keep working; a notice is shown." />
+              <SettingToggle settingKey="membership_enabled" value={settings.membership_enabled} label="Sell membership passes" hint="Shows active plans on the Pricing page. Existing members keep their passes either way." />
+              <SettingToggle settingKey="free_downloads" value={settings.free_downloads} label="Free downloads" hint="Allow free wallpapers to be downloaded without an account." />
+              <SettingToggle settingKey="creator_signups" value={settings.creator_signups} label="New creator sign-ups" hint="Let new people join as creators. Existing creators can still upload." />
+              <SettingToggle settingKey="newsletter_enabled" value={settings.newsletter_enabled} label="Newsletter sign-up boxes" hint="Show the 'Stay updated' email box on the home and pricing pages." />
+              <SettingToggle settingKey="google_login" value={settings.google_login} label="Google sign-in" hint="Show 'Continue with Google' on the sign-in page. Turn on only after enabling the Google provider in Supabase → Authentication → Sign In / Providers." />
             </div>
-          ))}
-        </div>
-      </section>
+          </Section>
 
-      <section className="grid gap-4 sm:grid-cols-3">
-        <Link href="/admin/membership" className="rounded-2xl border bg-card p-5 text-sm hover:border-foreground/40">
-          <p className="font-semibold">Membership plans →</p>
-          <p className="text-muted-foreground">Add, edit, price and switch plans; manage members.</p>
-        </Link>
-        <Link href="/admin/credit-packs" className="rounded-2xl border bg-card p-5 text-sm hover:border-foreground/40">
-          <p className="font-semibold">Credit packs →</p>
-          <p className="text-muted-foreground">Pack sizes and prices for each region.</p>
-        </Link>
-        <Link href="/admin/categories" className="rounded-2xl border bg-card p-5 text-sm hover:border-foreground/40">
-          <p className="font-semibold">Categories &amp; sets →</p>
-          <p className="text-muted-foreground">Organise the catalogue.</p>
-        </Link>
-      </section>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Section title="Announcement bar" description="A one-line message at the top of every store page.">
+              <AdminForm
+                action="/api/admin/settings"
+                method="PUT"
+                fields={[
+                  { name: 'enabled', label: 'Show the bar', type: 'checkbox', span: 4 },
+                  { name: 'text', label: 'Message', placeholder: 'Diwali drop is live — 20 new wallpapers', span: 4 },
+                  { name: 'href', label: 'Link (optional)', placeholder: '/explore?q=diwali', span: 4 },
+                ]}
+                initial={settings.announcement}
+                submitLabel="Save banner"
+                wrapAs="announcement"
+              />
+            </Section>
+            <Section title="Downloads per purchase" description="How many times a buyer can download each wallpaper they buy (applies to new purchases).">
+              <AdminForm
+                action="/api/admin/settings"
+                method="PUT"
+                fields={[{ name: 'downloads_per_purchase', label: 'Downloads', type: 'number', span: 2 }]}
+                initial={{ downloads_per_purchase: settings.downloads_per_purchase }}
+                wrapAs="downloads_per_purchase"
+              />
+            </Section>
+          </div>
+        </>
+      )}
+
+      {tab === 'business' && (
+        <>
+          <Section
+            title="Business details"
+            description="Printed on every receipt. With a GSTIN set, Indian orders show as a Tax Invoice with GST split out. ⚠️ Confirm the invoice format and rate with a tax adviser."
+          >
+            <AdminForm
+              action="/api/admin/settings"
+              method="PUT"
+              fields={[
+                { name: 'legal_name', label: 'Legal / trade name', placeholder: 'HirecWallp (proprietor: …)', span: 4 },
+                { name: 'address', label: 'Registered address', type: 'textarea' },
+                { name: 'gstin', label: 'GSTIN (optional)', placeholder: '24ABCDE1234F1Z5', span: 2 },
+                { name: 'gst_rate', label: 'GST rate %', type: 'number', span: 1 },
+                { name: 'support_email', label: 'Support email', placeholder: 'support@hirecwallp.com', span: 4 },
+              ]}
+              initial={seller}
+              submitLabel="Save business details"
+              wrapAs="business"
+            />
+          </Section>
+
+          <Section
+            title="Grievance officer & legal"
+            description="Required by the Consumer Protection (E-Commerce) Rules 2020 — shown on the Grievance, Privacy and Terms pages. Leave blank to use the business name and support email."
+          >
+            <AdminForm
+              action="/api/admin/settings"
+              method="PUT"
+              fields={[
+                { name: 'grievance_name', label: 'Grievance officer name', span: 2 },
+                { name: 'grievance_designation', label: 'Designation', span: 2 },
+                { name: 'grievance_email', label: 'Grievance email', span: 2 },
+                { name: 'grievance_phone', label: 'Phone (optional)' },
+                { name: 'jurisdiction_city', label: 'Courts at (city)', placeholder: 'e.g. Ahmedabad' },
+              ]}
+              initial={settings.legal}
+              submitLabel="Save legal details"
+              wrapAs="legal"
+            />
+          </Section>
+
+          <Section title="Social links" description="Footer icons appear only for links you fill in. Use full https:// addresses.">
+            <AdminForm
+              action="/api/admin/settings"
+              method="PUT"
+              fields={[
+                { name: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/hirecwallp', span: 2 },
+                { name: 'pinterest', label: 'Pinterest', placeholder: 'https://pinterest.com/hirecwallp', span: 2 },
+                { name: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@hirecwallp', span: 2 },
+                { name: 'x', label: 'X / Twitter', placeholder: 'https://x.com/hirecwallp', span: 2 },
+                { name: 'facebook', label: 'Facebook', placeholder: 'https://facebook.com/hirecwallp', span: 2 },
+              ]}
+              initial={socialLinks(settings)}
+              submitLabel="Save links"
+              wrapAs="social"
+            />
+          </Section>
+        </>
+      )}
+
+      {tab === 'growth' && (
+        <Section
+          title="Welcome bonus, referrals & programmes"
+          description={
+            <>
+              All of these are bonus credits (they expire). Welcome bonus: once per account, at most 2 per network per 30 days. The inviter is rewarded only when
+              their friend makes a first <strong>paid</strong> purchase, capped per month; refunds take it back. Results are on{' '}
+              <Link href="/admin/growth" className="underline">Growth</Link>.
+            </>
+          }
+        >
+          <AdminForm
+            action="/api/admin/settings"
+            method="PUT"
+            fields={[
+              { name: 'welcome_credits', label: 'Welcome credits (everyone)', type: 'number' },
+              { name: 'welcome_days', label: 'Welcome credits valid (days)', type: 'number' },
+              { name: 'referee_bonus', label: 'Extra credits with a friend’s code', type: 'number' },
+              { name: 'referrer_reward', label: 'Inviter reward (credits)', type: 'number' },
+              { name: 'referral_monthly_cap', label: 'Max rewards per inviter / month', type: 'number' },
+              { name: 'reward_days', label: 'Reward credits valid (days)', type: 'number' },
+              { name: 'first_purchase_bonus', label: 'First-purchase bonus credits', type: 'number' },
+              { name: 'affiliate_pct', label: 'Creator affiliate commission %', type: 'number' },
+              { name: 'daily_email_cap', label: 'Daily-wallpaper emails / day', type: 'number' },
+              { name: 'referral_enabled', label: 'Referral programme on', type: 'checkbox' },
+              { name: 'gifts_enabled', label: 'Gift credits on', type: 'checkbox' },
+              { name: 'affiliate_enabled', label: 'Creator affiliate links on', type: 'checkbox' },
+              { name: 'daily_enabled', label: 'Daily free wallpaper on', type: 'checkbox' },
+            ]}
+            initial={settings.growth}
+            submitLabel="Save growth settings"
+            wrapAs="growth"
+          />
+        </Section>
+      )}
+
+      {tab === 'prices' && (
+        <>
+          <Section
+            title="Default wallpaper prices"
+            description={
+              <>
+                The price a new wallpaper starts at in each region (in credits — 1 credit = 1 wallpaper; what a credit costs is set in{' '}
+                <Link href="/admin/credit-packs" className="underline">Credit packs</Link>), the allowed range for automatic pricing, and how much more the commercial
+                licence costs. Fine-tune with <Link href="/admin/pricing" className="underline">Auto pricing</Link>.
+              </>
+            }
+          >
+            <div className="divide-y">
+              {(rules ?? []).map((r) => (
+                <div key={r.region_code as string} className="py-4 first:pt-0 last:pb-0">
+                  <p className="mb-2 text-sm font-medium">{REGION_NAME[r.region_code as string] ?? r.region_code}</p>
+                  <AdminForm
+                    compact
+                    action="/api/admin/price-rules"
+                    fields={[
+                      { name: 'base_price', label: 'Default price', type: 'number' },
+                      { name: 'min_price', label: 'Lowest', type: 'number' },
+                      { name: 'max_price', label: 'Highest', type: 'number' },
+                      { name: 'commercial_multiplier', label: 'Commercial ×', type: 'number' },
+                    ]}
+                    initial={{ ...r, commercial_multiplier: mult.get(r.region_code as string) ?? 5 }}
+                    extra={{ region_code: r.region_code as string }}
+                  />
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          <Section
+            title="Exchange rates"
+            description={
+              <>
+                Rupees per 1 unit, used for turnover and creator payouts. Refreshed automatically on the 1st of each month from ECB rates (or now from the{' '}
+                <Link href="/admin/tax" className="underline">Tax centre</Link>).
+              </>
+            }
+          >
+            <AdminForm
+              action="/api/admin/settings"
+              method="PUT"
+              fields={['USD', 'GBP', 'EUR', 'AUD', 'CAD'].map((c) => ({ name: c, label: `₹ per ${c}`, type: 'number' as const }))}
+              initial={settings.fx_to_inr}
+              submitLabel="Save rates"
+              wrapAs="fx_to_inr"
+            />
+          </Section>
+        </>
+      )}
     </div>
   );
 }

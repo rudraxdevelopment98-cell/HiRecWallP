@@ -359,6 +359,15 @@ Key Phase 3 decisions:
 - `recordAcceptance()` writes `policy_acceptances` (terms+privacy on sign-in, terms+refunds at checkout, creator at onboarding).
 - `housekeeping()` strips hashed IP / user agent from download logs older than 12 months (watermark trace kept).
 
+## Admin UI system (2026-11-03)
+
+- `/admin` has its own shell (`AdminSidebar` + `AdminTopbar` in `components/admin/admin-nav.tsx`); the store
+  header/footer/announcement skip rendering via `isAdminRoute()` (`x-hw-path` header set in middleware).
+- Sidebar badges come from `getAdminCounts()` (`src/lib/admin-counts.ts`, cached per request).
+- Build admin pages from `components/admin/ui.tsx` (`PageHeader`, `Section`, `Stat`/`StatGrid`, `FilterTabs`,
+  `EmptyState`, `DetailList`) and the CSS classes `.admin-card`, `.admin-table`, `.admin-btn`, `.admin-btn-primary`.
+- Settings tabs: `/admin/settings?tab=general|business|growth|prices` — deep-link to the right tab.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

@@ -1,3 +1,4 @@
+import { isAdminRoute } from '@/lib/route';
 import Link from 'next/link';
 import { Facebook, Heart, Instagram, Mountain, Pin, Twitter, Youtube } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
@@ -21,6 +22,8 @@ const LINKS = [
 ];
 
 export async function SiteFooter() {
+  // Admin pages have their own shell.
+  if (await isAdminRoute()) return null;
   // Shown only once an account URL is set in Admin → Settings (no dead "#" links).
   const links = socialLinks(await getSettings());
   const SOCIAL = [

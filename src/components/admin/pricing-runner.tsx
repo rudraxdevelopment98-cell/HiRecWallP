@@ -64,9 +64,9 @@ export function PricingRunner() {
             marker(s).
           </p>
           {result.diff.length > 0 ? (
-            <table className="w-full text-sm">
-              <thead className="text-left text-muted-foreground">
-                <tr className="border-b">
+            <table className="admin-table">
+              <thead>
+                <tr>
                   <th className="py-1">Wallpaper</th>
                   <th>Region</th>
                   <th>Old → New</th>

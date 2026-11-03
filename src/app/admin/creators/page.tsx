@@ -1,4 +1,5 @@
 import { requireAdmin } from '@/lib/auth';
+import { PageHeader } from '@/components/admin/ui';
 import { createServiceClient } from '@/lib/supabase/service';
 import { emailsFor } from '@/lib/admin';
 import { formatMoneyMinor } from '@/lib/format';
@@ -29,43 +30,44 @@ export default async function AdminCreatorsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold">Creators</h1>
-        <RunJobButton label="Run monthly payouts" variant="outline" endpoint="/api/jobs/creator-payouts" />
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Creators"
+        description="Verify KYC, set commission and run payouts. Payouts run automatically on the 1st of each month."
+        actions={<RunJobButton label="Run monthly payouts" variant="outline" endpoint="/api/jobs/creator-payouts" />}
+      />
 
       {(creators ?? []).length === 0 ? (
         <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">No creators have joined yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border bg-card">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr className="border-b">
-                <th className="p-3">Creator</th>
-                <th className="p-3">Joined</th>
-                <th className="p-3">Uploads</th>
-                <th className="p-3">Payout via</th>
-                <th className="p-3">Commission</th>
-                <th className="p-3">KYC</th>
+        <div className="admin-card overflow-x-auto">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Creator</th>
+                <th>Joined</th>
+                <th>Uploads</th>
+                <th>Payout via</th>
+                <th>Commission</th>
+                <th>KYC</th>
               </tr>
             </thead>
             <tbody>
               {(creators ?? []).map((c) => {
                 const n = counts.get(c.user_id as string) ?? { total: 0, published: 0 };
                 return (
-                  <tr key={c.user_id as string} className="border-b last:border-0">
-                    <td className="p-3">
+                  <tr key={c.user_id as string}>
+                    <td >
                       {(c.display_name as string) ?? '—'}
                       <span className="block text-xs text-muted-foreground">{email.get(c.user_id as string)}</span>
                     </td>
-                    <td className="whitespace-nowrap p-3">{new Date(c.created_at as string).toLocaleDateString('en-IN')}</td>
-                    <td className="p-3">
+                    <td className="whitespace-nowrap">{new Date(c.created_at as string).toLocaleDateString('en-IN')}</td>
+                    <td >
                       {n.published} live / {n.total}
                     </td>
-                    <td className="p-3">{(c.payout_provider as string)?.replace('_', ' ') ?? '—'}</td>
-                    <td className="p-3">{Number(c.commission_pct)}%</td>
-                    <td className="p-3">
+                    <td >{(c.payout_provider as string)?.replace('_', ' ') ?? '—'}</td>
+                    <td >{Number(c.commission_pct)}%</td>
+                    <td >
                       <StatusSelect
                         url={`/api/admin/creators/${c.user_id}`}
                         field="kyc_status"
@@ -86,7 +88,7 @@ export default async function AdminCreatorsPage() {
         {(payouts ?? []).length === 0 ? (
           <p className="text-sm text-muted-foreground">No payouts yet.</p>
         ) : (
-          <ul className="divide-y rounded-2xl border bg-card text-sm">
+          <ul className="divide-y admin-card text-sm">
             {(payouts ?? []).map((p) => (
               <li key={p.id as string} className="flex flex-wrap items-center justify-between gap-2 p-3">
                 <span>

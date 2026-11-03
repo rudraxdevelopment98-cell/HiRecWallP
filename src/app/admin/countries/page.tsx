@@ -30,9 +30,9 @@ export default async function AdminCountriesPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">Pricing by country</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Pricing by country</h1>
         <p className="text-sm text-muted-foreground">
           Visitors are auto-detected by country and shown their tier&rsquo;s prices (or a country&rsquo;s own prices where set in{' '}
           <Link href="/admin/credit-packs" className="underline">Credit packs</Link> / <Link href="/admin/membership" className="underline">Membership</Link>).
@@ -42,7 +42,7 @@ export default async function AdminCountriesPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         {REGION_CODES.map((t) => (
-          <div key={t} className="rounded-2xl border bg-card p-5 text-sm">
+          <div key={t} className="admin-card p-5 text-sm">
             <p className="font-semibold">
               {t} — {REGION_LABEL[t]}
             </p>
@@ -60,14 +60,14 @@ export default async function AdminCountriesPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="admin-card p-6">
           <h2 className="font-semibold">Move countries between tiers</h2>
           <p className="mb-3 text-xs text-muted-foreground">
             One per line: country code and tier, e.g. <code>BR T4</code>. Marked * above. Takes effect within a minute.
           </p>
           <CountryTiersForm initial={overrides} />
         </div>
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="admin-card p-6">
           <h2 className="font-semibold">Creator earnings: value of one credit</h2>
           <p className="mb-3 text-xs text-muted-foreground">
             Creators are paid on credits spent on their wallpapers and membership claims, at this rupee value per credit,

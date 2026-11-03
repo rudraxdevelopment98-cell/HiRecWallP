@@ -45,7 +45,7 @@ export default async function AdminSocialPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Social calendar</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Social calendar</h1>
           <p className="text-sm text-muted-foreground">
             Drafts are created automatically on publish. Scheduler runs every 30 min (IG ≤3/day,
             Pinterest ≤10/day).

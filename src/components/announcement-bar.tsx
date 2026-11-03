@@ -1,8 +1,11 @@
+import { isAdminRoute } from '@/lib/route';
 import Link from 'next/link';
 import { getSettings } from '@/lib/settings';
 
 /** Site-wide message set in Admin → Settings (e.g. a sale or maintenance note). */
 export async function AnnouncementBar() {
+  // Admin pages have their own shell.
+  if (await isAdminRoute()) return null;
   const { announcement, store_open } = await getSettings();
   const text = !store_open
     ? 'Checkout is temporarily closed — browsing and free downloads still work.'

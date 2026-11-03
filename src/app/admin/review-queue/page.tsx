@@ -52,7 +52,7 @@ export default async function ReviewQueuePage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Review queue</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Review queue</h1>
           <p className="text-sm text-muted-foreground">
             Human quality gate. Approve to publish + schedule social, or reject.
           </p>

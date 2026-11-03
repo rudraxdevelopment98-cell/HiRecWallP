@@ -52,6 +52,32 @@
 }
 
 @layer components {
+  /* --- Admin design system ------------------------------------------------ */
+  .admin-card {
+    @apply rounded-xl border bg-card shadow-[0_1px_2px_rgba(16,24,40,0.04)];
+  }
+  .admin-table {
+    @apply w-full border-collapse text-sm tabular-nums;
+  }
+  .admin-table thead th {
+    @apply whitespace-nowrap border-b bg-secondary/50 px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+  .admin-table tbody td {
+    @apply border-b px-4 py-3 align-middle;
+  }
+  .admin-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .admin-table tbody tr:hover td {
+    @apply bg-secondary/40;
+  }
+  .admin-btn {
+    @apply inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md border bg-card px-3 text-sm font-medium transition-colors hover:bg-secondary;
+  }
+  .admin-btn-primary {
+    @apply inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-foreground px-3 text-sm font-medium text-background transition-opacity hover:opacity-90;
+  }
+
   /* Clean white surface with a soft shadow (default card). */
   .glass {
     background: hsl(0 0% 100% / 0.92);

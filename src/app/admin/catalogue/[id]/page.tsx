@@ -37,7 +37,7 @@ export default async function AdminWallpaperEditPage(props: { params: Promise<{ 
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold">{w.title as string}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{w.title as string}</h1>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <Badge variant="secondary">{(w.status as string).replace('_', ' ')}</Badge>
             {w.orientation as string} · largest {(w.max_long_edge as number | null) ?? '—'}px ·{' '}

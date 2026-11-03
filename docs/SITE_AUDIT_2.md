@@ -54,7 +54,7 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 - ⬜ Settings change history with one-click revert
 
 ## B7 — Admin UI/UX (owner: "messy, not clean")
-- ⬜ One layout system: page header (title, description, primary action), section cards, consistent spacing
-- ⬜ Shared table, stat, empty-state, badge and form components used on every admin page
-- ⬜ Settings split into clear sub-pages instead of one long page; navigation regrouped
-- ⬜ Dashboard rebuilt as an overview (today, needs-attention list, shortcuts)
+- ✅ App-style shell: own sidebar (grouped, badges for work waiting) + top bar (breadcrumb, view store, sign out, mobile drawer); store header/footer hidden on /admin
+- ✅ One layout system: `PageHeader`, `Section`, `Stat`/`StatGrid`, `FilterTabs`, `EmptyState`, `DetailList` (`components/admin/ui.tsx`) + `.admin-card`, `.admin-table`, `.admin-btn(-primary)`
+- ✅ Settings split into tabs: General · Business & legal · Growth · Prices & FX (`/admin/settings?tab=`)
+- ✅ Dashboard rebuilt: needs-attention list (takedowns, failed jobs, messages, reviews, KYC, drafts), launch checklist, 30-day KPIs with trend, 14-day chart, recent orders, shortcuts

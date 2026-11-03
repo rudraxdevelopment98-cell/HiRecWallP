@@ -1,3 +1,4 @@
+import { isAdminRoute } from '@/lib/route';
 import Link from 'next/link';
 import { Heart, Mountain, Search, User } from 'lucide-react';
 import { publicEnv } from '@/lib/env';
@@ -14,6 +15,8 @@ const NAV = [
 ];
 
 export async function SiteHeader() {
+  // Admin pages have their own shell.
+  if (await isAdminRoute()) return null;
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/85 backdrop-blur">
       <div className="container flex h-16 items-center gap-4">

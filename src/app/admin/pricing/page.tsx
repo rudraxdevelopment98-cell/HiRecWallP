@@ -33,9 +33,9 @@ export default async function AdminPricingPage() {
   const history = await recentHistory();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Dynamic pricing</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Dynamic pricing</h1>
         <p className="text-sm text-muted-foreground">
           Nightly job (02:00 UTC). Simulate to preview the diff; apply to write prices + history.
           Rules, freeze and overrides are configured per region/category/wallpaper in price_rules.
@@ -53,10 +53,10 @@ export default async function AdminPricingPage() {
         ) : history.length === 0 ? (
           <p className="glass rounded-2xl p-6 text-sm text-muted-foreground">No price changes recorded yet.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-left text-muted-foreground">
-              <tr className="border-b">
-                <th className="py-2">When</th>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>When</th>
                 <th>Region</th>
                 <th>Old → New</th>
                 <th>Reason</th>

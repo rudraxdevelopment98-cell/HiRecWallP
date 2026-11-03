@@ -1,4 +1,5 @@
 import { requireAdmin } from '@/lib/auth';
+import { PageHeader } from '@/components/admin/ui';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { Badge } from '@/components/ui/badge';
@@ -31,38 +32,40 @@ export default async function AdminCustomersPage(props: { searchParams: Promise<
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold">Customers</h1>
-        <form action="/admin/customers">
-          <input name="q" defaultValue={q} placeholder="Search email or name…" className="input h-8 w-64 py-1" aria-label="Search customers" />
-        </form>
-      </div>
-      <p className="text-sm text-muted-foreground">{total.toLocaleString('en-IN')} account(s)</p>
-      <div className="overflow-x-auto rounded-2xl border bg-card">
-        <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase text-muted-foreground">
-            <tr className="border-b">
-              <th className="p-3">Customer</th>
-              <th className="p-3">Joined</th>
-              <th className="p-3">Paid orders</th>
-              <th className="p-3">Wallpapers owned</th>
-              <th className="p-3">Role</th>
+      <PageHeader
+        title="Customers"
+        description={`${total.toLocaleString('en-IN')} account(s). Open one to adjust credits, gift passes, change role or block.`}
+        actions={
+          <form action="/admin/customers">
+            <input name="q" defaultValue={q} placeholder="Search email or name…" className="input h-9 w-64 py-1" aria-label="Search customers" />
+          </form>
+        }
+      />
+      <div className="admin-card overflow-x-auto">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Joined</th>
+              <th>Paid orders</th>
+              <th>Wallpapers owned</th>
+              <th>Role</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((u) => (
-              <tr key={u.id} className="border-b last:border-0 hover:bg-secondary/50">
-                <td className="p-3">
+              <tr key={u.id}>
+                <td >
                   <Link href={`/admin/customers/${u.id}`} className="font-medium hover:underline">
                     {u.email ?? u.id.slice(0, 8)}
                   </Link>
                   {u.display_name && <span className="text-muted-foreground"> · {u.display_name}</span>}
                   {u.gstin && <span className="block text-xs text-muted-foreground">GSTIN {u.gstin}</span>}
                 </td>
-                <td className="whitespace-nowrap p-3">{new Date(u.created_at).toLocaleDateString('en-IN')}</td>
-                <td className="p-3 tabular-nums">{u.paid_orders}</td>
-                <td className="p-3 tabular-nums">{u.owned}</td>
-                <td className="p-3">
+                <td className="whitespace-nowrap">{new Date(u.created_at).toLocaleDateString('en-IN')}</td>
+                <td className="tabular-nums">{u.paid_orders}</td>
+                <td className="tabular-nums">{u.owned}</td>
+                <td >
                   <Badge variant={u.role === 'admin' ? 'default' : 'secondary'}>{u.role}</Badge>
                 </td>
               </tr>

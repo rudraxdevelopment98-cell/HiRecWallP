@@ -37,17 +37,17 @@ export default async function AdminTaxPage() {
   const fyYear = fy.start.getUTCFullYear() + (fy.start.getUTCMonth() === 2 ? 1 : 0);
 
   const actions: string[] = [];
-  if (status.level === 'register' && !t.gst_registered) actions.push('Your turnover has reached the GST limit: apply for GST registration within 30 days (gst.gov.in → Registration → New). Then enter the GSTIN in Settings → Business details and switch on "GST registered" below.');
+  if (status.level === 'register' && !t.gst_registered) actions.push('Your turnover has reached the GST limit: apply for GST registration within 30 days (gst.gov.in → Registration → New). Then enter the GSTIN in Settings → Business & legal and switch on "GST registered" below.');
   if ((status.level === 'soon' || status.level === 'watch') && !t.gst_registered) actions.push('Turnover is approaching the GST limit. Keep PAN, Aadhaar, bank proof and address proof ready to register.');
   if (t.gst_registered && !t.lut_filed && sales.exportInr > 0) actions.push('You sell abroad: file a Letter of Undertaking (LUT) on the GST portal so foreign sales stay free of IGST, then tick "LUT filed" below.');
   if (hasCreators && !t.tan) actions.push('Creators are on the platform. Before the first payout that needs TDS, get a TAN (Form 49B on the NSDL/Protean site, free) and enter it below.');
-  if (!seller.address) actions.push('Add your address in Settings → Business details so receipts are complete.');
+  if (!seller.address) actions.push('Add your address in Settings → Business & legal so receipts are complete.');
   if (sales.unconverted > 0) actions.push(`${sales.unconverted} foreign order(s) have no exchange rate — refresh rates below.`);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">Tax centre</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Tax centre</h1>
         <p className="text-sm text-muted-foreground">
           FY {fy.label} (1 April – 31 March). The site tracks your GST limit, creator TDS and key dates. ⚠️ Based on our reading of current rules
           (see docs/TAX_COMPLIANCE.md); verify on gst.gov.in / incometax.gov.in before filing.
@@ -66,7 +66,7 @@ export default async function AdminTaxPage() {
       )}
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border bg-card p-5 lg:col-span-2">
+        <div className="admin-card p-5 lg:col-span-2">
           <p className="text-xs text-muted-foreground">Turnover this FY (India + exports, refunds excluded)</p>
           <p className="font-display text-3xl font-semibold">{formatRupees(turnover)}</p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary" role="img" aria-label={`${status.pct}% of the GST limit`}>
@@ -79,7 +79,7 @@ export default async function AdminTaxPage() {
             India {formatRupees(sales.domesticInr)} · exports {formatRupees(sales.exportInr)} (converted at your current rates) · refunded {formatRupees(sales.refundedInr)}
           </p>
         </div>
-        <div className="rounded-2xl border bg-card p-5">
+        <div className="admin-card p-5">
           <p className="text-xs text-muted-foreground">Income tax (simplified scheme, s.58)</p>
           <p className="font-display text-2xl font-semibold">{formatRupees(presumptiveProfit(turnover, t))}</p>
           <p className="text-xs text-muted-foreground">
@@ -89,7 +89,7 @@ export default async function AdminTaxPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border bg-card p-6 text-sm">
+        <div className="admin-card p-6 text-sm">
           <h2 className="font-semibold">Upcoming dates</h2>
           {deadlines.length === 0 ? (
             <p className="mt-2 text-muted-foreground">Nothing due in the next six months.</p>
@@ -107,7 +107,7 @@ export default async function AdminTaxPage() {
             </ul>
           )}
         </div>
-        <div className="space-y-4 rounded-2xl border bg-card p-6 text-sm">
+        <div className="space-y-4 admin-card p-6 text-sm">
           <h2 className="font-semibold">Registers (for your returns)</h2>
           <p className="text-muted-foreground">Download and keep these every month; they are what a filing service or the GST/TDS portals need.</p>
           <div className="flex flex-wrap gap-2">
@@ -128,11 +128,11 @@ export default async function AdminTaxPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border bg-card p-6">
+      <section className="admin-card p-6">
         <h2 className="mb-1 font-semibold">Tax settings</h2>
         <p className="mb-3 text-xs text-muted-foreground">
           Defaults follow the Income-tax Act 2025 (from 1 Apr 2026) and CGST rules as we read them. Change only if the law changes. GSTIN and address live in{' '}
-          <Link href="/admin/settings" className="underline">Settings → Business details</Link>.
+          <Link href="/admin/settings?tab=business" className="underline">Settings → Business &amp; legal</Link>.
         </p>
         <AdminForm
           action="/api/admin/settings"

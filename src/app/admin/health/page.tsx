@@ -93,13 +93,13 @@ export default async function AdminHealthPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">System health</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">System health</h1>
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <span className={`inline-block h-2.5 w-2.5 rounded-full ${DOT[worst]}`} /> Overall: {WORD[worst]}
         </p>
       </div>
 
-      <section className="divide-y rounded-2xl border bg-card">
+      <section className="divide-y admin-card">
         {checks.map((c) => (
           <div key={c.label} className="flex items-start gap-3 p-4 text-sm">
             <span className={`mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full ${DOT[c.level]}`} />
@@ -113,7 +113,7 @@ export default async function AdminHealthPage() {
         ))}
       </section>
 
-      <section className="rounded-2xl border bg-card p-5 text-sm">
+      <section className="admin-card p-5 text-sm">
         <h2 className="mb-1 font-semibold">Orders waiting for payment confirmation</h2>
         <p className="mb-3 text-xs text-muted-foreground">
           Checkout opened more than an hour ago and Razorpay never confirmed. Usually the customer just closed the window; if they say they paid, check the payment in the Razorpay dashboard.
@@ -134,7 +134,7 @@ export default async function AdminHealthPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border bg-card p-5 text-sm">
+      <section className="admin-card p-5 text-sm">
         <h2 className="mb-3 font-semibold">Scheduled jobs — last run</h2>
         {latest.size === 0 ? (
           <p className="text-muted-foreground">No job has run yet.</p>

@@ -1,163 +1,300 @@
+import Link from 'next/link';
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Coins,
+  Crown,
+  ExternalLink,
+  Images,
+  Inbox,
+  Landmark,
+  ListChecks,
+  Palette,
+  Receipt,
+  Settings,
+  ShieldAlert,
+  Store,
+  Upload,
+  Users,
+  Wrench,
+  type LucideIcon,
+} from 'lucide-react';
 import { requireAdmin } from '@/lib/auth';
 import { createServiceClient } from '@/lib/supabase/service';
 import { publicEnv } from '@/lib/env';
-import { formatMoneyMinor } from '@/lib/format';
-import Link from 'next/link';
+import { formatMoneyMinor, formatRupees } from '@/lib/format';
+import { getAdminCounts } from '@/lib/admin-counts';
+import { getSettings, sellerDetails } from '@/lib/settings';
+import { toInr } from '@/lib/jobs/creator-payouts';
 import { RunJobButton } from '@/components/admin/run-job-button';
-import { sumByCurrency } from '@/lib/admin';
+import { PageHeader, Section, Stat, StatGrid } from '@/components/admin/ui';
+import { cn } from '@/lib/utils';
 
-interface Stats {
-  revenue: Map<string, number>;
-  paidOrders: number;
-  published: number;
-  drafts: number;
-  creatorSubmissions: number;
-  newMessages: number;
-  openTakedowns: number;
-  subscribers: number;
-  members: number;
-  recent: { id: string; amount_minor: number; currency: string; status: string; created_at: string }[];
-  /** Paid orders per day, last 7 days (count — currencies differ). */
-  weekly: number[];
+export const dynamic = 'force-dynamic';
+
+const DAY = 86_400_000;
+const CHART_DAYS = 14;
+
+interface PaidOrder {
+  id: string;
+  amount_minor: number;
+  currency: string;
+  created_at: string;
 }
 
-async function loadStats(): Promise<Stats | null> {
+interface Overview {
+  revenue30: number | null;
+  revenuePrev30: number | null;
+  orders30: number;
+  ordersPrev30: number;
+  newCustomers30: number;
+  members: number;
+  published: number;
+  drafts: number;
+  failedJobs: number;
+  daily: number[];
+  recent: PaidOrder[];
+}
+
+async function loadOverview(rates: Record<string, number>): Promise<Overview | null> {
   if (!publicEnv.NEXT_PUBLIC_SUPABASE_URL) return null;
   try {
-    const supabase = createServiceClient();
+    const s = createServiceClient();
     const head = { count: 'exact' as const, head: true };
-    const [published, drafts, creatorSubs, orders, messages, takedowns, subs] = await Promise.all([
-      supabase.from('wallpapers').select('id', head).eq('status', 'published'),
-      supabase.from('wallpapers').select('id', head).eq('status', 'draft'),
-      supabase.from('wallpapers').select('id', head).eq('status', 'pending_review').not('creator_id', 'is', null),
-      supabase.from('orders').select('id, amount_minor, currency, status, created_at').eq('status', 'paid').order('created_at', { ascending: false }).limit(1000),
-      supabase.from('contact_messages').select('id', head).eq('status', 'new'),
-      supabase.from('takedown_reports').select('id', head).in('status', ['open', 'reviewing']),
-      supabase.from('newsletter_subscribers').select('id', head),
-    ]);
-    const { count: members } = await supabase
-      .from('memberships')
-      .select('id', head)
-      .eq('status', 'active')
-      .gt('ends_at', new Date().toISOString());
-    const paid = orders.data ?? [];
-    const weekly = Array.from({ length: 7 }, () => 0);
     const now = Date.now();
+    const since60 = new Date(now - 60 * DAY).toISOString();
+    const since30 = new Date(now - 30 * DAY).toISOString();
+    const [orders, published, drafts, customers, members, failed] = await Promise.all([
+      s.from('orders').select('id, amount_minor, currency, created_at').eq('status', 'paid').gte('created_at', since60).order('created_at', { ascending: false }).limit(5000),
+      s.from('wallpapers').select('id', head).eq('status', 'published'),
+      s.from('wallpapers').select('id', head).eq('status', 'draft'),
+      s.from('profiles').select('id', head).gte('created_at', since30),
+      s.from('memberships').select('id', head).eq('status', 'active').gt('ends_at', new Date().toISOString()),
+      s.from('jobs_log').select('id', head).eq('status', 'failed').gte('started_at', new Date(now - 7 * DAY).toISOString()),
+    ]);
+    const paid = (orders.data ?? []) as PaidOrder[];
+    const age = (o: PaidOrder) => now - new Date(o.created_at).getTime();
+    const last30 = paid.filter((o) => age(o) < 30 * DAY);
+    const prev30 = paid.filter((o) => age(o) >= 30 * DAY);
+    // Sum in rupees; null when a currency has no rate (shown as "—").
+    const inr = (rows: PaidOrder[]) => {
+      let total = 0;
+      for (const o of rows) {
+        const v = toInr(o.amount_minor, o.currency, rates);
+        if (v == null) return null;
+        total += v;
+      }
+      return total;
+    };
+    const daily = Array.from({ length: CHART_DAYS }, () => 0);
     for (const o of paid) {
-      const days = Math.floor((now - new Date(o.created_at).getTime()) / 86_400_000);
-      if (days >= 0 && days < 7) weekly[6 - days]! += 1;
+      const d = Math.floor(age(o) / DAY);
+      if (d >= 0 && d < CHART_DAYS) daily[CHART_DAYS - 1 - d]! += 1;
     }
     return {
-      revenue: sumByCurrency(paid),
-      paidOrders: paid.length,
+      revenue30: inr(last30),
+      revenuePrev30: inr(prev30),
+      orders30: last30.length,
+      ordersPrev30: prev30.length,
+      newCustomers30: customers.count ?? 0,
+      members: members.count ?? 0,
       published: published.count ?? 0,
       drafts: drafts.count ?? 0,
-      creatorSubmissions: creatorSubs.count ?? 0,
-      newMessages: messages.count ?? 0,
-      openTakedowns: takedowns.count ?? 0,
-      subscribers: subs.count ?? 0,
-      members: members ?? 0,
+      failedJobs: failed.count ?? 0,
+      daily,
       recent: paid.slice(0, 6),
-      weekly,
     };
   } catch {
     return null;
   }
 }
 
+/** "+12% vs previous 30 days" hint with a tone. */
+function trend(now: number | null, before: number | null): { hint: string; tone: 'default' | 'good' | 'bad' } {
+  if (now == null || before == null) return { hint: 'Previous 30 days: —', tone: 'default' };
+  if (before === 0) return { hint: now > 0 ? 'New this month' : 'No sales yet', tone: now > 0 ? 'good' : 'default' };
+  const pct = Math.round(((now - before) / before) * 100);
+  return { hint: `${pct >= 0 ? '+' : ''}${pct}% vs previous 30 days`, tone: pct > 0 ? 'good' : pct < 0 ? 'bad' : 'default' };
+}
+
+interface Todo {
+  href: string;
+  label: string;
+  detail: string;
+  icon: LucideIcon;
+  n?: number;
+  urgent?: boolean;
+}
+
 export default async function AdminOverviewPage() {
   await requireAdmin();
-  const stats = await loadStats();
-  const bars = stats?.weekly ?? Array.from({ length: 7 }, () => 0);
-  const revenue = stats ? [...stats.revenue].map(([cur, minor]) => formatMoneyMinor(minor, cur)).join(' · ') : '';
-  const dayLabel = (i: number) =>
-    new Date(Date.now() - (6 - i) * 86_400_000).toLocaleDateString('en-IN', { weekday: 'short' });
+  const settings = await getSettings();
+  const [o, counts] = await Promise.all([loadOverview(settings.fx_to_inr), getAdminCounts()]);
+  const seller = sellerDetails(settings, '');
+  const paymentsReady = Boolean(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+
+  // Work waiting on the owner, most urgent first.
+  const todos: Todo[] = [];
+  if (counts._takedowns > 0) todos.push({ href: '/admin/messages', label: 'Takedown reports open', detail: 'Copyright/abuse reports — review quickly.', icon: ShieldAlert, n: counts._takedowns, urgent: true });
+  if (o && o.failedJobs > 0) todos.push({ href: '/admin/health', label: 'Background jobs failed', detail: 'In the last 7 days — see System health.', icon: AlertTriangle, n: o.failedJobs, urgent: true });
+  if (counts._messages > 0) todos.push({ href: '/admin/messages', label: 'New messages', detail: 'Customer contact form — reply within 48 hours.', icon: Inbox, n: counts._messages });
+  if (counts._submissions > 0) todos.push({ href: '/admin/catalogue?status=pending_review', label: 'Wallpapers to review', detail: 'Creator uploads waiting for approval.', icon: Images, n: counts._submissions });
+  if (counts._review > 0) todos.push({ href: '/admin/review-queue', label: 'AI images to review', detail: 'Generated images awaiting approve/reject.', icon: ListChecks, n: counts._review });
+  if (counts._kyc > 0) todos.push({ href: '/admin/creators', label: 'Creator KYC pending', detail: 'Verify before their first payout.', icon: Palette, n: counts._kyc });
+  if (o && o.drafts > 0) todos.push({ href: '/admin/catalogue?status=draft', label: 'Drafts not published', detail: 'Uploaded but not live yet.', icon: Images, n: o.drafts });
+
+  // One-time setup the store still needs.
+  const setup: { label: string; done: boolean; href: string }[] = [
+    { label: 'Publish your first wallpapers', done: (o?.published ?? 0) > 0, href: '/admin/upload' },
+    { label: 'Payments connected (Razorpay keys)', done: paymentsReady, href: '/admin/health' },
+    { label: 'Business name & address on receipts', done: Boolean(settings.business.legal_name && seller.address), href: '/admin/settings?tab=business' },
+    { label: 'Grievance officer named (consumer law)', done: Boolean(settings.legal.grievance_name && settings.legal.grievance_email), href: '/admin/settings?tab=business' },
+    { label: 'Store open for checkout', done: settings.store_open, href: '/admin/settings' },
+  ];
+  const setupLeft = setup.filter((x) => !x.done).length;
+
+  const rev = trend(o?.revenue30 ?? null, o?.revenuePrev30 ?? null);
+  const ord = trend(o?.orders30 ?? null, o?.ordersPrev30 ?? null);
+  const max = Math.max(...(o?.daily ?? [0]), 1);
+  const dayLabel = (i: number) => new Date(Date.now() - (CHART_DAYS - 1 - i) * DAY).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Store health at a glance.</p>
-        </div>
-        <RunJobButton label="Run creator payouts" variant="outline" endpoint="/api/jobs/creator-payouts" />
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Dashboard"
+        description="What needs you today, and how the store is doing."
+        actions={
+          <>
+            <Link href="/admin/upload" className="admin-btn-primary">
+              <Upload className="h-4 w-4" /> Upload
+            </Link>
+            <Link href="/" target="_blank" className="admin-btn">
+              <ExternalLink className="h-4 w-4" /> View store
+            </Link>
+          </>
+        }
+      />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi label="Revenue (paid, all time)" value={revenue || '—'} />
-        <Kpi label="Paid orders" value={stats ? String(stats.paidOrders) : '—'} />
-        <Kpi label="Published" value={stats ? String(stats.published) : '—'} />
-        <Kpi label="Drafts" value={stats ? String(stats.drafts) : '—'} />
-      </div>
+      {!o && (
+        <p className="admin-card p-4 text-sm text-muted-foreground">The database isn’t connected, so live numbers can’t be shown. Check System health.</p>
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-4 font-semibold">Paid orders — last 7 days</h2>
-          <div className="flex h-40 items-end gap-3">
-            {bars.map((v, i) => {
-              const max = Math.max(...bars, 1);
-              return (
-                <div key={i} className="flex flex-1 flex-col items-center gap-2">
-                  <div
-                    className="w-full rounded-t-md bg-primary/85 transition-[height]"
-                    style={{ height: `${v === 0 ? 2 : Math.max(8, (v / max) * 100)}%` }}
-                    title={`${v} order(s)`}
-                  />
-                  <span className="text-[10px] text-muted-foreground">{dayLabel(i)}</span>
-                </div>
-              );
-            })}
-          </div>
-          {bars.every((v) => v === 0) && <p className="mt-3 text-xs text-muted-foreground">No paid orders in the last 7 days.</p>}
-        </div>
+      <StatGrid>
+        <Stat label="Revenue · 30 days" icon={Receipt} value={o?.revenue30 != null ? formatRupees(o.revenue30) : '—'} hint={rev.hint} tone={rev.tone} href="/admin/analytics" />
+        <Stat label="Paid orders · 30 days" icon={Coins} value={o ? o.orders30 : '—'} hint={ord.hint} tone={ord.tone} href="/admin/orders" />
+        <Stat label="New customers · 30 days" icon={Users} value={o ? o.newCustomers30 : '—'} hint={o ? `${o.members} active member${o.members === 1 ? '' : 's'}` : undefined} href="/admin/customers" />
+        <Stat label="Live wallpapers" icon={Images} value={o ? o.published : '—'} hint={o && o.drafts > 0 ? `${o.drafts} draft${o.drafts === 1 ? '' : 's'} waiting` : 'All uploads are live'} tone={o && o.drafts > 0 ? 'warn' : 'default'} href="/admin/catalogue" />
+      </StatGrid>
 
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="mb-4 font-semibold">Recent orders</h2>
-          {!stats || stats.recent.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No paid orders yet.</p>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <Section title="Needs attention" description={todos.length ? 'Most urgent first.' : undefined} flush>
+          {todos.length === 0 ? (
+            <div className="flex items-center gap-3 px-5 py-6 text-sm text-muted-foreground">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" /> You’re all caught up.
+            </div>
           ) : (
-            <ul className="divide-y text-sm">
-              {stats.recent.map((o) => (
-                <li key={o.id} className="flex items-center justify-between py-2">
-                  <Link href="/admin/orders" className="truncate text-muted-foreground hover:underline">
-                    #{o.id.slice(0, 8)} · {new Date(o.created_at).toLocaleDateString('en-IN')}
+            <ul className="divide-y">
+              {todos.map((t) => (
+                <li key={t.label}>
+                  <Link href={t.href} className="group flex items-center gap-3 px-5 py-3.5 hover:bg-secondary/50">
+                    <span className={cn('grid h-8 w-8 shrink-0 place-items-center rounded-lg', t.urgent ? 'bg-rose-500/10 text-rose-700' : 'bg-amber-500/10 text-amber-700')}>
+                      <t.icon className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium">{t.label}</span>
+                      <span className="block truncate text-xs text-muted-foreground">{t.detail}</span>
+                    </span>
+                    {t.n != null && <span className="font-display text-lg font-semibold tabular-nums">{t.n}</span>}
+                    <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                   </Link>
-                  <span className="font-medium">{formatMoneyMinor(o.amount_minor, o.currency)}</span>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </Section>
+
+        <Section title="Store setup" description={setupLeft ? `${setupLeft} step${setupLeft === 1 ? '' : 's'} left before launch.` : 'Everything is set up.'} flush>
+          <ul className="divide-y">
+            {setup.map((x) => (
+              <li key={x.label}>
+                <Link href={x.href} className="flex items-center gap-3 px-5 py-3 text-sm hover:bg-secondary/50">
+                  {x.done ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                  ) : (
+                    <span aria-hidden className="h-4 w-4 shrink-0 rounded-full border-2 border-muted-foreground/40" />
+                  )}
+                  <span className={cn('flex-1', x.done && 'text-muted-foreground line-through decoration-muted-foreground/40')}>{x.label}</span>
+                  {!x.done && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Section>
       </div>
 
-      {stats && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Todo href="/admin/catalogue?status=pending_review" n={stats.creatorSubmissions} label="Creator submissions to review" />
-          <Todo href="/admin/catalogue?status=draft" n={stats.drafts} label="Drafts not published" />
-          <Todo href="/admin/messages" n={stats.newMessages + stats.openTakedowns} label="Messages & takedowns open" />
-          <Todo href="/admin/newsletter" n={stats.subscribers} label="Newsletter subscribers" />
-          <Todo href="/admin/membership" n={stats.members} label="Active members" />
-          <Todo href="/admin/settings" n={0} label="Settings & controls" hideCount />
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <Section title="Paid orders" description={`Last ${CHART_DAYS} days`} actions={<Link href="/admin/analytics" className="text-sm text-muted-foreground hover:text-foreground">Analytics →</Link>}>
+          <div className="flex h-44 items-end gap-1.5" role="img" aria-label={`Paid orders per day, last ${CHART_DAYS} days`}>
+            {(o?.daily ?? Array.from({ length: CHART_DAYS }, () => 0)).map((v, i) => (
+              <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+                {v > 0 && <span className="text-[10px] tabular-nums text-muted-foreground">{v}</span>}
+                <div
+                  className={cn('w-full rounded-t', v > 0 ? 'bg-foreground/80' : 'bg-secondary')}
+                  style={{ height: `${v === 0 ? 3 : Math.max(8, (v / max) * 85)}%` }}
+                  title={`${dayLabel(i)}: ${v} order(s)`}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+            <span>{dayLabel(0)}</span>
+            <span>{dayLabel(Math.floor(CHART_DAYS / 2))}</span>
+            <span>Today</span>
+          </div>
+        </Section>
+
+        <Section title="Recent orders" actions={<Link href="/admin/orders" className="text-sm text-muted-foreground hover:text-foreground">All orders →</Link>} flush>
+          {!o || o.recent.length === 0 ? (
+            <p className="px-5 py-6 text-sm text-muted-foreground">No paid orders yet.</p>
+          ) : (
+            <ul className="divide-y text-sm">
+              {o.recent.map((r) => (
+                <li key={r.id}>
+                  <Link href={`/admin/orders/${r.id}`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-secondary/50">
+                    <span className="min-w-0 truncate">
+                      <span className="font-mono text-xs">#{r.id.slice(0, 8)}</span>
+                      <span className="ml-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                    </span>
+                    <span className="font-medium tabular-nums">{formatMoneyMinor(r.amount_minor, r.currency)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+      </div>
+
+      <Section title="Shortcuts">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { href: '/admin/catalogue', label: 'Wallpapers', icon: Images },
+            { href: '/admin/credit-packs', label: 'Credit packs', icon: Coins },
+            { href: '/admin/membership', label: 'Membership plans', icon: Crown },
+            { href: '/admin/countries', label: 'Pricing by country', icon: Store },
+            { href: '/admin/tax', label: 'Tax centre', icon: Landmark },
+            { href: '/admin/settings', label: 'Settings', icon: Settings },
+            { href: '/admin/health', label: 'System health', icon: Wrench },
+          ].map((x) => (
+            <Link key={x.href} href={x.href} className="flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-sm hover:bg-secondary">
+              <x.icon className="h-4 w-4 text-muted-foreground" /> {x.label}
+            </Link>
+          ))}
+          <div className="flex items-center">
+            <RunJobButton label="Run creator payouts" variant="outline" endpoint="/api/jobs/creator-payouts" confirm="Compute and send this month’s creator payouts now?" />
+          </div>
         </div>
-      )}
+      </Section>
     </div>
-  );
-}
-
-function Kpi({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border bg-card p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-semibold">{value}</p>
-    </div>
-  );
-}
-
-function Todo({ href, n, label, hideCount }: { href: string; n: number; label: string; hideCount?: boolean }) {
-  return (
-    <Link href={href} className="rounded-2xl border bg-card p-4 text-sm hover:border-foreground/40">
-      <p className="text-xl font-semibold">{hideCount ? '⚙︎' : n}</p>
-      <p className="text-muted-foreground">{label} →</p>
-    </Link>
   );
 }

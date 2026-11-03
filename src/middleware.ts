@@ -11,6 +11,8 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
  * is re-verified at checkout against the billing country).
  */
 export async function middleware(request: NextRequest) {
+  // Let server components know the route (admin pages use their own shell).
+  request.headers.set('x-hw-path', request.nextUrl.pathname);
   let response = NextResponse.next({ request });
 
   // --- Supabase session refresh ---------------------------------------------

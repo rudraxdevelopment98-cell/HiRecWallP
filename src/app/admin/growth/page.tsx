@@ -41,18 +41,18 @@ export default async function AdminGrowthPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">Growth</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Growth</h1>
         <p className="text-sm text-muted-foreground">
-          Last 30 days. Change every number in <Link href="/admin/settings" className="underline">Settings → Growth</Link>; festival dates are on each
+          Last 30 days. Change every number in <Link href="/admin/settings?tab=growth" className="underline">Settings → Growth</Link>; festival dates are on each
           pack or plan in <Link href="/admin/credit-packs" className="underline">Credit packs</Link> / <Link href="/admin/membership" className="underline">Membership</Link>.
         </p>
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map(([label, value, hint]) => (
-          <div key={label} className="rounded-2xl border bg-card p-5">
+          <div key={label} className="admin-card p-5">
             <p className="text-xs text-muted-foreground">{label}</p>
             <p className="font-display text-2xl font-semibold">{value}</p>
             <p className="text-xs text-muted-foreground">{hint}</p>
@@ -61,7 +61,7 @@ export default async function AdminGrowthPage() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border bg-card p-6 text-sm">
+        <div className="admin-card p-6 text-sm">
           <h2 className="font-semibold">Daily free wallpaper</h2>
           {p?.wallpapers ? (
             <p className="mt-2">
@@ -78,7 +78,7 @@ export default async function AdminGrowthPage() {
             <RunJobButton label="Run daily pick now" endpoint="/api/jobs/daily-pick" />
           </div>
         </div>
-        <div className="rounded-2xl border bg-card p-6 text-sm">
+        <div className="admin-card p-6 text-sm">
           <h2 className="font-semibold">Creator affiliate commissions</h2>
           {affiliate.size === 0 ? (
             <p className="mt-2 text-muted-foreground">None yet. Creators share links with <code>?via=CODE</code> from their dashboard.</p>

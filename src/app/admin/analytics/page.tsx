@@ -1,4 +1,5 @@
 import { requireAdmin } from '@/lib/auth';
+import { FilterTabs, PageHeader } from '@/components/admin/ui';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { formatMoneyMinor } from '@/lib/format';
@@ -60,24 +61,12 @@ export default async function AdminAnalyticsPage(props: { searchParams: Promise<
   const bought = counts.get('purchase') ?? 0;
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-semibold">Analytics</h1>
-          <p className="text-sm text-muted-foreground">Since {from.toLocaleDateString('en-IN', { dateStyle: 'medium' })}</p>
-        </div>
-        <div className="flex gap-1.5 text-sm">
-          {RANGES.map((r) => (
-            <Link
-              key={r}
-              href={`/admin/analytics?days=${r}`}
-              className={`rounded-full border px-3 py-1 ${r === days ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'}`}
-            >
-              {r === 365 ? '1 year' : `${r} days`}
-            </Link>
-          ))}
-        </div>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Analytics"
+        description={`Sales, top wallpapers and the buying funnel since ${from.toLocaleDateString('en-IN', { dateStyle: 'medium' })}.`}
+        actions={<FilterTabs items={RANGES.map((r) => ({ href: `/admin/analytics?days=${r}`, label: r === 365 ? '1 year' : `${r} days`, active: r === days }))} />}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Paid orders" value={String(totalOrders)} />
@@ -91,7 +80,7 @@ export default async function AdminAnalyticsPage(props: { searchParams: Promise<
         <Kpi label="Opened → bought" value={detail ? `${((bought / detail) * 100).toFixed(1)}%` : '—'} sub="wallpaper page views that became a sale" />
       </div>
 
-      <section className="rounded-2xl border bg-card p-6">
+      <section className="admin-card p-6">
         <h2 className="mb-4 font-semibold">Paid orders per day</h2>
         <BarChart data={ordersPerDay} format={(v) => `${v}`} />
         {currencies.map((c) => (
@@ -109,7 +98,7 @@ export default async function AdminAnalyticsPage(props: { searchParams: Promise<
         ))}
       </section>
 
-      <section className="rounded-2xl border bg-card p-6">
+      <section className="admin-card p-6">
         <h2 className="mb-1 font-semibold">Buying funnel</h2>
         <p className="mb-4 text-xs text-muted-foreground">How many times each step happened. Big drops show where people give up.</p>
         <div className="space-y-3">
@@ -139,23 +128,23 @@ export default async function AdminAnalyticsPage(props: { searchParams: Promise<
         <RankTable title="Most viewed" rows={((viewed.data ?? []) as { wallpaper_id: string; title: string; slug: string; views: number }[]).map((r) => ({ id: r.wallpaper_id, title: r.title, slug: r.slug, n: Number(r.views) }))} unit="views" />
       </div>
 
-      <section className="rounded-2xl border bg-card p-6">
+      <section className="admin-card p-6">
         <h2 className="mb-3 font-semibold">Sales by billing country</h2>
         {((countries.data ?? []) as unknown[]).length === 0 ? (
           <p className="text-sm text-muted-foreground">No paid orders in this period.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase text-muted-foreground">
-                <tr className="border-b">
-                  <th className="py-2">Country</th>
-                  <th className="py-2">Orders</th>
-                  <th className="py-2">Revenue</th>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Country</th>
+                  <th>Orders</th>
+                  <th>Revenue</th>
                 </tr>
               </thead>
               <tbody>
                 {((countries.data ?? []) as { country: string; currency: string; orders: number; revenue_minor: number }[]).map((r) => (
-                  <tr key={`${r.country}-${r.currency}`} className="border-b last:border-0">
+                  <tr key={`${r.country}-${r.currency}`}>
                     <td className="py-2">{r.country}</td>
                     <td className="py-2 font-mono tabular-nums">{r.orders}</td>
                     <td className="py-2 font-mono tabular-nums">{formatMoneyMinor(Number(r.revenue_minor), r.currency)}</td>
@@ -172,7 +161,7 @@ export default async function AdminAnalyticsPage(props: { searchParams: Promise<
 
 function Kpi({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-2xl border bg-card p-5">
+    <div className="admin-card p-5">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
       {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
@@ -182,7 +171,7 @@ function Kpi({ label, value, sub }: { label: string; value: string; sub?: string
 
 function RankTable({ title, rows, unit }: { title: string; rows: { id: string; title: string; slug: string; n: number }[]; unit: string }) {
   return (
-    <section className="rounded-2xl border bg-card p-6">
+    <section className="admin-card p-6">
       <h2 className="mb-3 font-semibold">{title}</h2>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">No data for this period yet.</p>

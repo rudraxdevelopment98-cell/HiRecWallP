@@ -44,7 +44,7 @@ export default async function AdminCreditPacksPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold">Credit packs</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Credit packs</h1>
         <p className="text-sm text-muted-foreground">
           Sold in every country. A wallpaper costs 1 credit by default (Settings → Default prices); what a credit costs is set here per tier, with optional country-specific prices.
         </p>
@@ -55,7 +55,7 @@ export default async function AdminCreditPacksPage() {
           {packs
             .filter((p) => p.region_code === tier)
             .map((p) => (
-              <details key={p.id} className="rounded-2xl border bg-card p-5">
+              <details key={p.id} className="admin-card p-5">
                 <summary className="flex cursor-pointer flex-wrap items-center gap-2 text-sm">
                   <span className="font-medium">
                     {p.name ?? 'Pack'} · {p.credits}
@@ -81,7 +81,7 @@ export default async function AdminCreditPacksPage() {
             ))}
         </section>
       ))}
-      <details className="rounded-2xl border border-dashed bg-card p-5">
+      <details className="rounded-xl border border-dashed bg-card p-5">
         <summary className="cursor-pointer font-medium">+ Add a credit pack</summary>
         <div className="mt-4">
           <AdminForm action="/api/admin/credit-packs" method="POST" submitLabel="Create pack" resetOnSuccess fields={FIELDS} initial={{ region_code: 'T1', currency: 'USD', bonus_credits: 0, badge: '', sort_order: 10, active: true }} />

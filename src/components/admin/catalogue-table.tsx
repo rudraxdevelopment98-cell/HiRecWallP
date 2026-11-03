@@ -78,7 +78,7 @@ export function CatalogueTable({ rows, categories }: { rows: CatalogueRow[]; cat
         {msg && <span className={msg.ok ? 'text-emerald-600' : 'text-rose-600'}>{msg.text}</span>}
       </div>
 
-      <ul className="divide-y rounded-2xl border bg-card">
+      <ul className="divide-y admin-card">
         {rows.map((row) => (
           <li key={row.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
             <input type="checkbox" checked={selected.has(row.id)} onChange={() => toggle(row.id)} aria-label={`Select ${row.title}`} />

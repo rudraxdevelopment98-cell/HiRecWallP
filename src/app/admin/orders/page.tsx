@@ -1,4 +1,5 @@
 import { requireAdmin } from '@/lib/auth';
+import { EmptyState, FilterTabs, PageHeader } from '@/components/admin/ui';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
 import { formatMoneyMinor } from '@/lib/format';
@@ -52,22 +53,23 @@ export default async function AdminOrdersPage(props: { searchParams: Promise<{ s
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold">Orders</h1>
-        <a href={`/api/admin/orders/export?status=${status}`} className="rounded-full border px-4 py-2 text-sm hover:bg-secondary">
-          Export CSV ({status})
-        </a>
-      </div>
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        {TABS.map((t) => (
-          <Link
-            key={t}
-            href={`/admin/orders?status=${t}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-            className={`rounded-full border px-3 py-1 capitalize ${status === t ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'}`}
-          >
-            {t === 'created' ? 'not completed' : t}
-          </Link>
-        ))}
+      <PageHeader
+        title="Orders"
+        description="Every checkout. Open an order for its receipt, payment id and refund."
+        actions={
+          <a href={`/api/admin/orders/export?status=${status}`} className="admin-btn">
+            Export CSV
+          </a>
+        }
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <FilterTabs
+          items={TABS.map((t) => ({
+            href: `/admin/orders?status=${t}${q ? `&q=${encodeURIComponent(q)}` : ''}`,
+            label: t === 'created' ? 'not completed' : t,
+            active: status === t,
+          }))}
+        />
         <form action="/admin/orders" className="ml-auto flex gap-2">
           <input type="hidden" name="status" value={status} />
           <input name="q" defaultValue={q} placeholder="Email, invoice HW-… or order id" className="input h-8 w-64 py-1" aria-label="Search orders" />
@@ -75,38 +77,38 @@ export default async function AdminOrdersPage(props: { searchParams: Promise<{ s
       </div>
       <p className="text-sm text-muted-foreground">{(count ?? 0).toLocaleString('en-IN')} order(s)</p>
       {rows.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">No orders match.</p>
+        <EmptyState title="No orders match" description={q ? 'Try another email, invoice number or order id.' : 'Orders appear here once customers check out.'} />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border bg-card">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr className="border-b">
-                <th className="p-3">Date</th>
-                <th className="p-3">Customer</th>
-                <th className="p-3">Items</th>
-                <th className="p-3">Amount</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Invoice</th>
+        <div className="admin-card overflow-x-auto">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Invoice</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((o) => (
-                <tr key={o.id} className="border-b last:border-0 hover:bg-secondary/50">
-                  <td className="whitespace-nowrap p-3">
+                <tr key={o.id}>
+                  <td className="whitespace-nowrap">
                     <Link href={`/admin/orders/${o.id}`} className="hover:underline">
                       {new Date(o.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
                     </Link>
                   </td>
-                  <td className="p-3">
+                  <td >
                     {o.profiles?.email ?? '—'}
                     {o.billing_country && <span className="text-muted-foreground"> · {o.billing_country}</span>}
                   </td>
-                  <td className="max-w-xs truncate p-3">{o.order_items.map(itemLabel).join(', ')}</td>
-                  <td className="whitespace-nowrap p-3 font-medium tabular-nums">{formatMoneyMinor(o.amount_minor, o.currency)}</td>
-                  <td className="p-3">
+                  <td className="max-w-xs truncate">{o.order_items.map(itemLabel).join(', ')}</td>
+                  <td className="whitespace-nowrap font-medium tabular-nums">{formatMoneyMinor(o.amount_minor, o.currency)}</td>
+                  <td >
                     <Badge variant={o.status === 'paid' ? 'default' : 'secondary'}>{o.status === 'created' ? 'not completed' : o.status}</Badge>
                   </td>
-                  <td className="whitespace-nowrap p-3 text-muted-foreground">{o.invoice_no ?? '—'}</td>
+                  <td className="whitespace-nowrap text-muted-foreground">{o.invoice_no ?? '—'}</td>
                 </tr>
               ))}
             </tbody>

@@ -26,7 +26,7 @@ export default async function AdminActivityPage(props: { searchParams: Promise<{
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold">Activity log</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Activity log</h1>
           <p className="text-sm text-muted-foreground">Every change made in the admin panel: who, what and when.</p>
         </div>
         <form action="/admin/activity">
@@ -36,14 +36,14 @@ export default async function AdminActivityPage(props: { searchParams: Promise<{
       {(data ?? []).length === 0 ? (
         <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">No admin activity recorded yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border bg-card">
-          <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-muted-foreground">
-              <tr className="border-b">
-                <th className="p-3">When</th>
-                <th className="p-3">Who</th>
-                <th className="p-3">Action</th>
-                <th className="p-3">Details</th>
+        <div className="admin-card overflow-x-auto">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Who</th>
+                <th>Action</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody>
@@ -51,12 +51,12 @@ export default async function AdminActivityPage(props: { searchParams: Promise<{
                 const href = targetHref(r.target_type as string | null, r.target_id as string | null);
                 return (
                   <tr key={r.id as string} className="border-b align-top last:border-0">
-                    <td className="whitespace-nowrap p-3">{new Date(r.created_at as string).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</td>
-                    <td className="p-3">{(r.actor_email as string) ?? 'system'}</td>
-                    <td className="p-3 font-mono text-xs">
+                    <td className="whitespace-nowrap">{new Date(r.created_at as string).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</td>
+                    <td >{(r.actor_email as string) ?? 'system'}</td>
+                    <td className="font-mono text-xs">
                       {href ? <Link href={href} className="underline">{r.action as string}</Link> : (r.action as string)}
                     </td>
-                    <td className="max-w-md p-3 font-mono text-xs text-muted-foreground">
+                    <td className="max-w-md font-mono text-xs text-muted-foreground">
                       <span className="line-clamp-2 break-all">{r.details ? JSON.stringify(r.details) : '—'}</span>
                     </td>
                   </tr>

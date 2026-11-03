@@ -35,7 +35,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold">{(profile.email as string) ?? id}</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{(profile.email as string) ?? id}</h1>
           <p className="text-sm text-muted-foreground">
             Joined {fmt(profile.created_at as string)}
             {u?.last_sign_in_at && ` · last sign-in ${fmt(u.last_sign_in_at)}`}
@@ -57,13 +57,13 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
         <Stat label="Credit balance" value={String(Number(balance ?? 0))} />
       </div>
 
-      <section className="rounded-2xl border bg-card p-5">
+      <section className="admin-card p-5">
         <h2 className="mb-3 font-semibold">Actions</h2>
         <CustomerActions userId={id} blocked={blocked} role={profile.role as string} priceCountry={(profile.price_country as string | null) ?? null} />
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">Orders</h2>
           {(orders ?? []).length === 0 ? (
             <p className="text-muted-foreground">No orders.</p>
@@ -83,7 +83,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
             </ul>
           )}
         </section>
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">Library</h2>
           {(ents ?? []).length === 0 ? (
             <p className="text-muted-foreground">Nothing owned yet.</p>
@@ -102,7 +102,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
             </ul>
           )}
         </section>
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">Credits history</h2>
           {(ledger ?? []).length === 0 ? (
             <p className="text-muted-foreground">No credit activity.</p>
@@ -119,7 +119,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
             </ul>
           )}
         </section>
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">Membership passes</h2>
           {(passes ?? []).length === 0 ? (
             <p className="text-muted-foreground">No passes.</p>
@@ -142,7 +142,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
       </div>
 
       {(log ?? []).length > 0 && (
-        <section className="rounded-2xl border bg-card p-5 text-sm">
+        <section className="admin-card p-5 text-sm">
           <h2 className="mb-2 font-semibold">Admin history</h2>
           <ul className="space-y-1 text-muted-foreground">
             {(log ?? []).map((l, i) => (
@@ -159,7 +159,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border bg-card p-5">
+    <div className="admin-card p-5">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
     </div>

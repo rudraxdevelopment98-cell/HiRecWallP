@@ -1,5 +1,5 @@
 import { requireAdmin } from '@/lib/auth';
-import Link from 'next/link';
+import { EmptyState, FilterTabs, PageHeader } from '@/components/admin/ui';
 import { createServiceClient } from '@/lib/supabase/service';
 import { StatusSelect } from '@/components/admin/status-select';
 
@@ -19,23 +19,21 @@ export default async function AdminMessagesPage(props: { searchParams: Promise<{
 
   return (
     <div className="space-y-5">
-      <h1 className="font-display text-2xl font-semibold">Messages</h1>
-      <div className="flex gap-2 text-sm">
-        <Link href="/admin/messages" className={`rounded-full border px-3 py-1 ${tab === 'contact' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'}`}>
-          Contact ({openContact} new)
-        </Link>
-        <Link href="/admin/messages?tab=takedowns" className={`rounded-full border px-3 py-1 ${tab === 'takedowns' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary'}`}>
-          Takedown reports ({openReports} open)
-        </Link>
-      </div>
+      <PageHeader title="Messages" description="Contact-form messages and copyright/takedown reports. Acknowledge within 48 hours; resolve within a month." />
+      <FilterTabs
+        items={[
+          { href: '/admin/messages', label: 'Contact', active: tab === 'contact', count: openContact },
+          { href: '/admin/messages?tab=takedowns', label: 'Takedown reports', active: tab === 'takedowns', count: openReports },
+        ]}
+      />
 
       {tab === 'contact' ? (
         (messages ?? []).length === 0 ? (
-          <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">No messages yet.</p>
+          <EmptyState title="No messages yet" description="Messages from the Contact page appear here." />
         ) : (
           <ul className="space-y-3">
             {(messages ?? []).map((m) => (
-              <li key={m.id as string} className="rounded-2xl border bg-card p-4 text-sm">
+              <li key={m.id as string} className="admin-card p-4 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-medium">
                     {m.name as string} · <a className="underline" href={`mailto:${m.email as string}?subject=${encodeURIComponent('Re: your message to HirecWallp')}`}>{m.email as string}</a>
@@ -55,7 +53,7 @@ export default async function AdminMessagesPage(props: { searchParams: Promise<{
       ) : (
         <ul className="space-y-3">
           {(reports ?? []).map((r) => (
-            <li key={r.id as string} className="rounded-2xl border bg-card p-4 text-sm">
+            <li key={r.id as string} className="admin-card p-4 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-medium">
                   {(r.reporter_email as string) ?? 'anonymous'}

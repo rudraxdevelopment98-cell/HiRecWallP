@@ -31,7 +31,7 @@ export function AdminUploadForm({ categories }: { categories: { id: string; name
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold">Upload wallpaper</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight">Upload wallpaper</h1>
         <p className="text-sm text-muted-foreground">
           Drop a high-resolution original (≥ 3840px long edge; 5120px+ unlocks 5K). Device sizes
           matching the artwork&rsquo;s orientation, previews, watermarks and the free size are
