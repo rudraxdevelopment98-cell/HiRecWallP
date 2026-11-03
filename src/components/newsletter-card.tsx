@@ -29,13 +29,13 @@ export function NewsletterCard() {
             const res = await fetch('/api/newsletter', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ email, source: 'home', website: fd.get('website') }),
+              body: JSON.stringify({ email, source: 'home', website: fd.get('website'), daily: fd.get('daily') === 'on' }),
             }).catch(() => null);
             setBusy(false);
             if (res?.ok) setDone(true);
             else setError(((await res?.json().catch(() => null)) as { error?: string } | null)?.error ?? 'Please try again.');
           }}
-          className="relative flex gap-2"
+          className="relative flex flex-wrap gap-2"
         >
           <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 opacity-0" />
           <input
@@ -48,6 +48,9 @@ export function NewsletterCard() {
           <button type="submit" disabled={busy} className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60">
             {busy ? '…' : 'Subscribe'}
           </button>
+          <label className="flex w-full items-center gap-2 text-xs text-muted-foreground">
+            <input type="checkbox" name="daily" /> Also email me the daily free wallpaper (unsubscribe any time)
+          </label>
         </form>
       )}
       {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}

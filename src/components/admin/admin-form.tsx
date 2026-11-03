@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
+import { fromIstInput, toIstInput } from '@/lib/sale-window';
 
-export type FieldType = 'text' | 'textarea' | 'number' | 'money' | 'checkbox' | 'lines' | 'select';
+export type FieldType = 'text' | 'textarea' | 'number' | 'money' | 'checkbox' | 'lines' | 'select' | 'datetime';
 
 export interface FieldDef {
   name: string;
@@ -94,6 +95,9 @@ export function AdminForm({
         case 'money':
           body[field.name] = raw === '' || raw == null ? null : Math.round(Number(raw) * 100);
           break;
+        case 'datetime':
+          body[field.name] = fromIstInput(String(raw ?? ''));
+          break;
         case 'lines':
           body[field.name] = String(raw ?? '')
             .split('\n')
@@ -115,6 +119,7 @@ export function AdminForm({
     if (v == null) return '';
     if (field.type === 'money') return (Number(v) / 100).toString();
     if (field.type === 'lines') return Array.isArray(v) ? v.join('\n') : String(v);
+    if (field.type === 'datetime') return toIstInput(String(v));
     return String(v);
   };
 
@@ -148,7 +153,7 @@ export function AdminForm({
               ) : (
                 <input
                   name={field.name}
-                  type={field.type === 'number' || field.type === 'money' ? 'number' : 'text'}
+                  type={field.type === 'number' || field.type === 'money' ? 'number' : field.type === 'datetime' ? 'datetime-local' : 'text'}
                   step={field.type === 'money' ? '0.01' : field.type === 'number' ? 'any' : undefined}
                   defaultValue={display(field)}
                   placeholder={field.placeholder}

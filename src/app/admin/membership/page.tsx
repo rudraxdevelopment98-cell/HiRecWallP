@@ -36,6 +36,8 @@ function planFields(categories: { value: string; label: string }[]): FieldDef[] 
     { name: 'sort_order', label: 'Order on page', type: 'number' },
     { name: 'includes_commercial', label: 'Commercial licence included', type: 'checkbox' },
     { name: 'active', label: 'On sale', type: 'checkbox' },
+    { name: 'sale_starts_at', label: 'On sale from (IST, optional)', type: 'datetime', span: 2 },
+    { name: 'sale_ends_at', label: 'On sale until (IST, optional — festival drops)', type: 'datetime', span: 2 },
     { name: 'perks', label: 'Bullet points on the card (one per line)', type: 'lines' },
   ];
 }

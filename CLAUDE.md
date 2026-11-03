@@ -320,6 +320,25 @@ Key Phase 3 decisions:
   `after_paid_order()` only on the friend's first PAID order, capped monthly; refund reverses it.
   All are expiring bonus lots. `/account/referrals` shows the link, WhatsApp share and stats.
 
+## Growth engine (2026-11-03) — migration 0018 (Admin → Growth + Settings → Growth)
+
+- **First-purchase bonus:** `first_purchase_bonus()` from the webhook (once per account, `profiles.first_bonus_at`;
+  keyed to the order so refunds reverse it).
+- **Gift credits:** `create-order {type:'credit_pack', gift:{email,from,message}}` → webhook `create_gift()` (12-char code,
+  12-month validity) + `sendGiftEmail()`; `/gift`, `/gift/[code]`, `/api/gifts/redeem` → `redeem_gift()` (atomic). Region rule
+  `canRedeemIn()`: redeem only in the same or a cheaper tier (Steam-style). Refund voids unused codes / reverses redeemed credits.
+- **Festival drops:** `sale_starts_at`/`sale_ends_at` on packs + plans (`isOnSale()` filters listings and checkout;
+  pricing shows "Available until …"). Admin datetime fields are IST (`toIstInput`/`fromIstInput`). Seeded inactive
+  "Diwali Festival Pass" (25 Oct – 12 Nov 2026).
+- **Creator affiliates:** `?via=CODE` on any URL → httpOnly `aff` cookie (middleware, 30 days, last click) →
+  `resolveAffiliate()` stamps `orders.affiliate_id` → webhook `record_affiliate_commission()` (pct, cap 50%, creators only,
+  no self) → creator payouts add commissions in INR via `site_settings.fx_to_inr` (`toInr()`), tied by `payout_period`.
+  Autopay subscription charges are not attributed (known limitation).
+- **Daily free wallpaper:** `pick_daily()` (idempotent, avoids repeats for 60 days) via cron `/api/jobs/daily-pick`
+  (18:35 UTC = 00:05 IST) or lazily on first visit; `claim_daily_pick()` → entitlement `source='daily'` (no creator payout).
+  Opt-in email (never pre-ticked) to `newsletter_subscribers.daily`, capped per day, signed one-click unsubscribe
+  (`/api/newsletter/unsubscribe`, RFC 8058 POST too).
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

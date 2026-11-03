@@ -20,6 +20,20 @@ const countryList = z
   .refine((list) => list.every((c) => /^[A-Z]{2}$/.test(c)), 'Countries: 2-letter codes like GB, IE')
   .refine((list) => list.length <= 60, 'Too many countries');
 const currency = z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, 'Currency like USD');
+/** ISO timestamp or null (AdminForm sends IST datetime inputs as ISO). */
+const optionalDate = z
+  .string()
+  .nullable()
+  .default(null)
+  .refine((v) => v === null || !Number.isNaN(Date.parse(v)), 'Invalid date')
+  .transform((v) => (v ? new Date(v).toISOString() : null));
+const saleWindow = {
+  sale_starts_at: optionalDate,
+  sale_ends_at: optionalDate,
+};
+const windowOk = (v: { sale_starts_at: string | null; sale_ends_at: string | null }) =>
+  !v.sale_starts_at || !v.sale_ends_at || v.sale_starts_at < v.sale_ends_at;
+
 const optionalUuid = z
   .string()
   .default('')
@@ -39,7 +53,9 @@ export const planSchema = z
     perks: z.array(z.string().max(80)).max(10),
     active: z.boolean(),
     sort_order: z.number().int().min(0).max(1000),
+    ...saleWindow,
   })
+  .refine(windowOk, { message: 'Sale end must be after the start', path: ['sale_ends_at'] })
   .refine((p) => p.kind !== 'category' || p.category_id, { message: 'Category passes need a category', path: ['category_id'] })
   // A plan lasts term_months × 30 days; the allowance refreshes every 30 days.
   .transform((p) => ({ ...p, duration_days: p.term_months * 30 }));
@@ -62,7 +78,8 @@ export const planPriceSchema = z
   })
   .transform((p) => ({ ...p, provider_plan_id: null }));
 
-export const packSchema = z.object({
+export const packSchema = z
+  .object({
   name: z.string().trim().min(1).max(40),
   region_code: regionCode,
   country_codes: countryList,
@@ -73,7 +90,9 @@ export const packSchema = z.object({
   badge,
   sort_order: z.number().int().min(0).max(1000).nullable().transform((v) => v ?? 0),
   active: z.boolean(),
-});
+  ...saleWindow,
+  })
+  .refine(windowOk, { message: 'Sale end must be after the start', path: ['sale_ends_at'] });
 
 export const categorySchema = z.object({
   name: z.string().trim().min(1).max(60),

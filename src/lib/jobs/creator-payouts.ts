@@ -59,7 +59,25 @@ export async function runCreatorPayouts(opts: {
   const rows = (items ?? []).filter((i) => i.wallpaper_id && i.unit_price != null);
 
   // Credit spends + membership claims in the period (library items by source).
-  const creditValue = (await getSettings()).creator_credit_value_inr;
+  const settings = await getSettings();
+  const creditValue = settings.creator_credit_value_inr;
+
+  // Affiliate commissions not yet in an earlier payout (converted to INR).
+  const { data: comms } = await supabase
+    .from('affiliate_commissions')
+    .select('id, affiliate_id, currency, commission_minor, payout_period')
+    .eq('status', 'pending')
+    .lt('created_at', end)
+    .or(`payout_period.is.null,payout_period.eq.${period}`);
+  const affByCreator = new Map<string, { inr: number; ids: string[] }>();
+  for (const c of (comms ?? []) as { id: string; affiliate_id: string; currency: string; commission_minor: number }[]) {
+    const inr = toInr(c.commission_minor, c.currency, settings.fx_to_inr);
+    if (inr == null) continue;
+    const slot = affByCreator.get(c.affiliate_id) ?? { inr: 0, ids: [] };
+    slot.inr = Math.round((slot.inr + inr) * 100) / 100;
+    slot.ids.push(c.id);
+    affByCreator.set(c.affiliate_id, slot);
+  }
   const { data: ents } = await supabase
     .from('entitlements')
     .select('id, wallpaper_id, source, licence')
@@ -82,7 +100,7 @@ export async function runCreatorPayouts(opts: {
     amount: (e.source === 'credits' ? creditsByEnt.get(e.id) ?? 0 : e.licence === 'commercial' ? 5 : 1) * creditValue,
   }));
 
-  if (rows.length === 0 && valued.length === 0) return { period, dryRun, creators: 0, note: 'no sales in period' };
+  if (rows.length === 0 && valued.length === 0 && affByCreator.size === 0) return { period, dryRun, creators: 0, note: 'no sales in period' };
 
   // Map wallpapers → creators.
   const wallpaperIds = [...new Set([...rows.map((r) => r.wallpaper_id!), ...valued.map((v) => v.wallpaper_id)])];
@@ -104,6 +122,7 @@ export async function runCreatorPayouts(opts: {
     if (!creatorId || v.amount <= 0) continue;
     grossByCreator.set(creatorId, Math.round(((grossByCreator.get(creatorId) ?? 0) + v.amount) * 100) / 100);
   }
+  for (const id of affByCreator.keys()) if (!grossByCreator.has(id)) grossByCreator.set(id, 0);
   if (grossByCreator.size === 0) return { period, dryRun, creators: 0, note: 'no creator sales' };
 
   const { data: creators } = await supabase
@@ -118,7 +137,9 @@ export async function runCreatorPayouts(opts: {
     if (!c) continue;
     const pct = Number(c.commission_pct ?? 30);
     const commission = Math.round(gross * (pct / 100) * 100) / 100;
-    const net = Math.round((gross - commission) * 100) / 100;
+    // Affiliate earnings are the creator's own commission: added after the platform's cut.
+    const affiliate = affByCreator.get(creatorId);
+    const net = Math.round((gross - commission + (affiliate?.inr ?? 0)) * 100) / 100;
 
     // Upsert the payout record (idempotent per creator+period).
     const { data: existing } = await supabase
@@ -145,6 +166,11 @@ export async function runCreatorPayouts(opts: {
       .select('id')
       .single();
 
+    // Tie this period's affiliate commissions to the payout (so they are never counted twice).
+    if (!dryRun && affiliate?.ids.length) {
+      await supabase.from('affiliate_commissions').update({ payout_period: period }).in('id', affiliate.ids);
+    }
+
     if (!dryRun && net > 0 && c.payout_account_id && c.kyc_status === 'verified' && payoutRow) {
       const payout = await getPayoutProvider(c.payout_provider as PayoutProviderId).createPayout({
         creatorAccountId: c.payout_account_id,
@@ -158,10 +184,20 @@ export async function runCreatorPayouts(opts: {
         .from('creator_payouts')
         .update({ status, provider_ref: providerRef })
         .eq('id', payoutRow.id);
+      if (status === 'paid' && affiliate?.ids.length) {
+        await supabase.from('affiliate_commissions').update({ status: 'paid' }).in('id', affiliate.ids);
+      }
     }
 
-    results.push({ creatorId, gross, commission, net, status });
+    results.push({ creatorId, gross, commission, affiliate: affiliate?.inr ?? 0, net, status });
   }
 
   return { period, dryRun, creators: results.length, results };
+}
+
+/** Minor units in `currency` → rupees, using the admin's rates. Null if no rate. */
+export function toInr(minor: number, currency: string, rates: Record<string, number>): number | null {
+  if (currency === 'INR') return minor / 100;
+  const rate = rates[currency];
+  return rate && rate > 0 ? Math.round((minor / 100) * rate * 100) / 100 : null;
 }

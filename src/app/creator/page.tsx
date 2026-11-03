@@ -6,6 +6,9 @@ import { buttonVariants } from '@/components/ui/button';
 import { OnboardForm } from '@/components/creator/onboard-form';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getSettings } from '@/lib/settings';
+import { CopyField } from '@/components/account/copy-field';
+import { formatMoneyMinor } from '@/lib/format';
+import { publicEnv } from '@/lib/env';
 
 const STATUS_LABEL: Record<string, string> = {
   pending_review: 'In review',
@@ -44,12 +47,29 @@ export default async function CreatorDashboardPage() {
   }
 
   // Creators can't read their own unpublished rows under RLS; scope by their id.
-  const { data: submissions } = await createServiceClient()
-    .from('wallpapers')
-    .select('id, slug, title, status, created_at')
-    .eq('creator_id', creator.user_id)
-    .order('created_at', { ascending: false })
-    .limit(100);
+  const service = createServiceClient();
+  const [{ data: submissions }, { data: code }, { data: comms }, settings] = await Promise.all([
+    service
+      .from('wallpapers')
+      .select('id, slug, title, status, created_at')
+      .eq('creator_id', creator.user_id)
+      .order('created_at', { ascending: false })
+      .limit(100),
+    service.rpc('ensure_referral_code', { p_user: creator.user_id }),
+    service.from('affiliate_commissions').select('currency, commission_minor, status').eq('affiliate_id', creator.user_id),
+    getSettings(),
+  ]);
+  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '');
+  const affLink = `${site}/?via=${code as string}`;
+  const sums = new Map<string, { pending: number; paid: number; orders: number }>();
+  for (const c of (comms ?? []) as { currency: string; commission_minor: number; status: string }[]) {
+    if (c.status === 'void') continue;
+    const s = sums.get(c.currency) ?? { pending: 0, paid: 0, orders: 0 };
+    s.orders += 1;
+    if (c.status === 'paid') s.paid += c.commission_minor;
+    else s.pending += c.commission_minor;
+    sums.set(c.currency, s);
+  }
 
   return (
     <div className="space-y-6">
@@ -69,6 +89,29 @@ export default async function CreatorDashboardPage() {
         <Card label="Commission">{creator.commission_pct}%</Card>
         <Card label="Payout method">{creator.payout_provider ?? '—'}</Card>
       </div>
+
+      {settings.growth.affiliate_enabled && (
+        <section className="space-y-3 rounded-2xl border bg-card p-5 text-sm">
+          <h2 className="font-semibold">Your affiliate link · earn {settings.growth.affiliate_pct}% of what your followers spend</h2>
+          <CopyField value={affLink} label="Affiliate link" />
+          <p className="text-xs text-muted-foreground">
+            Add <code>?via={code as string}</code> to any {publicEnv.NEXT_PUBLIC_BRAND_NAME} link (for example your wallpaper pages).
+            Anyone who buys within 30 days of clicking earns you {settings.growth.affiliate_pct}% of their order, paid with your monthly payout. Refunded orders don&rsquo;t count.
+          </p>
+          {sums.size === 0 ? (
+            <p className="text-muted-foreground">No referred sales yet.</p>
+          ) : (
+            <ul className="space-y-1">
+              {[...sums.entries()].map(([cur, v]) => (
+                <li key={cur}>
+                  {v.orders} order{v.orders === 1 ? '' : 's'} · {formatMoneyMinor(v.pending, cur)} pending · {formatMoneyMinor(v.paid, cur)} paid
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
 
       {creator.kyc_status !== 'verified' && (
         <p className="glass rounded-xl p-4 text-sm text-muted-foreground">

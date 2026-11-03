@@ -50,6 +50,12 @@ export async function middleware(request: NextRequest) {
       : NextResponse.redirect(new URL('/login?next=/admin', request.url));
   }
 
+  // --- Creator affiliate attribution: ?via=CODE on any link (last click, 30 days)
+  const via = request.nextUrl.searchParams.get('via')?.toUpperCase();
+  if (via && /^[A-Z0-9]{6,12}$/.test(via)) {
+    response.cookies.set('aff', via, { path: '/', httpOnly: true, sameSite: 'lax', secure: request.nextUrl.protocol === 'https:', maxAge: 60 * 60 * 24 * 30 });
+  }
+
   // --- Country / pricing tier cookies (display only) -------------------------
   // Auto-detected from the geo header on first visit; the visitor can change it
   // with the country picker. Checkout re-checks against the billing country.

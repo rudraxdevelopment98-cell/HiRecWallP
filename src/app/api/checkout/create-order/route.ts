@@ -9,6 +9,7 @@ import { isSameOrigin } from '@/lib/http';
 import { getSettings } from '@/lib/settings';
 import { getPlanOffer } from '@/lib/membership';
 import { startAutopay } from '@/lib/subscriptions';
+import { resolveAffiliate } from '@/lib/growth';
 import type { CreditPack } from '@/lib/catalogue';
 
 export const runtime = 'nodejs';
@@ -20,7 +21,19 @@ const country = z
   .optional();
 
 const schema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('credit_pack'), creditPackId: z.string().uuid(), billingCountry: country }),
+  z.object({
+    type: z.literal('credit_pack'),
+    creditPackId: z.string().uuid(),
+    billingCountry: country,
+    // Optional: buy this pack as a gift (the friend redeems a code).
+    gift: z
+      .object({
+        email: z.string().trim().toLowerCase().email().max(254),
+        from: z.string().trim().min(1).max(60),
+        message: z.string().trim().max(300).default(''),
+      })
+      .optional(),
+  }),
   z.object({
     type: z.literal('membership'),
     planId: z.string().uuid(),
@@ -61,10 +74,15 @@ export async function POST(request: Request) {
   const billingCountry = body.billingCountry ?? null;
   const ctx: PriceContext = await getChargeContext(billingCountry);
   const supabase = createServiceClient();
+  // Creator who sent this buyer (?via= link, last 30 days), if any.
+  const affiliateId = await resolveAffiliate(user.id);
 
   try {
     // --- Credit pack -------------------------------------------------------
     if (body.type === 'credit_pack') {
+      if (body.gift && !settings.growth.gifts_enabled) {
+        return NextResponse.json({ error: 'Gifting is not available right now.' }, { status: 409 });
+      }
       const { data: pack } = await supabase
         .from('credit_packs')
         .select('*')
@@ -95,6 +113,8 @@ export async function POST(request: Request) {
           currency: pack.currency,
           amount_minor: pack.amount_minor,
           billing_country: ctx.country,
+          affiliate_id: affiliateId,
+          ...(body.gift ? { gift_email: body.gift.email, gift_from: body.gift.from, gift_message: body.gift.message || null } : {}),
         })
         .select('id')
         .single();
@@ -137,6 +157,7 @@ export async function POST(request: Request) {
         currency: price.currency,
         amount_minor: price.amount_minor,
         billing_country: ctx.country,
+        affiliate_id: affiliateId,
       })
       .select('id')
       .single();

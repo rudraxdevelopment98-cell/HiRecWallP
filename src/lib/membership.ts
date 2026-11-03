@@ -3,6 +3,7 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { pickPricePoints, type PriceContext } from '@/lib/geo';
+import { isOnSale } from '@/lib/sale-window';
 
 export type PlanKind = 'monthly' | 'contract' | 'category' | 'business';
 export type Billing = 'prepaid' | 'autopay';
@@ -29,6 +30,8 @@ export interface MembershipPlan {
   perks: string[];
   active: boolean;
   sort_order: number;
+  sale_starts_at: string | null;
+  sale_ends_at: string | null;
   categories?: { name: string; slug: string } | null;
 }
 
@@ -58,6 +61,7 @@ function toOffers(plans: MembershipPlan[], prices: PlanPrice[], ctx: PriceContex
   const picked = pickPricePoints(prices, ctx, (p) => `${p.plan_id}:${p.billing}`);
   const by = new Map(picked.map((p) => [`${p.plan_id}:${p.billing}`, p]));
   return plans
+    .filter((plan) => isOnSale(plan))
     .map((plan) => ({ plan, prepaid: by.get(`${plan.id}:prepaid`) ?? null, autopay: by.get(`${plan.id}:autopay`) ?? null }))
     .filter((o) => o.prepaid || o.autopay);
 }

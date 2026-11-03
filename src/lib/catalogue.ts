@@ -5,6 +5,7 @@ import { publicObjectUrl } from '@/lib/storage';
 import { cache } from 'react';
 import { DEFAULT_REGION, REGION_RANK, normaliseCountry, pickPricePoints, strictestContext, type PriceContext, type RegionCode } from '@/lib/geo';
 import { countryForTimeZone } from '@/lib/timezones';
+import { isOnSale } from '@/lib/sale-window';
 import { getSettings } from '@/lib/settings';
 import { DEMO_CATEGORIES, demoWallpaperBySlug, demoWallpapers } from '@/lib/demo';
 import type {
@@ -373,6 +374,8 @@ export interface CreditPack {
   badge: 'recommended' | 'best_value' | null;
   sort_order: number;
   active: boolean;
+  sale_starts_at: string | null;
+  sale_ends_at: string | null;
 }
 
 /**
@@ -389,7 +392,9 @@ export async function listCreditPacks(ctx: PriceContext | RegionCode): Promise<C
       .eq('region_code', c.region)
       .eq('active', true);
     if (error || !data) return [];
-    return pickPricePoints(data as CreditPack[], c, (p) => p.name ?? p.id).sort(
+    // Off-sale rows (festival windows) are dropped before choosing, so a
+    // country's expired offer falls back to the tier's regular pack.
+    return pickPricePoints((data as CreditPack[]).filter((p) => isOnSale(p)), c, (p) => p.name ?? p.id).sort(
       (a, b) => a.sort_order - b.sort_order || a.credits - b.credits,
     );
   } catch {

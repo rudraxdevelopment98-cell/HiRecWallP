@@ -4,6 +4,8 @@ import { Briefcase, CalendarRange, Check, Coins, Crown, Globe2, Tags } from 'luc
 import { countryName } from '@/lib/geo';
 import { formatMoneyMinor, formatPerUnit } from '@/lib/format';
 import { NewsletterCard } from '@/components/newsletter-card';
+import { saleEndsLabel } from '@/lib/sale-window';
+import { GiftPackButton } from '@/components/gift/gift-pack-button';
 import { BuyButton, BuyPackButton } from '@/components/pricing/buy-pack-button';
 import { listPlanOffers, type PlanKind, type PlanOffer } from '@/lib/membership';
 import { getSettings } from '@/lib/settings';
@@ -73,7 +75,7 @@ export default async function PricingPage(props: { searchParams: Promise<{ tab?:
       <section aria-labelledby="tab-title">
         <h2 id="tab-title" className="text-center font-display text-2xl font-semibold tracking-tight">{current.label}</h2>
         <p className="mb-8 mt-1 text-center text-sm text-muted-foreground">{current.blurb}</p>
-        {tab === 'credits' ? <PackGrid packs={packs} /> : <PlanGrid offers={offers} kind={tab} />}
+        {tab === 'credits' ? <PackGrid packs={packs} giftsOn={settings.growth.gifts_enabled} /> : <PlanGrid offers={offers} kind={tab} />}
       </section>
 
       <FinePrint tab={tab} />
@@ -116,7 +118,7 @@ function Card({ badge, children }: { badge?: string | null; children: React.Reac
   );
 }
 
-function PackGrid({ packs }: { packs: CreditPack[] }) {
+function PackGrid({ packs, giftsOn }: { packs: CreditPack[]; giftsOn: boolean }) {
   if (packs.length === 0) {
     return <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">Credit packs will appear here soon.</p>;
   }
@@ -129,7 +131,10 @@ function PackGrid({ packs }: { packs: CreditPack[] }) {
         const save = Math.round((1 - p.amount_minor / total / base) * 100);
         return (
           <Card key={p.id} badge={p.badge ? BADGE[p.badge] : null}>
-            <p className="text-sm font-medium text-muted-foreground">{p.name ?? 'Credits'}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              {p.name ?? 'Credits'}
+              {saleEndsLabel(p) && <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs">Available until {saleEndsLabel(p)}</span>}
+            </p>
             <p className="mt-2 font-display text-4xl font-semibold">
               {total} <span className="text-base font-normal text-muted-foreground">credits</span>
             </p>
@@ -148,6 +153,7 @@ function PackGrid({ packs }: { packs: CreditPack[] }) {
             <p className="mt-3 text-sm text-muted-foreground">= {total} wallpapers in every size</p>
             <div className="mt-auto pt-2">
               <BuyPackButton packId={p.id} credits={total} />
+              {giftsOn && <GiftPackButton packId={p.id} credits={total} />}
             </div>
           </Card>
         );
@@ -176,7 +182,10 @@ function PlanGrid({ offers, kind }: { offers: PlanOffer[]; kind: PlanKind }) {
         const autopaySave = refMonthly && o.autopay ? Math.round((1 - o.autopay.amount_minor / refMonthly) * 100) : 0;
         return (
           <Card key={plan.id} badge={plan.badge ? BADGE[plan.badge] : null}>
-            <p className="text-sm font-medium text-muted-foreground">{plan.name}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              {plan.name}
+              {saleEndsLabel(plan) && <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs">Available until {saleEndsLabel(plan)}</span>}
+            </p>
             <p className="mt-2">
               <span className="font-display text-4xl font-semibold">{plan.download_limit}</span>
               <span className="text-sm text-muted-foreground"> wallpapers / month</span>

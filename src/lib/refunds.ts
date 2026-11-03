@@ -53,6 +53,11 @@ export async function refundOrder(orderId: string, reason: string, viaProvider: 
   if (revErr) throw revErr;
   const credits = Number(reversed ?? 0);
 
+  // Gifts: an unredeemed code is cancelled (a redeemed one had its credits
+  // reversed above); affiliate commission on this order is voided.
+  await supabase.from('gift_codes').update({ status: 'void' }).eq('order_id', orderId).eq('status', 'pending');
+  await supabase.from('affiliate_commissions').update({ status: 'void' }).eq('order_id', orderId).neq('status', 'paid');
+
   const { data: revoked } = await supabase
     .from('memberships')
     .update({ status: 'revoked', note: `Refunded: ${reason}` })

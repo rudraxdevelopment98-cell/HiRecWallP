@@ -71,3 +71,25 @@ export async function getMyReferral(userId: string): Promise<MyReferral | null> 
     return null;
   }
 }
+
+export const AFF_COOKIE = 'aff';
+
+/**
+ * The creator who should earn the affiliate commission on this buyer's order:
+ * the `aff` cookie's code, if it belongs to a creator (not rejected) other
+ * than the buyer. Null when affiliates are off or nothing matches.
+ */
+export async function resolveAffiliate(buyerId: string): Promise<string | null> {
+  try {
+    if (!(await getSettings()).growth.affiliate_enabled) return null;
+    const code = (await cookies()).get(AFF_COOKIE)?.value?.toUpperCase();
+    if (!code || !REF_CODE.test(code)) return null;
+    const supabase = createServiceClient();
+    const { data: p } = await supabase.from('profiles').select('id').eq('referral_code', code).maybeSingle();
+    if (!p || p.id === buyerId) return null;
+    const { data: c } = await supabase.from('creators').select('user_id, kyc_status').eq('user_id', p.id).maybeSingle();
+    return c && c.kyc_status !== 'rejected' ? (p.id as string) : null;
+  } catch {
+    return null;
+  }
+}

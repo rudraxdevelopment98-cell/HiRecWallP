@@ -10,6 +10,8 @@ export const runtime = 'nodejs';
 const schema = z.object({
   email: z.string().trim().toLowerCase().email().max(254),
   source: z.string().max(40).optional(),
+  /** Explicit opt-in to the daily free-wallpaper email (never pre-ticked). */
+  daily: z.boolean().optional(),
 });
 
 /** Newsletter sign-up. Idempotent per email; admins export from the panel. */
@@ -28,7 +30,10 @@ export async function POST(request: Request) {
   try {
     const { error } = await createServiceClient()
       .from('newsletter_subscribers')
-      .upsert({ email: parsed.data.email, source: parsed.data.source ?? 'site' }, { onConflict: 'email', ignoreDuplicates: true });
+      .upsert(
+        { email: parsed.data.email, source: parsed.data.source ?? 'site', ...(parsed.data.daily ? { daily: true } : {}) },
+        { onConflict: 'email', ignoreDuplicates: !parsed.data.daily },
+      );
     if (error) throw error;
     return NextResponse.json({ ok: true });
   } catch {

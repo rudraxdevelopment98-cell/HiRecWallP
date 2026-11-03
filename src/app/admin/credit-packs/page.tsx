@@ -27,6 +27,8 @@ const FIELDS: FieldDef[] = [
     ],
   },
   { name: 'sort_order', label: 'Order', type: 'number' },
+  { name: 'sale_starts_at', label: 'On sale from (IST)', type: 'datetime', span: 2 },
+  { name: 'sale_ends_at', label: 'On sale until (IST) — festival packs', type: 'datetime', span: 2 },
   { name: 'active', label: 'On sale', type: 'checkbox' },
 ];
 

@@ -8,6 +8,9 @@ import { buttonVariants } from '@/components/ui/button';
 import { FavouriteButton } from '@/components/favourite-button';
 import { MemberClaimButton } from '@/components/member-claim-button';
 import { getMyPasses, passesFor } from '@/lib/membership';
+import { getTodayPick } from '@/lib/daily';
+import { DailyClaimButton } from '@/components/daily/daily-claim-button';
+import { getUser } from '@/lib/auth';
 import { getSettings } from '@/lib/settings';
 import { AddToCart } from '@/components/add-to-cart';
 import { DownloadButton } from '@/components/download-button';
@@ -54,10 +57,13 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
       ? ((await downloadableVariants([w.id])).get(w.id) ?? ['free_phone', 'free_desktop']).filter((v) => v in FREE_VARIANT_LABELS)
       : [];
   const sizes = (w.devices ?? []).filter((d) => d in SIZE_INFO);
-  const [passes, settings] = await Promise.all([
+  const [passes, settings, daily, viewer] = await Promise.all([
     !w.is_free && UUID.test(w.id) ? getMyPasses() : Promise.resolve([]),
     getSettings(),
+    !w.is_free && UUID.test(w.id) ? getTodayPick(region) : Promise.resolve(null),
+    getUser(),
   ]);
+  const freeToday = daily?.id === w.id;
   // Passes that cover this wallpaper's category and still have allowance this month.
   const covering = passesFor(passes, w.category_id ?? null);
   const memberRemaining = covering.reduce((n, p) => n + (p.allowance - p.used_this_period), 0);
@@ -160,6 +166,11 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
                   ))}
                 </div>
               )
+            ) : freeToday ? (
+              <div className="flex flex-1 flex-col gap-1">
+                <DailyClaimButton size="lg" signedIn={Boolean(viewer)} next={`/w/${w.slug}`} />
+                <p className="text-center text-xs text-muted-foreground">Today&rsquo;s free wallpaper · free until midnight IST</p>
+              </div>
             ) : covering.length > 0 ? (
               <MemberClaimButton wallpaperId={w.id} remaining={memberRemaining} />
             ) : (

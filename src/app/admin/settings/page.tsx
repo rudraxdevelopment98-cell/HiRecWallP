@@ -84,11 +84,30 @@ export default async function AdminSettingsPage() {
             { name: 'referrer_reward', label: 'Inviter reward (credits)', type: 'number' },
             { name: 'referral_monthly_cap', label: 'Max rewards per inviter / month', type: 'number' },
             { name: 'reward_days', label: 'Reward credits valid (days)', type: 'number' },
-            { name: 'referral_enabled', label: 'Referral programme on', type: 'checkbox', span: 2 },
+            { name: 'first_purchase_bonus', label: 'First-purchase bonus credits', type: 'number' },
+            { name: 'affiliate_pct', label: 'Creator affiliate commission %', type: 'number' },
+            { name: 'daily_email_cap', label: 'Daily-wallpaper emails / day', type: 'number' },
+            { name: 'referral_enabled', label: 'Referral programme on', type: 'checkbox' },
+            { name: 'gifts_enabled', label: 'Gift credits on', type: 'checkbox' },
+            { name: 'affiliate_enabled', label: 'Creator affiliate links on', type: 'checkbox' },
+            { name: 'daily_enabled', label: 'Daily free wallpaper on', type: 'checkbox' },
           ]}
           initial={settings.growth}
           submitLabel="Save growth settings"
           wrapAs="growth"
+        />
+      </section>
+
+      <section className="rounded-2xl border bg-card p-6">
+        <h2 className="mb-1 font-semibold">Exchange rates for creator payouts</h2>
+        <p className="mb-3 text-xs text-muted-foreground">Rupees per 1 unit. Used to pay creators for foreign-currency affiliate sales. ⚠️ Update monthly.</p>
+        <AdminForm
+          action="/api/admin/settings"
+          method="PUT"
+          fields={['USD', 'GBP', 'EUR', 'AUD', 'CAD'].map((c) => ({ name: c, label: `₹ per ${c}`, type: 'number' as const }))}
+          initial={settings.fx_to_inr}
+          submitLabel="Save rates"
+          wrapAs="fx_to_inr"
         />
       </section>
 

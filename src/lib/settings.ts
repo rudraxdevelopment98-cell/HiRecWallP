@@ -37,7 +37,18 @@ export interface SiteSettings {
     referrer_reward: number;
     referral_monthly_cap: number;
     reward_days: number;
+    /** Extra bonus credits on an account's first paid order (0 = off). */
+    first_purchase_bonus: number;
+    gifts_enabled: boolean;
+    affiliate_enabled: boolean;
+    /** % of the order paid to the creator who sent the buyer. */
+    affiliate_pct: number;
+    daily_enabled: boolean;
+    /** Max daily-wallpaper emails per day (Resend free plan: 100/day). */
+    daily_email_cap: number;
   };
+  /** Rupees per unit of other currencies, for creator payouts of foreign sales. ⚠️ Review monthly. */
+  fx_to_inr: Record<string, number>;
   /** Move a country to another pricing tier, e.g. { "BR": "T4" } (Admin → Pricing by country). */
   country_tiers: Record<string, RegionCode>;
   /** Footer social links (icons appear only when a URL is set). */
@@ -65,7 +76,14 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     referrer_reward: 20,
     referral_monthly_cap: 20,
     reward_days: 365,
+    first_purchase_bonus: 5,
+    gifts_enabled: true,
+    affiliate_enabled: true,
+    affiliate_pct: 10,
+    daily_enabled: true,
+    daily_email_cap: 90,
   },
+  fx_to_inr: { USD: 84, GBP: 107, EUR: 91, AUD: 55, CAD: 61 },
 };
 
 export type SettingKey = keyof SiteSettings;
@@ -94,6 +112,7 @@ export async function getSettings(): Promise<SiteSettings> {
     value.business = { ...DEFAULT_SETTINGS.business, ...(value.business ?? {}) };
     value.social = { ...DEFAULT_SETTINGS.social, ...(value.social ?? {}) };
     value.growth = { ...DEFAULT_SETTINGS.growth, ...(value.growth ?? {}) };
+    value.fx_to_inr = { ...DEFAULT_SETTINGS.fx_to_inr, ...(value.fx_to_inr ?? {}) };
     value.country_tiers = value.country_tiers && typeof value.country_tiers === 'object' ? value.country_tiers : {};
     cache = { at: Date.now(), value };
     return value;

@@ -19,6 +19,7 @@ import {
   Mountain,
   Palette,
   Receipt,
+  Rocket,
   Settings,
   Sparkles,
   Tags,
@@ -60,6 +61,7 @@ export const ADMIN_NAV = [
   {
     group: 'Marketing',
     items: [
+      { href: '/admin/growth', label: 'Growth', icon: Rocket },
       { href: '/admin/social', label: 'Social posts', icon: Megaphone },
       { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
       { href: '/admin/messages', label: 'Messages', icon: Inbox },

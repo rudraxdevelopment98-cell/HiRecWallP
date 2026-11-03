@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { getProvider } from '@/lib/payments';
 import { getSettings } from '@/lib/settings';
 import { handleSubscriptionEvent } from '@/lib/subscriptions';
+import { sendGiftEmail } from '@/lib/gifts';
 
 export const runtime = 'nodejs';
 
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
     // Load the order this event refers to.
     const { data: order } = await supabase
       .from('orders')
-      .select('id, user_id, status, provider')
+      .select('id, user_id, status, provider, gift_email')
       .eq('provider_order_id', result.providerOrderId)
       .maybeSingle();
     if (!order) return NextResponse.json({ ok: true, unknownOrder: true });
@@ -136,10 +137,15 @@ export async function POST(request: Request) {
       } else if (item.credit_pack_id) {
         const { data: pack } = await supabase
           .from('credit_packs')
-          .select('credits, bonus_credits')
+          .select('credits, bonus_credits, region_code')
           .eq('id', item.credit_pack_id)
           .maybeSingle();
-        if (pack) {
+        if (pack && order.gift_email) {
+          // Gift: create a redeemable code for the friend instead of crediting the buyer.
+          const { data: code, error: gErr } = await supabase.rpc('create_gift', { p_order: order.id, p_region: pack.region_code });
+          if (gErr) throw gErr;
+          await sendGiftEmail(order.id, code as string).catch((e) => console.error('[webhook] gift email failed', e));
+        } else if (pack) {
           // Paid credits never expire; bonus credits expire after 12 months.
           const { error: cErr } = await supabase.rpc('add_pack_credits', {
             p_user: order.user_id,
@@ -150,6 +156,17 @@ export async function POST(request: Request) {
           });
           if (cErr) throw cErr;
         }
+      }
+    }
+
+    // Growth: first-purchase bonus and creator affiliate commission (both idempotent).
+    {
+      const g = (await getSettings()).growth;
+      if (g.first_purchase_bonus > 0) {
+        await supabase.rpc('first_purchase_bonus', { p_order: order.id, p_credits: g.first_purchase_bonus, p_days: 365 });
+      }
+      if (g.affiliate_enabled && g.affiliate_pct > 0) {
+        await supabase.rpc('record_affiliate_commission', { p_order: order.id, p_pct: g.affiliate_pct });
       }
     }
 
