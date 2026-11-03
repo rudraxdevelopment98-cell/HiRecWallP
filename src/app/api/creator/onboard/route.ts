@@ -13,6 +13,15 @@ const schema = z.object({
   payoutProvider: z.enum(['razorpay_route', 'paypal_payouts']),
   payoutAccountId: z.string().min(2).max(128),
   acceptAgreement: z.literal(true),
+  // Tax details for TDS on payouts (Income-tax Act 2025, s.393).
+  taxResident: z.enum(['IN', 'foreign']).default('IN'),
+  entityType: z.enum(['individual', 'huf', 'firm', 'company']).default('individual'),
+  pan: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .default('')
+    .refine((v) => v === '' || /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(v), 'PAN looks like ABCDE1234F'),
 });
 
 /**
@@ -27,7 +36,8 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid input (agreement must be accepted)' }, { status: 400 });
+    const issue = parsed.success ? null : parsed.error.issues.find((i) => i.path[0] === 'pan');
+    return NextResponse.json({ error: issue?.message ?? 'Invalid input (agreement must be accepted)' }, { status: 400 });
   }
 
   try {
@@ -49,6 +59,9 @@ export async function POST(request: Request) {
         payout_account_id: parsed.data.payoutAccountId,
         kyc_status: kyc.status,
         agreement_accepted_at: new Date().toISOString(),
+        tax_resident: parsed.data.taxResident,
+        entity_type: parsed.data.entityType,
+        pan: parsed.data.taxResident === 'IN' && parsed.data.pan ? parsed.data.pan : null,
       },
       { onConflict: 'user_id' },
     );

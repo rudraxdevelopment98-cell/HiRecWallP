@@ -3,6 +3,7 @@ import 'server-only';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getPayoutProvider, type PayoutProviderId } from '@/lib/payouts';
 import { getSettings } from '@/lib/settings';
+import { computeTds, fyRange } from '@/lib/tax';
 
 /**
  * creator_payouts: compute each creator's monthly earnings and (on a live run)
@@ -127,9 +128,26 @@ export async function runCreatorPayouts(opts: {
 
   const { data: creators } = await supabase
     .from('creators')
-    .select('user_id, commission_pct, payout_provider, payout_account_id, kyc_status')
+    .select('user_id, commission_pct, payout_provider, payout_account_id, kyc_status, pan, tax_resident, entity_type')
     .in('user_id', [...grossByCreator.keys()]);
   const creatorMap = new Map((creators ?? []).map((c) => [c.user_id, c]));
+
+  // Earlier payouts this financial year (for TDS thresholds and commission catch-up).
+  const fy = fyRange(new Date(`${period}-15T00:00:00Z`));
+  const { data: fyRows } = await supabase
+    .from('creator_payouts')
+    .select('creator_id, period, gross, affiliate, tds_commission')
+    .eq('financial_year', fy.label)
+    .neq('period', period)
+    .in('creator_id', [...grossByCreator.keys()]);
+  const fyBefore = new Map<string, { sales: number; affiliate: number; tdsComm: number }>();
+  for (const r of (fyRows ?? []) as { creator_id: string; gross: number; affiliate: number; tds_commission: number }[]) {
+    const v = fyBefore.get(r.creator_id) ?? { sales: 0, affiliate: 0, tdsComm: 0 };
+    v.sales += Number(r.gross);
+    v.affiliate += Number(r.affiliate);
+    v.tdsComm += Number(r.tds_commission);
+    fyBefore.set(r.creator_id, v);
+  }
 
   const results: Array<Record<string, unknown>> = [];
   for (const [creatorId, gross] of grossByCreator) {
@@ -139,7 +157,23 @@ export async function runCreatorPayouts(opts: {
     const commission = Math.round(gross * (pct / 100) * 100) / 100;
     // Affiliate earnings are the creator's own commission: added after the platform's cut.
     const affiliate = affByCreator.get(creatorId);
-    const net = Math.round((gross - commission + (affiliate?.inr ?? 0)) * 100) / 100;
+    const before = fyBefore.get(creatorId) ?? { sales: 0, affiliate: 0, tdsComm: 0 };
+    const tds = computeTds(
+      {
+        creator: {
+          pan: (c.pan as string | null) ?? null,
+          tax_resident: (c.tax_resident as 'IN' | 'foreign') ?? 'IN',
+          entity_type: (c.entity_type as 'individual') ?? 'individual',
+        },
+        grossSales: gross,
+        affiliate: affiliate?.inr ?? 0,
+        fySalesBefore: before.sales,
+        fyAffiliateBefore: before.affiliate,
+        fyCommissionTdsBefore: before.tdsComm,
+      },
+      settings.tax,
+    );
+    const net = Math.round((gross - commission + (affiliate?.inr ?? 0) - tds.tdsSales - tds.tdsCommission) * 100) / 100;
 
     // Upsert the payout record (idempotent per creator+period).
     const { data: existing } = await supabase
@@ -160,7 +194,20 @@ export async function runCreatorPayouts(opts: {
     const { data: payoutRow } = await supabase
       .from('creator_payouts')
       .upsert(
-        { creator_id: creatorId, period, gross, commission, net, currency: 'INR', status },
+        {
+          creator_id: creatorId,
+          period,
+          gross,
+          commission,
+          net,
+          currency: 'INR',
+          status,
+          affiliate: affiliate?.inr ?? 0,
+          tds_sales: tds.tdsSales,
+          tds_commission: tds.tdsCommission,
+          financial_year: fy.label,
+          tax_note: tds.note,
+        },
         { onConflict: 'creator_id,period' },
       )
       .select('id')
@@ -189,7 +236,7 @@ export async function runCreatorPayouts(opts: {
       }
     }
 
-    results.push({ creatorId, gross, commission, affiliate: affiliate?.inr ?? 0, net, status });
+    results.push({ creatorId, gross, commission, affiliate: affiliate?.inr ?? 0, tds: tds.tdsSales + tds.tdsCommission, net, status });
   }
 
   return { period, dryRun, creators: results.length, results };

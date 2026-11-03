@@ -339,6 +339,18 @@ Key Phase 3 decisions:
   Opt-in email (never pre-ticked) to `newsletter_subscribers.daily`, capped per day, signed one-click unsubscribe
   (`/api/newsletter/unsubscribe`, RFC 8058 POST too).
 
+## Tax & compliance (2026-11-03) — migration 0019, docs/TAX_COMPLIANCE.md
+
+- Owner has no CA: rules are encoded and tracked; **Admin → Tax centre** (`/admin/tax`) shows FY turnover vs the
+  ₹20 lakh GST limit (`gstThresholdStatus`), presumptive profit (s.58, 6%), upcoming deadlines (`upcomingDeadlines`),
+  to-dos, editable `site_settings.tax`, and CSV registers (`/api/admin/tax/sales-register`, `/tds-register`).
+- Receipts use `gstTreatment()` (unregistered receipt / CGST+SGST / IGST / export under LUT).
+- Creator payouts deduct TDS via `computeTds()` (s.393 T8(v) 0.1%/5%, ₹5L individual exemption; T1(ii) 2%/20% above
+  ₹20k with catch-up; non-residents flagged, not automated); payout rows store `affiliate`, `tds_*`, `financial_year`.
+  Onboarding collects PAN, residency, entity type.
+- FX: `refreshFxRates()` (ECB via Frankfurter, free, no key; sanity-checked) monthly cron `/api/jobs/fx-rates`
+  (05:15 UTC on the 1st, before payouts) + Tax centre button; `fx_meta` records source/date.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

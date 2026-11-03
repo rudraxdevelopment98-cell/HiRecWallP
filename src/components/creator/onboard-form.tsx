@@ -24,6 +24,9 @@ export function OnboardForm() {
           payoutProvider: form.get('payoutProvider'),
           payoutAccountId: form.get('payoutAccountId'),
           acceptAgreement: form.get('acceptAgreement') === 'on',
+          taxResident: form.get('taxResident'),
+          entityType: form.get('entityType'),
+          pan: form.get('pan') ?? '',
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -59,6 +62,36 @@ export function OnboardForm() {
         </label>
         <input id="payoutAccountId" name="payoutAccountId" required className="w-full rounded-md border bg-background px-3 py-2 text-sm" />
       </div>
+
+      <fieldset className="space-y-3 rounded-xl border p-4">
+        <legend className="px-1 text-sm font-medium">Tax details (for TDS on payouts)</legend>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="space-y-1 text-sm">
+            <span className="font-medium">Tax residence</span>
+            <select id="taxResident" name="taxResident" className="w-full rounded-md border bg-background px-3 py-2 text-sm">
+              <option value="IN">India</option>
+              <option value="foreign">Outside India</option>
+            </select>
+          </label>
+          <label className="space-y-1 text-sm">
+            <span className="font-medium">You are</span>
+            <select id="entityType" name="entityType" className="w-full rounded-md border bg-background px-3 py-2 text-sm">
+              <option value="individual">An individual</option>
+              <option value="huf">An HUF</option>
+              <option value="firm">A firm / LLP</option>
+              <option value="company">A company</option>
+            </select>
+          </label>
+        </div>
+        <label className="block space-y-1 text-sm">
+          <span className="font-medium">PAN (Indian residents)</span>
+          <input id="pan" name="pan" maxLength={10} placeholder="ABCDE1234F" className="w-full rounded-md border bg-background px-3 py-2 text-sm uppercase" />
+          <span className="block text-xs text-muted-foreground">
+            By law we deduct TDS from creator payouts: 0.1% on sales (none for individuals under ₹5 lakh a year with PAN) and 2% on
+            affiliate commission above ₹20,000 a year. Without a PAN the rates are higher (5% / 20%). You can claim TDS back in your tax return.
+          </span>
+        </label>
+      </fieldset>
 
       <div className="rounded-xl border p-4 text-sm text-muted-foreground">
         <p className="mb-2 font-medium text-foreground">Creator agreement (summary)</p>

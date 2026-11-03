@@ -7,6 +7,7 @@ import { getMyOrder } from '@/lib/orders';
 import { PrintButton } from '@/components/account/print-button';
 import { publicEnv } from '@/lib/env';
 import { getSettings, sellerDetails } from '@/lib/settings';
+import { gstTreatment } from '@/lib/gst';
 
 export const metadata: Metadata = { title: 'Receipt' };
 
@@ -24,9 +25,17 @@ export default async function ReceiptPage(props: { params: Promise<{ id: string 
   const order = await getMyOrder(params.id);
   if (!order || order.status !== 'paid') notFound();
 
-  const seller = sellerDetails(await getSettings(), publicEnv.NEXT_PUBLIC_BRAND_NAME);
+  const settings = await getSettings();
+  const seller = sellerDetails(settings, publicEnv.NEXT_PUBLIC_BRAND_NAME);
   const rate = seller.rate;
-  const showGst = Boolean(seller.gstin) && order.currency === 'INR';
+  const g = gstTreatment({
+    registered: settings.tax.gst_registered && Boolean(seller.gstin),
+    lutFiled: settings.tax.lut_filed,
+    currency: order.currency,
+    sellerGstin: seller.gstin,
+    buyerGstin: order.buyer_gstin,
+  });
+  const showGst = g.mode === 'cgst_sgst' || g.mode === 'igst';
   const taxable = showGst ? Math.round(order.amount_minor / (1 + rate / 100)) : order.amount_minor;
   const tax = order.amount_minor - taxable;
   const money = (minor: number) => formatMoneyMinor(minor, order.currency);
@@ -48,7 +57,7 @@ export default async function ReceiptPage(props: { params: Promise<{ id: string 
             {seller.gstin && <p className="text-muted-foreground">GSTIN: {seller.gstin}</p>}
           </div>
           <div className="text-right">
-            <p className="text-lg font-semibold">{showGst ? 'Tax Invoice' : 'Receipt'}</p>
+            <p className="text-lg font-semibold">{g.title}</p>
             <p className="text-muted-foreground">No. {order.invoice_no ?? order.id.slice(0, 8).toUpperCase()}</p>
             <p className="text-muted-foreground">
               {new Date(order.paid_at ?? order.created_at).toLocaleDateString('en-IN', { dateStyle: 'long' })}
@@ -92,10 +101,23 @@ export default async function ReceiptPage(props: { params: Promise<{ id: string 
                 <dt>Taxable value</dt>
                 <dd>{money(taxable)}</dd>
               </div>
-              <div className="flex justify-between text-muted-foreground">
-                <dt>GST @ {rate}% (included)</dt>
-                <dd>{money(tax)}</dd>
-              </div>
+              {g.mode === 'cgst_sgst' ? (
+                <>
+                  <div className="flex justify-between text-muted-foreground">
+                    <dt>CGST @ {rate / 2}% (included)</dt>
+                    <dd>{money(Math.floor(tax / 2))}</dd>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <dt>SGST @ {rate / 2}% (included)</dt>
+                    <dd>{money(tax - Math.floor(tax / 2))}</dd>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>IGST @ {rate}% (included)</dt>
+                  <dd>{money(tax)}</dd>
+                </div>
+              )}
             </>
           )}
           <div className="flex justify-between border-t pt-2 text-base font-semibold">
@@ -105,8 +127,7 @@ export default async function ReceiptPage(props: { params: Promise<{ id: string 
         </dl>
 
         <footer className="mt-8 border-t pt-4 text-xs text-muted-foreground">
-          Paid online via Razorpay. This is a computer-generated document.
-          {!seller.gstin && ' Seller GST details will appear here once registered.'}
+          Paid online via Razorpay. This is a computer-generated document. {g.note}
         </footer>
       </article>
     </div>

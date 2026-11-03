@@ -36,6 +36,22 @@ const schema = z.discriminatedUnion('key', [
       daily_email_cap: z.number().int().min(0).max(10000),
     }),
   }),
+  z.object({
+    key: z.literal('tax'),
+    value: z.object({
+      gst_registered: bool,
+      lut_filed: bool,
+      gst_threshold_inr: z.number().int().min(0).max(100_000_000),
+      tds_sales_pct: z.number().min(0).max(30),
+      tds_sales_no_pan_pct: z.number().min(0).max(30),
+      tds_sales_exempt_below_inr: z.number().min(0).max(100_000_000),
+      tds_commission_pct: z.number().min(0).max(30),
+      tds_commission_no_pan_pct: z.number().min(0).max(30),
+      tds_commission_threshold_inr: z.number().min(0).max(100_000_000),
+      presumptive_digital_pct: z.number().min(0).max(100),
+      tan: z.string().trim().toUpperCase().refine((v) => v === '' || /^[A-Z]{4}[0-9]{5}[A-Z]$/.test(v), 'TAN looks like ABCD12345E'),
+    }),
+  }),
   z.object({ key: z.literal('fx_to_inr'), value: z.record(z.string().regex(/^[A-Z]{3}$/), z.number().positive().max(10000)) }),
   z.object({
     key: z.literal('country_tiers'),

@@ -15,6 +15,10 @@ interface PayoutRow {
   status: string;
   provider_ref: string | null;
   created_at: string;
+  affiliate: number;
+  tds_sales: number;
+  tds_commission: number;
+  tax_note: string | null;
 }
 
 function variant(status: string): 'free' | 'secondary' | 'outline' {
@@ -30,7 +34,7 @@ export default async function CreatorPayoutsPage() {
   const supabase = (await createClient());
   const { data } = await supabase
     .from('creator_payouts')
-    .select('id, period, net, currency, status, provider_ref, created_at')
+    .select('id, period, net, currency, status, provider_ref, created_at, affiliate, tds_sales, tds_commission, tax_note')
     .order('period', { ascending: false })
     .returns<PayoutRow[]>();
   const rows = data ?? [];
@@ -57,6 +61,8 @@ export default async function CreatorPayoutsPage() {
           <thead className="text-left text-muted-foreground">
             <tr className="border-b">
               <th className="py-2">Period</th>
+              <th>Affiliate</th>
+              <th>TDS</th>
               <th>Net</th>
               <th>Status</th>
               <th>Reference</th>
@@ -66,6 +72,8 @@ export default async function CreatorPayoutsPage() {
             {rows.map((r) => (
               <tr key={r.id} className="border-b">
                 <td className="py-2">{r.period}</td>
+                <td>{formatRupees(Number(r.affiliate ?? 0))}</td>
+                <td title={r.tax_note ?? undefined}>{formatRupees(Number(r.tds_sales ?? 0) + Number(r.tds_commission ?? 0))}</td>
                 <td>{formatRupees(Number(r.net))}</td>
                 <td>
                   <Badge variant={variant(r.status)}>{r.status}</Badge>

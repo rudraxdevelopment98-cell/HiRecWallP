@@ -36,3 +36,11 @@ test('referral links remember the code and send people to sign-up', async ({ req
   expect(res.headers()['location']).toContain('/login?ref=1');
   expect(res.headers()['set-cookie']).toContain('ref=ABC2345');
 });
+
+test('tax centre and registers are admin-only', async ({ page, request }) => {
+  await page.goto('/admin/tax');
+  await expect(page).toHaveURL(/\/login/);
+  expect([401, 403]).toContain((await request.get('/api/admin/tax/sales-register')).status());
+  expect([401, 403]).toContain((await request.get('/api/admin/tax/tds-register')).status());
+  expect((await request.get('/api/jobs/fx-rates')).status()).toBe(401);
+});

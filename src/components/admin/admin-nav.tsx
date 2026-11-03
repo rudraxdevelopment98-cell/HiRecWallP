@@ -12,6 +12,7 @@ import {
   History,
   Images,
   Inbox,
+  Landmark,
   LayoutDashboard,
   ListChecks,
   Mail,
@@ -71,6 +72,7 @@ export const ADMIN_NAV = [
     group: 'System',
     items: [
       { href: '/admin/settings', label: 'Settings & controls', icon: Settings },
+      { href: '/admin/tax', label: 'Tax centre', icon: Landmark },
       { href: '/admin/pricing', label: 'Auto pricing', icon: Tags },
       { href: '/admin/health', label: 'System health', icon: Activity },
       { href: '/admin/activity', label: 'Activity log', icon: History },

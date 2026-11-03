@@ -2,6 +2,7 @@ import 'server-only';
 
 import { createClient as createSupabase } from '@supabase/supabase-js';
 import type { RegionCode } from '@/lib/geo';
+import { DEFAULT_TAX, type TaxSettings } from '@/lib/tax';
 
 /**
  * Admin-controlled switches (table `site_settings`, edited at /admin/settings).
@@ -47,8 +48,12 @@ export interface SiteSettings {
     /** Max daily-wallpaper emails per day (Resend free plan: 100/day). */
     daily_email_cap: number;
   };
-  /** Rupees per unit of other currencies, for creator payouts of foreign sales. ⚠️ Review monthly. */
+  /** Rupees per unit of other currencies (auto-updated monthly from ECB rates; editable). */
   fx_to_inr: Record<string, number>;
+  /** When/where the rates came from. */
+  fx_meta: { updated_at: string | null; source: string };
+  /** GST / TDS / income-tax switches and rates (Admin → Tax centre). */
+  tax: TaxSettings;
   /** Move a country to another pricing tier, e.g. { "BR": "T4" } (Admin → Pricing by country). */
   country_tiers: Record<string, RegionCode>;
   /** Footer social links (icons appear only when a URL is set). */
@@ -84,6 +89,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     daily_email_cap: 90,
   },
   fx_to_inr: { USD: 84, GBP: 107, EUR: 91, AUD: 55, CAD: 61 },
+  fx_meta: { updated_at: null, source: 'default' },
+  tax: DEFAULT_TAX,
 };
 
 export type SettingKey = keyof SiteSettings;
@@ -113,6 +120,8 @@ export async function getSettings(): Promise<SiteSettings> {
     value.social = { ...DEFAULT_SETTINGS.social, ...(value.social ?? {}) };
     value.growth = { ...DEFAULT_SETTINGS.growth, ...(value.growth ?? {}) };
     value.fx_to_inr = { ...DEFAULT_SETTINGS.fx_to_inr, ...(value.fx_to_inr ?? {}) };
+    value.fx_meta = { ...DEFAULT_SETTINGS.fx_meta, ...(value.fx_meta ?? {}) };
+    value.tax = { ...DEFAULT_TAX, ...(value.tax ?? {}) };
     value.country_tiers = value.country_tiers && typeof value.country_tiers === 'object' ? value.country_tiers : {};
     cache = { at: Date.now(), value };
     return value;
