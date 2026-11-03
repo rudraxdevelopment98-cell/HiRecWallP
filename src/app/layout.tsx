@@ -4,6 +4,7 @@ import './globals.css';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { AnnouncementBar } from '@/components/announcement-bar';
+import { NavigationProgress } from '@/components/navigation-progress';
 
 const sans = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
 const display = Space_Grotesk({
@@ -47,6 +48,7 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-screen flex-col antialiased">
+        <NavigationProgress />
         <AnnouncementBar />
         <SiteHeader />
         <div className="flex-1">{children}</div>

@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["bom1"],
   "crons": [
     { "path": "/api/jobs/dynamic-pricing", "schedule": "0 2 * * *" },
     { "path": "/api/jobs/social-scheduler", "schedule": "0 3 * * *" },

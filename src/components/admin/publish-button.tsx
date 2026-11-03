@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
 
 export function PublishButton({ wallpaperId }: { wallpaperId: string }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [busy, setBusy] = useState(false);
 
   async function publish() {
@@ -16,15 +16,15 @@ export function PublishButton({ wallpaperId }: { wallpaperId: string }) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ wallpaperId }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) refresh();
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <Button size="sm" variant="outline" onClick={publish} disabled={busy}>
-      {busy ? 'Publishing…' : 'Publish'}
+    <Button size="sm" variant="outline" onClick={publish} disabled={busy || refreshing}>
+      {busy || refreshing ? 'Publishing…' : 'Publish'}
     </Button>
   );
 }

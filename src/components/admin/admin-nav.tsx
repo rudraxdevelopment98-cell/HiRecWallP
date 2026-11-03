@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity,
   BarChart3,
@@ -25,6 +25,7 @@ import {
   Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { startNavigationProgress } from '@/components/navigation-progress';
 
 export const ADMIN_NAV = [
   {
@@ -80,7 +81,7 @@ const isActive = (pathname: string, href: string) =>
 export function AdminSidebar() {
   const pathname = usePathname();
   return (
-    <aside className="hidden flex-col gap-5 bg-neutral-950 p-4 text-sm text-neutral-300 lg:flex">
+    <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] flex-col gap-5 overflow-y-auto overscroll-contain bg-neutral-950 p-4 text-sm text-neutral-300 [scrollbar-width:thin] lg:flex">
       <Link href="/" className="flex items-center gap-2 px-2 font-semibold text-white">
         <Mountain className="h-5 w-5" /> HirecWallp admin
       </Link>
@@ -113,9 +114,10 @@ export function AdminSidebar() {
 /** Mobile: a section picker that stays usable on small screens. */
 export function AdminMobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const current = ADMIN_NAV.flatMap((g) => g.items).find((i) => isActive(pathname, i.href));
   return (
-    <div className="border-b bg-card px-3 py-2 lg:hidden">
+    <div className="sticky top-16 z-30 border-b bg-card/95 px-3 py-2 backdrop-blur lg:hidden">
       <label className="sr-only" htmlFor="admin-section">
         Admin section
       </label>
@@ -124,7 +126,8 @@ export function AdminMobileNav() {
         className="input"
         value={current?.href ?? '/admin'}
         onChange={(e) => {
-          window.location.href = e.target.value;
+          startNavigationProgress();
+          router.push(e.target.value);
         }}
       >
         {ADMIN_NAV.map((g) => (

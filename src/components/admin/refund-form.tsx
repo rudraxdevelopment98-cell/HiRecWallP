@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
 
 /** Refund with a reason; two-step confirm built into the page. */
 export function RefundForm({ orderId, canRefundAtProvider }: { orderId: string; canRefundAtProvider: boolean }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [reason, setReason] = useState('');
   const [viaProvider, setViaProvider] = useState(canRefundAtProvider);
   const [confirming, setConfirming] = useState(false);
@@ -24,7 +24,7 @@ export function RefundForm({ orderId, canRefundAtProvider }: { orderId: string; 
     if (res?.ok) {
       setState('done');
       setMsg(`Refunded. Removed ${json.entitlementsRemoved ?? 0} wallpaper(s), reversed ${json.creditsReversed ?? 0} credit(s), revoked ${json.passesRevoked ?? 0} pass(es).`);
-      router.refresh();
+      refresh();
     } else {
       setState('error');
       setMsg(json.error ?? 'Refund failed');
@@ -53,7 +53,7 @@ export function RefundForm({ orderId, canRefundAtProvider }: { orderId: string; 
           <span className="text-rose-700">
             {viaProvider ? 'Refund the money and remove access?' : 'Remove access (money already refunded elsewhere)?'}
           </span>
-          <Button size="sm" onClick={refund} disabled={state === 'busy'}>
+          <Button size="sm" onClick={refund} disabled={state === 'busy' || refreshing}>
             {state === 'busy' ? 'Refunding…' : 'Yes, refund'}
           </Button>
           <Button size="sm" variant="outline" onClick={() => setConfirming(false)}>

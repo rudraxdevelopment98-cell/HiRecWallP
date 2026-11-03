@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRefresh } from '@/lib/use-refresh';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { WallpaperActions } from '@/components/admin/wallpaper-actions';
@@ -23,7 +23,7 @@ export interface CatalogueRow {
 
 /** Catalogue list with row selection and bulk actions. */
 export function CatalogueTable({ rows, categories }: { rows: CatalogueRow[]; categories: { id: string; name: string }[] }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -51,7 +51,7 @@ export function CatalogueTable({ rows, categories }: { rows: CatalogueRow[]; cat
     if (res?.ok) {
       setMsg({ ok: true, text: `${label}: ${json.changed ?? 0} changed` });
       setSelected(new Set());
-      router.refresh();
+      refresh();
     } else setMsg({ ok: false, text: json.error ?? 'Failed' });
   }
 
@@ -62,11 +62,11 @@ export function CatalogueTable({ rows, categories }: { rows: CatalogueRow[]; cat
           <input type="checkbox" checked={all} onChange={() => setSelected(all ? new Set() : new Set(rows.map((r) => r.id)))} aria-label="Select all on this page" />
           {selected.size ? `${selected.size} selected` : 'Select'}
         </label>
-        <Button size="sm" disabled={busy || !selected.size} onClick={() => bulk({ action: 'publish' }, 'Published')}>Publish</Button>
-        <Button size="sm" variant="outline" disabled={busy || !selected.size} onClick={() => bulk({ action: 'unpublish' }, 'Unpublished')}>Unpublish</Button>
-        <Button size="sm" variant="outline" disabled={busy || !selected.size} onClick={() => bulk({ action: 'archive' }, 'Archived')}>Archive</Button>
-        <Button size="sm" variant="outline" disabled={busy || !selected.size} onClick={() => bulk({ action: 'free', value: true }, 'Marked free')}>Make free</Button>
-        <Button size="sm" variant="outline" disabled={busy || !selected.size} onClick={() => bulk({ action: 'free', value: false }, 'Marked premium')}>Make premium</Button>
+        <Button size="sm" disabled={busy || refreshing || !selected.size} onClick={() => bulk({ action: 'publish' }, 'Published')}>Publish</Button>
+        <Button size="sm" variant="outline" disabled={busy || refreshing || !selected.size} onClick={() => bulk({ action: 'unpublish' }, 'Unpublished')}>Unpublish</Button>
+        <Button size="sm" variant="outline" disabled={busy || refreshing || !selected.size} onClick={() => bulk({ action: 'archive' }, 'Archived')}>Archive</Button>
+        <Button size="sm" variant="outline" disabled={busy || refreshing || !selected.size} onClick={() => bulk({ action: 'free', value: true }, 'Marked free')}>Make free</Button>
+        <Button size="sm" variant="outline" disabled={busy || refreshing || !selected.size} onClick={() => bulk({ action: 'free', value: false }, 'Marked premium')}>Make premium</Button>
         <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-md border bg-background px-2 py-1 text-xs" aria-label="Category for selected">
           <option value="">Move to category…</option>
           <option value="none">— No category —</option>
@@ -74,7 +74,7 @@ export function CatalogueTable({ rows, categories }: { rows: CatalogueRow[]; cat
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
-        <Button size="sm" variant="outline" disabled={busy || !selected.size || !category} onClick={() => bulk({ action: 'category', categoryId: category === 'none' ? null : category }, 'Moved')}>Apply</Button>
+        <Button size="sm" variant="outline" disabled={busy || refreshing || !selected.size || !category} onClick={() => bulk({ action: 'category', categoryId: category === 'none' ? null : category }, 'Moved')}>Apply</Button>
         {msg && <span className={msg.ok ? 'text-emerald-600' : 'text-rose-600'}>{msg.text}</span>}
       </div>
 

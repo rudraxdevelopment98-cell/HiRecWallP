@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
 
 /** Row actions: publish / unpublish / archive / edit / delete. */
 export function WallpaperActions({ id, status }: { id: string; status: string }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,24 +20,24 @@ export function WallpaperActions({ id, status }: { id: string; status: string })
       body: body ? JSON.stringify(body) : undefined,
     }).catch(() => null);
     setBusy(false);
-    if (res?.ok) router.refresh();
+    if (res?.ok) refresh();
     else setError(((await res?.json().catch(() => null)) as { error?: string } | null)?.error ?? 'Failed');
   }
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-1.5">
       {status !== 'published' && (
-        <Button size="sm" disabled={busy} onClick={() => call('/api/admin/publish', 'POST', { wallpaperId: id })}>
+        <Button size="sm" disabled={busy || refreshing} onClick={() => call('/api/admin/publish', 'POST', { wallpaperId: id })}>
           Publish
         </Button>
       )}
       {status === 'published' && (
-        <Button size="sm" variant="outline" disabled={busy} onClick={() => call(`/api/admin/wallpapers/${id}`, 'PATCH', { status: 'draft' })}>
+        <Button size="sm" variant="outline" disabled={busy || refreshing} onClick={() => call(`/api/admin/wallpapers/${id}`, 'PATCH', { status: 'draft' })}>
           Unpublish
         </Button>
       )}
       {status !== 'archived' && (
-        <Button size="sm" variant="outline" disabled={busy} onClick={() => call(`/api/admin/wallpapers/${id}`, 'PATCH', { status: 'archived' })}>
+        <Button size="sm" variant="outline" disabled={busy || refreshing} onClick={() => call(`/api/admin/wallpapers/${id}`, 'PATCH', { status: 'archived' })}>
           Archive
         </Button>
       )}
@@ -47,7 +47,7 @@ export function WallpaperActions({ id, status }: { id: string; status: string })
       <Button
         size="sm"
         variant="outline"
-        disabled={busy}
+        disabled={busy || refreshing}
         onClick={() => {
           if (confirm('Delete this wallpaper and its files permanently?')) void call(`/api/admin/wallpapers/${id}`, 'DELETE');
         }}

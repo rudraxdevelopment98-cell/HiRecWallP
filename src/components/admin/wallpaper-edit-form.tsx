@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
 
 export interface EditableWallpaper {
@@ -24,7 +24,7 @@ export function WallpaperEditForm({
   categories: { id: string; name: string }[];
   sets: { id: string; title: string }[];
 }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [error, setError] = useState('');
 
@@ -50,7 +50,7 @@ export function WallpaperEditForm({
     }).catch(() => null);
     if (res?.ok) {
       setState('saved');
-      router.refresh();
+      refresh();
     } else {
       setState('error');
       setError(((await res?.json().catch(() => null)) as { error?: string } | null)?.error ?? 'Could not save');
@@ -95,8 +95,8 @@ export function WallpaperEditForm({
         <input type="checkbox" name="is_free" defaultChecked={wallpaper.is_free} /> Free wallpaper
       </label>
       <div className="flex items-center gap-3">
-        <Button type="submit" disabled={state === 'saving'}>
-          {state === 'saving' ? 'Saving…' : 'Save'}
+        <Button type="submit" disabled={state === 'saving' || refreshing}>
+          {state === 'saving' || refreshing ? 'Saving…' : 'Save'}
         </Button>
         {state === 'saved' && <span className="text-emerald-600">Saved</span>}
         {state === 'error' && <span className="text-rose-600">{error}</span>}

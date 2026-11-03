@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
 
 export type FieldType = 'text' | 'textarea' | 'number' | 'money' | 'checkbox' | 'lines' | 'select';
@@ -55,7 +55,7 @@ export function AdminForm({
    */
   wrapAs?: string;
 }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [state, setState] = useState<'idle' | 'busy' | 'saved' | 'error'>('idle');
   const [error, setError] = useState('');
 
@@ -69,7 +69,7 @@ export function AdminForm({
     }).catch(() => null);
     if (res?.ok) {
       setState('saved');
-      router.refresh();
+      refresh();
       return true;
     }
     setState('error');
@@ -161,15 +161,15 @@ export function AdminForm({
         })}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="submit" size="sm" disabled={state === 'busy'}>
-          {state === 'busy' ? 'Saving…' : submitLabel}
+        <Button type="submit" size="sm" disabled={state === 'busy' || refreshing}>
+          {state === 'busy' || refreshing ? 'Saving…' : submitLabel}
         </Button>
         {deleteAction && (
           <Button
             type="button"
             size="sm"
             variant="outline"
-            disabled={state === 'busy'}
+            disabled={state === 'busy' || refreshing}
             onClick={() => {
               if (confirm(deleteConfirm)) void send(deleteAction, 'DELETE');
             }}
@@ -177,7 +177,7 @@ export function AdminForm({
             Delete
           </Button>
         )}
-        {state === 'saved' && <span className="text-emerald-600">Saved</span>}
+        {state === 'saved' && !refreshing && <span className="text-emerald-600">Saved</span>}
         {state === 'error' && <span className="text-rose-600">{error}</span>}
       </div>
     </form>
@@ -186,7 +186,7 @@ export function AdminForm({
 
 /** One on/off switch that saves immediately. */
 export function SettingToggle({ settingKey, label, hint, value }: { settingKey: string; label: string; hint: string; value: boolean }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [on, setOn] = useState(value);
   const [busy, setBusy] = useState(false);
   return (
@@ -200,7 +200,7 @@ export function SettingToggle({ settingKey, label, hint, value }: { settingKey: 
         role="switch"
         aria-checked={on}
         aria-label={label}
-        disabled={busy}
+        disabled={busy || refreshing}
         onClick={async () => {
           setBusy(true);
           const next = !on;
@@ -211,7 +211,7 @@ export function SettingToggle({ settingKey, label, hint, value }: { settingKey: 
           }).catch(() => null);
           if (res?.ok) {
             setOn(next);
-            router.refresh();
+            refresh();
           }
           setBusy(false);
         }}

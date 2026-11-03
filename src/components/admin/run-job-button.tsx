@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
 
 /** Generic admin trigger: POSTs to a job/endpoint and surfaces the result. */
@@ -18,7 +18,7 @@ export function RunJobButton({
   variant?: 'default' | 'outline' | 'secondary';
   confirm?: string;
 }) {
-  const router = useRouter();
+  const { refresh, refreshing } = useRefresh();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -35,7 +35,7 @@ export function RunJobButton({
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? 'Failed');
       setMsg('Done');
-      router.refresh();
+      refresh();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : 'Failed');
     } finally {
@@ -45,8 +45,8 @@ export function RunJobButton({
 
   return (
     <span className="inline-flex items-center gap-2">
-      <Button size="sm" variant={variant} onClick={run} disabled={busy}>
-        {busy ? 'Running…' : label}
+      <Button size="sm" variant={variant} onClick={run} disabled={busy || refreshing}>
+        {busy || refreshing ? 'Running…' : label}
       </Button>
       {msg && <span className="text-xs text-muted-foreground">{msg}</span>}
     </span>

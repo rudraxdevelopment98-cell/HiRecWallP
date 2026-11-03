@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 
@@ -6,8 +7,12 @@ export interface SessionUser {
   email: string | null;
 }
 
-/** Current signed-in user (via request cookies), or null. */
-export async function getUser(): Promise<SessionUser | null> {
+/**
+ * Current signed-in user (via request cookies), or null. Wrapped in React
+ * `cache()` so the layout, the page and helpers share ONE auth round trip per
+ * request instead of each calling Supabase.
+ */
+export const getUser = cache(async (): Promise<SessionUser | null> => {
   try {
     const supabase = (await createClient());
     const { data, error } = await supabase.auth.getUser();
@@ -16,25 +21,24 @@ export async function getUser(): Promise<SessionUser | null> {
   } catch {
     return null;
   }
-}
+});
 
-/** True if the current user has the admin role (checked against profiles). */
-export async function isAdminUser(): Promise<boolean> {
+/** True if the current user has the admin role (checked against profiles; cached per request). */
+export const isAdminUser = cache(async (): Promise<boolean> => {
   try {
-    const supabase = (await createClient());
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) return false;
-    const { data, error } = await supabase
+    const user = await getUser();
+    if (!user) return false;
+    const { data, error } = await (await createClient())
       .from('profiles')
       .select('role')
-      .eq('id', auth.user.id)
+      .eq('id', user.id)
       .maybeSingle();
     if (error || !data) return false;
     return data.role === 'admin';
   } catch {
     return false;
   }
-}
+});
 
 /**
  * Signed-in user or redirect to login. Use in every protected page: layouts

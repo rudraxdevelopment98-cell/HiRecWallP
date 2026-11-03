@@ -264,6 +264,17 @@ Key Phase 3 decisions:
 - Migration 0014: RLS policies use `(select auth.uid())` (evaluated once per query) + hot FK indexes.
   Remaining advisor notes are intentional (see migration header); leaked-password check n/a (no passwords).
 
+## Responsiveness (2026-11-03)
+
+- Functions run in **bom1 (Mumbai)** via `vercel.json` `regions`, next to Supabase ap-south-1
+  (was iad1 → every DB call crossed the globe).
+- `getUser()` / `isAdminUser()` are React `cache()`d: layout + page share one auth round trip.
+- `loading.tsx` for /admin and /account (instant skeleton on click); global `NavigationProgress`
+  top bar (call `startNavigationProgress()` before a programmatic `router.push`).
+- Admin client components use `useRefresh()` (`router.refresh()` in a transition) and stay
+  "busy" until the refreshed data is on screen. Use it instead of bare `router.refresh()`.
+- Admin sidebar is sticky with its own scroll; mobile section picker is sticky and uses client navigation.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International
