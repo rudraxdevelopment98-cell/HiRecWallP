@@ -43,7 +43,7 @@ export default function RootLayout({
             and content stays visible when JS is unavailable. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('js')`,
+            __html: `document.documentElement.classList.add('js');try{var z=Intl.DateTimeFormat().resolvedOptions().timeZone;if(z&&document.cookie.indexOf('tz='+encodeURIComponent(z))<0)document.cookie='tz='+encodeURIComponent(z)+';path=/;max-age=31536000;samesite=lax'}catch(e){}`,
           }}
         />
       </head>

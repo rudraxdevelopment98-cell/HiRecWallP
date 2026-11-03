@@ -302,6 +302,24 @@ Key Phase 3 decisions:
 - No dark patterns: no countdowns, fake scarcity, struck-through prices, pre-ticked add-ons or hidden fees;
   savings badges are computed from real prices (e2e checks this on /pricing).
 
+## Price lock + referrals (2026-11-03) — migration 0017
+
+- **No country picking** (researched Netflix/Spotify/Steam/Epic: price follows account + payment
+  method, never a user choice). `getPriceContext()` = `strictestContext([locked account country,
+  IP header country, browser time-zone country])`; `getChargeContext(billing)` adds the declared
+  billing country. Signals can only raise the tier. Header shows a non-interactive country label.
+- `tz` cookie set by the inline script in the root layout; `src/lib/timezones.ts` (generated from
+  tzdata zone.tab) maps zone → country. The `country` cookie is ignored on Vercel (dev/tests only).
+- `profiles.price_country` is locked by `after_paid_order()` (webhook + subscription charges) on the
+  first paid order; admins change it on the customer page (customer moved). Not client-writable.
+- Razorpay only reports Indian vs foreign card (no foreign card country), so India is hard-protected
+  (foreign card on INR → refund) and other tiers rely on the stacked signals above.
+- **Welcome bonus + referrals** (`site_settings.growth`, Admin → Settings → Growth): `claim_welcome_bonus()`
+  (auth callback + account layout; once per account; ≤2 per hashed IP per 30 days; referral code from the
+  `ref` cookie set by `/r/[code]`, new accounts only, no same-network self-referral). Inviter rewarded by
+  `after_paid_order()` only on the friend's first PAID order, capped monthly; refund reverses it.
+  All are expiring bonus lots. `/account/referrals` shows the link, WhatsApp share and stats.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

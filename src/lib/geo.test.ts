@@ -7,6 +7,7 @@ import {
   isRegionCode,
   normaliseCountry,
   pickPricePoints,
+  strictestContext,
   regionForCountry,
   resolveChargeRegion,
 } from './geo';
@@ -93,5 +94,21 @@ describe('misc', () => {
     expect(normaliseCountry(' in ')).toBe('IN');
     expect(normaliseCountry('IND')).toBeNull();
     expect(countryName('IN')).toBe('India');
+  });
+});
+
+describe('strictestContext (no picking a cheaper country)', () => {
+  it('a VPN to Pakistan with a US time zone pays US prices', () => {
+    expect(strictestContext([null, 'PK', 'US'])).toEqual({ region: 'T1', country: 'US' });
+  });
+  it('an account locked to the UK stays on UK prices from a cheaper IP', () => {
+    expect(strictestContext(['GB', 'BR', 'BR'])).toEqual({ region: 'T1', country: 'GB' });
+  });
+  it('India stays India when every signal agrees', () => {
+    expect(strictestContext(['IN', 'IN', null])).toEqual({ region: 'IN', country: 'IN' });
+  });
+  it('ties keep the first (locked) country; no signals → default tier', () => {
+    expect(strictestContext(['DE', 'US'])).toEqual({ region: 'T1', country: 'DE' });
+    expect(strictestContext([null, undefined, 'nope'])).toEqual({ region: 'T3', country: null });
   });
 });

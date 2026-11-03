@@ -27,10 +27,13 @@ test('pricing page renders with plan-type tabs', async ({ page }) => {
   await expect(page.getByRole('navigation', { name: 'Plan types' }).getByRole('link', { name: 'Credit packs' })).toBeVisible();
 });
 
-test('country picker sets the country cookie and prices follow it', async ({ page, context }) => {
+test('visitors cannot pick a cheaper country: prices follow location + time zone', async ({ page, context }) => {
+  // A "VPN" cookie claiming Pakistan, but the browser time zone is New York.
+  await context.addCookies([
+    { name: 'country', value: 'PK', url: test.info().project.use.baseURL ?? 'http://127.0.0.1:3000' },
+    { name: 'tz', value: encodeURIComponent('America/New_York'), url: test.info().project.use.baseURL ?? 'http://127.0.0.1:3000' },
+  ]);
   await page.goto('/pricing');
-  // Header on desktop, footer on mobile — exactly one is visible.
-  await page.locator('select[aria-label="Change country"]:visible').selectOption('IN');
-  await expect.poll(async () => (await context.cookies()).find((c) => c.name === 'country')?.value).toBe('IN');
-  await expect(page.getByText('Prices for', { exact: false }).getByText('India')).toBeVisible();
+  await expect(page.locator('select[aria-label="Change country"]')).toHaveCount(0);
+  await expect(page.getByText('Prices for', { exact: false }).getByText('United States')).toBeVisible();
 });

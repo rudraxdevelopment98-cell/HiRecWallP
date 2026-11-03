@@ -68,6 +68,30 @@ export default async function AdminSettingsPage() {
         </div>
       </section>
 
+      <section className="rounded-2xl border bg-card p-6">
+        <h2 className="mb-1 font-semibold">Growth: welcome bonus &amp; referrals</h2>
+        <p className="mb-3 text-xs text-muted-foreground">
+          All of these are bonus credits (they expire). Welcome bonus: once per account, at most 2 per network per 30 days.
+          The inviter is rewarded only when their friend makes a first <strong>paid</strong> purchase, capped per month; refunds take it back.
+        </p>
+        <AdminForm
+          action="/api/admin/settings"
+          method="PUT"
+          fields={[
+            { name: 'welcome_credits', label: 'Welcome credits (everyone)', type: 'number' },
+            { name: 'welcome_days', label: 'Welcome credits valid (days)', type: 'number' },
+            { name: 'referee_bonus', label: 'Extra credits with a friend’s code', type: 'number' },
+            { name: 'referrer_reward', label: 'Inviter reward (credits)', type: 'number' },
+            { name: 'referral_monthly_cap', label: 'Max rewards per inviter / month', type: 'number' },
+            { name: 'reward_days', label: 'Reward credits valid (days)', type: 'number' },
+            { name: 'referral_enabled', label: 'Referral programme on', type: 'checkbox', span: 2 },
+          ]}
+          initial={settings.growth}
+          submitLabel="Save growth settings"
+          wrapAs="growth"
+        />
+      </section>
+
       <section className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border bg-card p-6">
           <h2 className="mb-1 font-semibold">Business details (receipts)</h2>

@@ -5,7 +5,7 @@ import { useRefresh } from '@/lib/use-refresh';
 import { Button } from '@/components/ui/button';
 
 /** Credits ±, gift a wallpaper, block/unblock, role. */
-export function CustomerActions({ userId, blocked, role }: { userId: string; blocked: boolean; role: string }) {
+export function CustomerActions({ userId, blocked, role, priceCountry }: { userId: string; blocked: boolean; role: string; priceCountry?: string | null }) {
   const { refresh, refreshing } = useRefresh();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -54,6 +54,31 @@ export function CustomerActions({ userId, blocked, role }: { userId: string; blo
             Gift
           </Button>
         </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-muted-foreground">Price country</span>
+        <input
+          id={`price-country-${userId}`}
+          defaultValue={priceCountry ?? ''}
+          placeholder="e.g. GB (blank = unlock)"
+          maxLength={2}
+          className="input w-40 uppercase"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') void act({ action: 'price_country', country: e.currentTarget.value }, 'Price country updated');
+          }}
+        />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={busy || refreshing}
+          onClick={() => {
+            const el = document.getElementById(`price-country-${userId}`) as HTMLInputElement | null;
+            void act({ action: 'price_country', country: el?.value ?? '' }, 'Price country updated');
+          }}
+        >
+          Save
+        </Button>
+        <span className="text-xs text-muted-foreground">Locked by their first purchase. Change only if they really moved.</span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground">Role</span>

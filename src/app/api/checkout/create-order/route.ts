@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUser } from '@/lib/auth';
-import { getDisplayCountry, getDisplayRegion, listCreditPacks } from '@/lib/catalogue';
+import { getChargeContext, listCreditPacks } from '@/lib/catalogue';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getProvider } from '@/lib/payments';
-import { chargeContext, type PriceContext } from '@/lib/geo';
+import type { PriceContext } from '@/lib/geo';
 import { isSameOrigin } from '@/lib/http';
 import { getSettings } from '@/lib/settings';
 import { getPlanOffer } from '@/lib/membership';
@@ -57,9 +57,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'The store is temporarily closed. Please try again soon.', code: 'store_closed' }, { status: 503 });
   }
 
-  const [displayRegion, displayCountry] = await Promise.all([getDisplayRegion(), getDisplayCountry()]);
+  // Highest tier of: locked account country, IP, time zone, declared billing country.
   const billingCountry = body.billingCountry ?? null;
-  const ctx: PriceContext = chargeContext(displayCountry, displayRegion, billingCountry, settings.country_tiers);
+  const ctx: PriceContext = await getChargeContext(billingCountry);
   const supabase = createServiceClient();
 
   try {
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
           status: 'created',
           currency: pack.currency,
           amount_minor: pack.amount_minor,
-          billing_country: billingCountry ?? displayCountry,
+          billing_country: ctx.country,
         })
         .select('id')
         .single();
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     }
 
     if (body.billing === 'autopay') {
-      const started = await startAutopay(user.id, offer, billingCountry ?? displayCountry);
+      const started = await startAutopay(user.id, offer, ctx.country);
       return NextResponse.json({ subscriptionId: started.subscriptionId, checkout: started.checkout, amountMinor: started.amountMinor, currency: started.currency, totalCount: started.totalCount });
     }
 
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
         status: 'created',
         currency: price.currency,
         amount_minor: price.amount_minor,
-        billing_country: billingCountry ?? displayCountry,
+        billing_country: ctx.country,
       })
       .select('id')
       .single();

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { safeNextPath } from '@/lib/http';
+import { claimWelcomeBonus } from '@/lib/growth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,11 +22,17 @@ export async function GET(request: Request) {
   try {
     const supabase = (await createClient());
     if (code) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-      if (!error) return NextResponse.redirect(new URL(next, url.origin));
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+      if (!error) {
+        if (data.user) await claimWelcomeBonus(data.user.id);
+        return NextResponse.redirect(new URL(next, url.origin));
+      }
     } else if (tokenHash && type) {
-      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
-      if (!error) return NextResponse.redirect(new URL(next, url.origin));
+      const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+      if (!error) {
+        if (data.user) await claimWelcomeBonus(data.user.id);
+        return NextResponse.redirect(new URL(next, url.origin));
+      }
     }
   } catch {
     // fall through

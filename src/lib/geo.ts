@@ -131,6 +131,28 @@ export function chargeContext(
   return { region, country: displayCountry && regionForCountry(displayCountry, overrides) === region ? displayCountry : null };
 }
 
+/**
+ * The strictest (most expensive) pricing context among several location
+ * signals — e.g. the account's locked country, the IP country, the browser
+ * time-zone country and a declared billing country. This is how the big
+ * platforms stop "pick a cheaper country": the customer never chooses their
+ * price; every signal can only push it up. Earlier entries win ties.
+ */
+export function strictestContext(
+  countries: (string | null | undefined)[],
+  overrides?: Partial<Record<string, RegionCode>> | null,
+  fallback: RegionCode = DEFAULT_REGION,
+): PriceContext {
+  let best: PriceContext | null = null;
+  for (const raw of countries) {
+    const country = normaliseCountry(raw);
+    if (!country) continue;
+    const region = regionForCountry(country, overrides);
+    if (!best || REGION_RANK[region] > REGION_RANK[best.region]) best = { region, country };
+  }
+  return best ?? { region: fallback, country: null };
+}
+
 /** A row priced per tier with optional country overrides (credit packs, plan prices). */
 export interface PricePoint {
   region_code: string;

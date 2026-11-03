@@ -14,6 +14,8 @@ const REASON: Record<string, string> = {
   refund: 'Refund',
   admin_adjust: 'Adjustment',
   bonus: 'Bonus credits',
+  welcome: 'Welcome bonus',
+  referral: 'Referral reward',
   expire: 'Bonus credits expired',
 };
 

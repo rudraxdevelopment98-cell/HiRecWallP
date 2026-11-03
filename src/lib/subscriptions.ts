@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { getProvider } from '@/lib/payments';
 import { supportsSubscriptions, type WebhookVerificationResult } from '@/lib/payments/provider';
 import type { PlanOffer } from '@/lib/membership';
+import { getSettings } from '@/lib/settings';
 
 /** Open-ended monthly plans renew up to this many months (Razorpay needs a count). */
 export const OPEN_ENDED_MONTHS = 120;
@@ -128,6 +129,7 @@ export async function handleSubscriptionEvent(result: WebhookVerificationResult)
         currency: result.currency ?? row.currency,
         amount_minor: result.amountMinor ?? row.amount_minor,
         subscription_id: row.id,
+        billing_country: /^[A-Z]{2}$/.test(sub.notes.billingCountry ?? '') ? sub.notes.billingCountry : null,
       })
       .select('id')
       .single();
@@ -145,6 +147,14 @@ export async function handleSubscriptionEvent(result: WebhookVerificationResult)
     p_subscription: row.id,
   });
   if (gErr) throw gErr;
+  const g = (await getSettings()).growth;
+  await supabase.rpc('after_paid_order', {
+    p_order: orderId,
+    p_country: /^[A-Z]{2}$/.test(sub.notes.billingCountry ?? '') ? sub.notes.billingCountry : null,
+    p_reward: g.referral_enabled ? g.referrer_reward : 0,
+    p_monthly_cap: g.referral_enabled ? g.referral_monthly_cap : 0,
+    p_days: g.reward_days,
+  });
   return { granted: true, orderId };
 }
 

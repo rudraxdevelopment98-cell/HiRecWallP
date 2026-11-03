@@ -4,6 +4,8 @@ import { LoginForm } from '@/components/auth/login-form';
 import { getUser } from '@/lib/auth';
 import { safeNextPath } from '@/lib/http';
 import { getSettings } from '@/lib/settings';
+import { cookies } from 'next/headers';
+import { REF_COOKIE } from '@/lib/growth';
 
 export const metadata: Metadata = { title: 'Sign in' };
 export const dynamic = 'force-dynamic';
@@ -19,6 +21,10 @@ export default async function LoginPage(
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
   if (configured && (await getUser())) redirect(next);
+  const settings = await getSettings();
+  const g = settings.growth;
+  const referred = g.referral_enabled && Boolean((await cookies()).get(REF_COOKIE)?.value);
+  const freeCredits = g.welcome_credits + (referred ? g.referee_bonus : 0);
 
   return (
     <main className="container flex max-w-md flex-col items-center gap-4 py-20 text-center">
@@ -26,6 +32,12 @@ export default async function LoginPage(
       <p className="text-sm text-muted-foreground">
         Sign in to buy wallpapers, spend credits and re-download from your library.
       </p>
+      {freeCredits > 0 && (
+        <p className="w-full rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">
+          New here? Your account starts with <strong>{freeCredits} free credits</strong>
+          {referred ? ' (including your friend’s invite bonus)' : ''} — enough for {freeCredits} wallpapers. Valid {g.welcome_days} days.
+        </p>
+      )}
       {searchParams.error && (
         <p className="w-full rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-600">
           That sign-in link was invalid or expired. Please try again.
@@ -33,7 +45,7 @@ export default async function LoginPage(
       )}
       {configured ? (
         <div className="w-full rounded-2xl border bg-card p-6">
-          <LoginForm next={next} google={(await getSettings()).google_login} />
+          <LoginForm next={next} google={settings.google_login} />
         </div>
       ) : (
         <p className="w-full rounded-2xl border bg-card p-6 text-sm text-muted-foreground">

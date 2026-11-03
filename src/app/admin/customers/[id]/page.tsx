@@ -41,6 +41,8 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
             {u?.last_sign_in_at && ` · last sign-in ${fmt(u.last_sign_in_at)}`}
             {profile.country_code && ` · ${profile.country_code as string}`}
             {profile.gstin && ` · GSTIN ${profile.gstin as string}`}
+            {profile.price_country ? ` · priced as ${profile.price_country as string}` : ' · price country not locked yet'}
+            {profile.referred_by && ' · joined via referral'}
           </p>
         </div>
         <div className="flex gap-2">
@@ -57,7 +59,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
 
       <section className="rounded-2xl border bg-card p-5">
         <h2 className="mb-3 font-semibold">Actions</h2>
-        <CustomerActions userId={id} blocked={blocked} role={profile.role as string} />
+        <CustomerActions userId={id} blocked={blocked} role={profile.role as string} priceCountry={(profile.price_country as string | null) ?? null} />
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">

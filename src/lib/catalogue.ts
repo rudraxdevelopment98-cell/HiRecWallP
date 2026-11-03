@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { publicEnv } from '@/lib/env';
 import { publicObjectUrl } from '@/lib/storage';
 import { cache } from 'react';
-import { DEFAULT_REGION, isRegionCode, normaliseCountry, pickPricePoints, regionForCountry, type PriceContext, type RegionCode } from '@/lib/geo';
+import { DEFAULT_REGION, REGION_RANK, normaliseCountry, pickPricePoints, strictestContext, type PriceContext, type RegionCode } from '@/lib/geo';
+import { countryForTimeZone } from '@/lib/timezones';
 import { getSettings } from '@/lib/settings';
 import { DEMO_CATEGORIES, demoWallpaperBySlug, demoWallpapers } from '@/lib/demo';
 import type {
@@ -86,27 +87,61 @@ async function catalogueLive(): Promise<boolean> {
   return liveCheck.live;
 }
 
-/** The visitor's country (cookie seeded from the geo header by middleware, or picked by them). */
-export const getDisplayCountry = cache(async (): Promise<string | null> => {
-  const fromCookie = normaliseCountry((await cookies()).get('country')?.value);
-  if (fromCookie) return fromCookie;
-  // First visit: the cookie is only on the response, so read the geo header directly.
+/** Country of the visitor's IP (Vercel/Cloudflare edge header — not user-settable). */
+async function ipCountry(): Promise<string | null> {
   const h = await headers();
-  return normaliseCountry(h.get('x-vercel-ip-country') ?? h.get('cf-ipcountry'));
+  const fromHeader = normaliseCountry(h.get('x-vercel-ip-country') ?? h.get('cf-ipcountry'));
+  if (fromHeader) return fromHeader;
+  // Local dev / tests only (no edge header): the middleware-seeded cookie.
+  return process.env.VERCEL ? null : normaliseCountry((await cookies()).get('country')?.value);
+}
+
+/** Country implied by the browser's time zone (cookie set by a tiny script in the root layout). */
+async function timeZoneCountry(): Promise<string | null> {
+  const tz = (await cookies()).get('tz')?.value;
+  return tz ? countryForTimeZone(decodeURIComponent(tz)) : null;
+}
+
+/** The signed-in buyer's locked price country (set by their first paid order). */
+export const getLockedPriceCountry = cache(async (): Promise<string | null> => {
+  if (!dbConfigured()) return null;
+  try {
+    const supabase = await createClient();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return null;
+    const { data } = await supabase.from('profiles').select('price_country').eq('id', auth.user.id).maybeSingle();
+    return normaliseCountry(data?.price_country as string | undefined);
+  } catch {
+    return null;
+  }
 });
 
-/** The visitor's pricing tier: from their country (with admin tier overrides), else the legacy region cookie. */
-export const getDisplayRegion = cache(async (): Promise<RegionCode> => {
-  const country = await getDisplayCountry();
-  if (country) return regionForCountry(country, (await getSettings()).country_tiers);
-  const value = (await cookies()).get('region')?.value;
-  return isRegionCode(value) ? value : DEFAULT_REGION;
+/**
+ * Where this visitor is priced: the most expensive tier among their locked
+ * account country, IP country and time-zone country (admin tier overrides
+ * applied). Visitors can't pick it — like Netflix, Spotify and Steam.
+ */
+export const getPriceContext = cache(async (): Promise<PriceContext> => {
+  const [locked, ip, tz, settings] = await Promise.all([getLockedPriceCountry(), ipCountry(), timeZoneCountry(), getSettings()]);
+  return strictestContext([locked, ip, tz], settings.country_tiers);
 });
 
-/** Tier + country used to pick display prices. */
-export async function getPriceContext(): Promise<PriceContext> {
-  const [region, country] = await Promise.all([getDisplayRegion(), getDisplayCountry()]);
-  return { region, country };
+/** Pricing context for a checkout: as above, plus the declared billing country. */
+export async function getChargeContext(billingCountry: string | null | undefined): Promise<PriceContext> {
+  const [base, settings] = await Promise.all([getPriceContext(), getSettings()]);
+  const ctx = strictestContext([base.country, billingCountry], settings.country_tiers, base.region);
+  // Never drop below the base tier (e.g. when base came from the default).
+  return REGION_RANK[ctx.region] >= REGION_RANK[base.region] ? ctx : base;
+}
+
+/** The visitor's pricing country (see getPriceContext). */
+export async function getDisplayCountry(): Promise<string | null> {
+  return (await getPriceContext()).country;
+}
+
+/** The visitor's pricing tier (see getPriceContext). */
+export async function getDisplayRegion(): Promise<RegionCode> {
+  return (await getPriceContext()).region;
 }
 
 /** Public (watermarked preview) URL for a storage key, via the active provider. */

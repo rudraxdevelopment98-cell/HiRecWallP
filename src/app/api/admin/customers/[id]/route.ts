@@ -13,6 +13,8 @@ const schema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('block') }),
   z.object({ action: z.literal('unblock') }),
   z.object({ action: z.literal('role'), role: z.enum(['buyer', 'creator', 'admin']) }),
+  // Customer moved country: change (or clear) the locked price country.
+  z.object({ action: z.literal('price_country'), country: z.string().trim().toUpperCase().regex(/^([A-Z]{2})?$/, 'Use a 2-letter country code, or leave blank to unlock') }),
 ]);
 
 /** Admin actions on one customer: credits ±, gift a wallpaper, block/unblock, change role. */
@@ -51,6 +53,14 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       // ~100 years = effectively permanent; 'none' lifts the ban.
       const { error } = await supabase.auth.admin.updateUserById(id, { ban_duration: a.action === 'block' ? '876000h' : 'none' });
       if (error) return NextResponse.json({ error: 'Could not update the account' }, { status: 400 });
+      break;
+    }
+    case 'price_country': {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ price_country: a.country || null, price_locked_at: a.country ? new Date().toISOString() : null })
+        .eq('id', id);
+      if (error) return NextResponse.json({ error: 'Could not change the price country' }, { status: 400 });
       break;
     }
     case 'role': {

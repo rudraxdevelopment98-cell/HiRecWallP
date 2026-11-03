@@ -1,0 +1,73 @@
+import 'server-only';
+
+import { cookies, headers } from 'next/headers';
+import { createServiceClient } from '@/lib/supabase/service';
+import { createClient } from '@/lib/supabase/server';
+import { hashIp } from '@/lib/request';
+import { getSettings } from '@/lib/settings';
+
+export const REF_COOKIE = 'ref';
+export const REF_CODE = /^[A-Z0-9]{6,12}$/;
+
+function ipFrom(h: Headers): string | null {
+  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? h.get('cf-connecting-ip');
+  return ip || null;
+}
+
+/**
+ * Give a newly signed-in account its welcome bonus (once), attaching the
+ * referral code from the `ref` cookie if there is one. Safe to call on every
+ * sign-in: the database makes it idempotent and enforces the anti-abuse rules
+ * (2 per network per 30 days, no self-referral, new accounts only).
+ */
+export async function claimWelcomeBonus(userId: string): Promise<{ status: string; credits?: number; referred?: boolean }> {
+  try {
+    const settings = await getSettings();
+    const g = settings.growth;
+    const [c, h] = await Promise.all([cookies(), headers()]);
+    const ref = c.get(REF_COOKIE)?.value?.toUpperCase() ?? null;
+    const ip = ipFrom(h);
+    const { data, error } = await createServiceClient().rpc('claim_welcome_bonus', {
+      p_user: userId,
+      p_ref_code: g.referral_enabled && ref && REF_CODE.test(ref) ? ref : null,
+      p_ip_hash: ip ? hashIp(ip) : null,
+      p_bonus: g.welcome_credits,
+      p_ref_bonus: g.referral_enabled ? g.referee_bonus : 0,
+      p_days: g.welcome_days,
+    });
+    if (error) return { status: 'error' };
+    return data as { status: string; credits?: number; referred?: boolean };
+  } catch {
+    return { status: 'error' };
+  }
+}
+
+export interface MyReferral {
+  code: string;
+  invited: number;
+  rewarded: number;
+  pending: number;
+  creditsEarned: number;
+}
+
+/** The signed-in user's referral code and stats. */
+export async function getMyReferral(userId: string): Promise<MyReferral | null> {
+  try {
+    const service = createServiceClient();
+    const { data: code } = await service.rpc('ensure_referral_code', { p_user: userId });
+    const { data: rows } = await (await createClient())
+      .from('referral_rewards')
+      .select('status, credits')
+      .eq('referrer_id', userId);
+    const list = (rows ?? []) as { status: string; credits: number | null }[];
+    return {
+      code: code as string,
+      invited: list.length,
+      rewarded: list.filter((r) => r.status === 'rewarded').length,
+      pending: list.filter((r) => r.status === 'pending').length,
+      creditsEarned: list.reduce((n, r) => n + (r.status === 'rewarded' ? r.credits ?? 0 : 0), 0),
+    };
+  } catch {
+    return null;
+  }
+}

@@ -47,7 +47,7 @@ export default async function PricingPage(props: { searchParams: Promise<{ tab?:
         </p>
         <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground">
           <Globe2 className="h-3.5 w-3.5" /> Prices for <strong className="text-foreground">{countryName(ctx.country)}</strong>
-          {currency && <> in {currency}</>} · change country in the header
+          {currency && <> in {currency}</>} · based on your location and account
         </p>
       </section>
 

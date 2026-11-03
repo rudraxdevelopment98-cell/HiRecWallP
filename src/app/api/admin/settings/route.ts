@@ -19,6 +19,18 @@ const schema = z.discriminatedUnion('key', [
   z.object({ key: z.literal('google_login'), value: bool }),
   z.object({ key: z.literal('creator_credit_value_inr'), value: z.number().min(0.5).max(100) }),
   z.object({
+    key: z.literal('growth'),
+    value: z.object({
+      welcome_credits: z.number().int().min(0).max(100),
+      welcome_days: z.number().int().min(1).max(365),
+      referral_enabled: bool,
+      referee_bonus: z.number().int().min(0).max(100),
+      referrer_reward: z.number().int().min(0).max(500),
+      referral_monthly_cap: z.number().int().min(0).max(1000),
+      reward_days: z.number().int().min(1).max(730),
+    }),
+  }),
+  z.object({
     key: z.literal('country_tiers'),
     value: z.record(z.string().regex(/^[A-Z]{2}$/), z.enum(REGION_CODES)).refine((v) => Object.keys(v).length <= 300, 'Too many overrides'),
   }),

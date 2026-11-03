@@ -153,6 +153,20 @@ export async function POST(request: Request) {
       }
     }
 
+    // Lock the buyer's price country (first paid order only) and pay any
+    // pending referral reward to whoever invited them.
+    {
+      const { data: paid } = await supabase.from('orders').select('billing_country').eq('id', order.id).maybeSingle();
+      const g = (await getSettings()).growth;
+      await supabase.rpc('after_paid_order', {
+        p_order: order.id,
+        p_country: (paid?.billing_country as string | null) ?? null,
+        p_reward: g.referral_enabled ? g.referrer_reward : 0,
+        p_monthly_cap: g.referral_enabled ? g.referral_monthly_cap : 0,
+        p_days: g.reward_days,
+      });
+    }
+
     // Analytics: one purchase event per wallpaper line (funnel + best sellers).
     const bought = (items ?? []).filter((i) => i.wallpaper_id);
     if (bought.length) {
