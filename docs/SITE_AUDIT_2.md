@@ -44,7 +44,7 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 - ⬜ Replace master / regenerate sizes for an existing wallpaper
 
 ## B5 — Resolution
-- ⬜ Device preview on the wallpaper page: see it on your own phone/tablet/desktop (owner idea, 2026-11-03)
+- ✅ Device preview on the wallpaper page: auto-detects your phone/tablet/computer, lock & home screen, full-screen try-on, sharpness hint (owner idea)
 - ⬜ Exact-fit downloads: choose your device (or auto-detect) → exact resolution crop from the master, cached
 - ⬜ Device catalogue (popular phones, tablets, monitors) and per-wallpaper "fits" list
 - ⬜ Quality badge from source resolution; AI upscale path for slightly-small uploads (adapter)

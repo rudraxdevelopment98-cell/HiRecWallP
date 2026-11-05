@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -17,6 +16,7 @@ import { DownloadButton } from '@/components/download-button';
 import { FREE_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { Reveal } from '@/components/reveal';
+import { DevicePreview } from '@/components/device-preview';
 import { TrackEvent } from '@/components/track-event';
 import { getDisplayRegion, getWallpaperBySlug, listPublishedWallpapers } from '@/lib/catalogue';
 import { formatRegionPrice } from '@/lib/format';
@@ -100,21 +100,19 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
       </p>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Preview */}
-        <div className={`relative overflow-hidden rounded-2xl border bg-muted ${w.orientation === 'portrait' ? 'mx-auto aspect-[9/16] w-full max-w-sm' : 'aspect-[4/3]'}`}>
-          {w.previewUrl ? (
-            <Image src={w.previewUrl} alt={w.alt_text ?? w.title} fill sizes="(max-width:768px) 100vw, 50vw" className="object-cover" priority />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">Watermarked preview</div>
-          )}
-          <div className="absolute left-3 top-3 flex gap-1.5">
-            {w.resolution && <span className="rounded-md bg-black/70 px-2 py-0.5 text-xs font-semibold text-white">{w.resolution}</span>}
-            {w.is_free && <span className="rounded-md bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">FREE</span>}
-          </div>
-          <p className="absolute bottom-3 left-3 rounded-md bg-black/60 px-2 py-0.5 text-[11px] text-white">
-            Preview is watermarked · your download is full quality
-          </p>
-        </div>
+        {/* Preview — on the visitor's own device */}
+        <DevicePreview
+          src={w.previewUrl ?? null}
+          alt={w.alt_text ?? w.title}
+          orientation={w.orientation ?? null}
+          maxLongEdge={w.max_long_edge ?? null}
+          badges={
+            <>
+              {w.resolution && <span className="rounded-md bg-black/70 px-2 py-0.5 text-xs font-semibold text-white">{w.resolution}</span>}
+              {w.is_free && <span className="rounded-md bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">FREE</span>}
+            </>
+          }
+        />
 
         {/* Buy box */}
         <div className="space-y-5">

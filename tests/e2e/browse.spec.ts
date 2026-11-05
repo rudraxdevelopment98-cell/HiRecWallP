@@ -37,3 +37,17 @@ test('visitors cannot pick a cheaper country: prices follow location + time zone
   await expect(page.locator('select[aria-label="Change country"]')).toHaveCount(0);
   await expect(page.getByText('Prices for', { exact: false }).getByText('United States')).toBeVisible();
 });
+
+test('wallpaper page previews the wallpaper on a device and full screen', async ({ page }) => {
+  await page.goto('/w/alpine-serenity');
+  const tabs = page.getByRole('tablist', { name: 'Preview on a device' });
+  await expect(tabs.getByRole('tab', { name: /^On (your|this)/ })).toBeVisible();
+  await tabs.getByRole('tab', { name: 'Tablet', exact: true }).click();
+  await expect(tabs.getByRole('tab', { name: 'Tablet', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('button', { name: 'Home screen' }).click();
+  await page.getByRole('button', { name: 'Try it full screen' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Full-screen preview' });
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+});

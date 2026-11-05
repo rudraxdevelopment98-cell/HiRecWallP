@@ -379,6 +379,13 @@ Key Phase 3 decisions:
   `selfRefund()` → `refundOrder()` + a resolved ticket. Max 2 per 90 days. Keep rules and policy text in sync.
 - `support_retention()` (housekeeping) deletes resolved tickets without an order after 3 years (Privacy Policy).
 
+## Device preview (2026-11-05)
+
+- `/w/[slug]` uses `DevicePreview` (`components/device-preview.tsx`): tabs "On your <device>" (auto, `detectDevice()` in
+  `src/lib/device-detect.ts` from UA + screen × DPR; iPadOS detected by touch) / Phone / Tablet / Desktop / Original,
+  lock- or home-screen overlay, full-screen try-on, `sharpnessOn()` hint vs `max_long_edge`. Uses only the public
+  watermarked preview — never the original. Generic frames (no brand styling).
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International
