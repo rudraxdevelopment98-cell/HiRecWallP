@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { hashIp } from '@/lib/request';
 import { getSettings } from '@/lib/settings';
 import { recordAcceptance } from '@/lib/consent';
+import { sendWelcomeEmail } from '@/lib/account-emails';
 
 export const REF_COOKIE = 'ref';
 export const REF_CODE = /^[A-Z0-9]{6,12}$/;
@@ -39,7 +40,9 @@ export async function claimWelcomeBonus(userId: string): Promise<{ status: strin
       p_days: g.welcome_days,
     });
     if (error) return { status: 'error' };
-    return data as { status: string; credits?: number; referred?: boolean };
+    const r = data as { status: string; credits?: number; referred?: boolean };
+    if (r.status === 'granted' || r.status === 'limited') await sendWelcomeEmail(userId, r.credits ?? 0).catch(() => undefined);
+    return r;
   } catch {
     return { status: 'error' };
   }

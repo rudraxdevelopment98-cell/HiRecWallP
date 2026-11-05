@@ -123,8 +123,9 @@ export default async function TermsPage() {
           heading: 'Closing your account',
           body: (
             <p>
-              You can close your account at any time by contacting us. Unused paid credits are refundable only as the Refund Policy allows. We may
-              close accounts that break these terms; we will tell you why.
+              You can close your account at any time in Account → Settings (or by contacting us). Closing it ends your library, active passes
+              and autopay, and any credits left are forfeited — unused packs can be refunded first as the Refund Policy allows. We may close
+              accounts that break these terms; we will tell you why.
             </p>
           ),
         },

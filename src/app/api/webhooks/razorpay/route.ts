@@ -4,6 +4,7 @@ import { getProvider } from '@/lib/payments';
 import { getSettings } from '@/lib/settings';
 import { handleSubscriptionEvent } from '@/lib/subscriptions';
 import { sendGiftEmail } from '@/lib/gifts';
+import { sendReceiptEmail } from '@/lib/account-emails';
 
 export const runtime = 'nodejs';
 
@@ -183,6 +184,9 @@ export async function POST(request: Request) {
         p_days: g.reward_days,
       });
     }
+
+    // Receipt email (once per order; best effort).
+    await sendReceiptEmail(order.id).catch((e) => console.error('[webhook] receipt email failed', e));
 
     // Analytics: one purchase event per wallpaper line (funnel + best sellers).
     const bought = (items ?? []).filter((i) => i.wallpaper_id);

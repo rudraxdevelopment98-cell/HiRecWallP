@@ -89,7 +89,9 @@ export default async function PrivacyPage() {
             <>
               <p>
                 You can ask to see your data, correct it, delete it, withdraw consent for optional emails, and nominate someone to act for you.
-                Update your profile in Account → Settings; unsubscribe from any email with one click. For anything else write to{' '}
+                In Account → Settings you can update your profile, change your email, sign out on all devices, <strong>download all your data</strong>{' '}
+                as a file, and <strong>close your account</strong> (personal details are removed at once; order and invoice records are kept for 8
+                years without your name or email, as tax law requires). Unsubscribe from any marketing email with one click. For anything else write to{' '}
                 <strong>{c.grievance.email}</strong> — we reply within 48 hours and complete requests within 30 days.
               </p>
               <p>

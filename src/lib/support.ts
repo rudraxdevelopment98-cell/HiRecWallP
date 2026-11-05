@@ -2,7 +2,7 @@ import 'server-only';
 
 import { createServiceClient } from '@/lib/supabase/service';
 import { createClient } from '@/lib/supabase/server';
-import { sendEmail } from '@/lib/email';
+import { mail as baseMail, quote, safeSend } from '@/lib/mail-template';
 import { publicEnv } from '@/lib/env';
 import { escapeHtml } from '@/lib/gift-rules';
 import { getSettings } from '@/lib/settings';
@@ -47,17 +47,8 @@ export const TICKET_FIELDS =
 
 // --- Email ------------------------------------------------------------------
 
-function mail(title: string, paragraphs: string[], cta?: { href: string; label: string }) {
-  return `<div style="font-family:system-ui,sans-serif;max-width:560px;margin:auto;line-height:1.55;color:#111">
-    <h2 style="margin:0 0 12px;font-size:18px">${escapeHtml(title)}</h2>
-    ${paragraphs.filter(Boolean).map((p) => `<p style="margin:0 0 12px">${p}</p>`).join("")}
-    ${cta ? `<p><a href="${cta.href}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">${escapeHtml(cta.label)}</a></p>` : ''}
-    <p style="color:#666;font-size:12px;margin-top:24px">${escapeHtml(brand())} support · please reply from the link above so your message stays with the request.</p>
-  </div>`;
-}
-
-const quote = (s: string) =>
-  `<blockquote style="margin:0;padding:10px 14px;border-left:3px solid #ccc;background:#f6f6f6;white-space:pre-wrap">${escapeHtml(s.slice(0, 2000))}</blockquote>`;
+const SUPPORT_FOOTER = () => `${brand()} support · please reply from the link above so your message stays with the request.`;
+const mail = (title: string, paragraphs: string[], cta?: { href: string; label: string }) => baseMail(title, paragraphs, cta, SUPPORT_FOOTER());
 
 async function customerEmail(userId: string): Promise<string | null> {
   const { data } = await createServiceClient().from('profiles').select('email').eq('id', userId).maybeSingle();
@@ -68,16 +59,6 @@ async function customerEmail(userId: string): Promise<string | null> {
 async function staffInbox(): Promise<string | null> {
   const s = await getSettings();
   return s.business.support_email || s.legal.grievance_email || null;
-}
-
-/** Best effort: a failed email never fails the request (it's all on the site too). */
-async function safeSend(to: string | null, subject: string, html: string) {
-  if (!to) return;
-  try {
-    await sendEmail({ to, subject, html });
-  } catch (err) {
-    console.error('[support] email failed', subject, err);
-  }
 }
 
 // --- Customer side ------------------------------------------------------------

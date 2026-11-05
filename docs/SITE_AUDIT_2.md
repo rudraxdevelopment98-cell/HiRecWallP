@@ -29,11 +29,11 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 - ⬜ Replace file (comes with B4 "replace master")
 
 ## B3 — Accounts & credits
-- ⬜ Delete my account (with clear consequences) + download my data (DPDP rights)
-- ⬜ Change email; sign out of all devices
-- ⬜ Email receipts after purchase; welcome email; bonus-credit expiry reminders
-- ⬜ Credit history: filters, paging, which purchase each credit came from, expiring-soon view
-- ⬜ Library: search, filter by device/licence, downloads-left, request extra downloads
+- ✅ Close my account (consequences shown first; personal data erased, orders kept 8 years without name) + download my data (JSON)
+- ✅ Change email (confirmation link); sign out of all devices
+- ✅ Email receipts after purchase (once per order); welcome email; bonus-credit expiry reminders (7 days before, daily job)
+- ✅ Credit history: filters (added/spent/bonus), paging, links to receipt / unlocked wallpaper, expiring-soon list
+- ✅ Library: search, licence filter, sort, downloads left, "need more?" → support request
 
 ## B4 — Uploading
 - ⬜ Batch upload: many files at once, per-file progress, queue, retry failed

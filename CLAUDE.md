@@ -386,6 +386,17 @@ Key Phase 3 decisions:
   lock- or home-screen overlay, full-screen try-on, `sharpnessOn()` hint vs `max_long_edge`. Uses only the public
   watermarked preview — never the original. Generic frames (no brand styling).
 
+## Account rights + account emails (2026-11-05) — migration 0022
+
+- Settings: change email (`/api/account/email`, Supabase confirmation), sign out everywhere (`/api/account/signout-all`),
+  download my data (`/api/account/export` → `buildExport()`), close account (`/api/account/close`, type email to confirm).
+- `closeAccount()` (src/lib/account.ts): cancel autopay → `close_account()` SQL (forfeit credits with `closure` ledger rows,
+  revoke passes, delete library/favourites/order-less tickets/newsletter, anonymise downloads, blank profile, `deleted_at`)
+  → auth email → `deleted-<id>@deleted.invalid` + ban. Orders stay (tax). Blocked for admins / pending creator payouts.
+- Emails (`src/lib/account-emails.ts`, shared `mail-template.ts`): receipt once per paid order (`orders.receipt_sent_at`, from
+  webhook + autopay), welcome once for new accounts, bonus-expiry reminder (housekeeping, `credit_ledger.reminded_at`).
+  Claims are released when no email provider is configured, so they go out once Resend is set.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

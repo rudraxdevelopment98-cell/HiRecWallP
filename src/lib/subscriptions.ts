@@ -5,6 +5,7 @@ import { getProvider } from '@/lib/payments';
 import { supportsSubscriptions, type WebhookVerificationResult } from '@/lib/payments/provider';
 import type { PlanOffer } from '@/lib/membership';
 import { getSettings } from '@/lib/settings';
+import { sendReceiptEmail } from '@/lib/account-emails';
 
 /** Open-ended monthly plans renew up to this many months (Razorpay needs a count). */
 export const OPEN_ENDED_MONTHS = 120;
@@ -155,6 +156,7 @@ export async function handleSubscriptionEvent(result: WebhookVerificationResult)
     p_monthly_cap: g.referral_enabled ? g.referral_monthly_cap : 0,
     p_days: g.reward_days,
   });
+  await sendReceiptEmail(orderId).catch((e) => console.error('[autopay] receipt email failed', e));
   return { granted: true, orderId };
 }
 

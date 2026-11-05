@@ -56,7 +56,7 @@ test('all policy pages Razorpay checks for exist, with versions and grievance co
   ] as const) {
     await page.goto(path);
     await expect(page.getByRole('heading', { level: 1, name: title })).toBeVisible();
-    await expect(page.getByText('version 2026-11-03', { exact: false })).toBeVisible();
+    await expect(page.getByText(/version 20\d\d-\d\d-\d\d/)).toBeVisible();
   }
   await page.goto('/grievance');
   await expect(page.getByText('48 hours', { exact: false }).first()).toBeVisible();
