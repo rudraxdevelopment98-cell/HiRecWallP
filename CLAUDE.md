@@ -404,6 +404,16 @@ Key Phase 3 decisions:
   `/w/${slug}`; select `code` with `slug`. `/w/[slug]` resolves by code (else slug) and 308-redirects to the canonical
   path, so old links and renamed titles keep working. Demo wallpapers use `demoCode(slug)`.
 
+## Security audit (2026-11-05) — docs/SECURITY_AUDIT.md, migration 0024
+
+- Inline JSON in `<script>` must use `jsonForScript()` (src/lib/safe-json.ts) — never bare `JSON.stringify`.
+- Decode untrusted images only via `openImage()` (src/lib/image-safety.ts, 120 MP cap).
+- Webhook refunds + fails an order whose captured amount/currency differs from the order.
+- `/api/events` accepts browser-side events only; `purchase`/`paid_download` are server-written.
+- `site_settings` public read excludes `tax`, `fx_meta`, `country_tiers`, `creator_credit_value_inr`;
+  `getSettings()` reads with the service key server-side. TRUNCATE/TRIGGER/REFERENCES revoked from API roles.
+- Unsubscribe: GET = confirm page, POST = unsubscribe (also RFC 8058 one-click).
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

@@ -101,14 +101,18 @@ export const SETTING_KEYS = Object.keys(DEFAULT_SETTINGS) as SettingKey[];
 
 let cache: { at: number; value: SiteSettings } | null = null;
 
-/** Read settings (public-read table, anon key), cached ~30 s per instance. */
+/**
+ * Read settings, cached ~30 s per instance. Server-side it uses the service
+ * key, because private keys (tax details, tier overrides) aren't publicly
+ * readable (migration 0024); without it, the public subset is read.
+ */
 export async function getSettings(): Promise<SiteSettings> {
   if (cache && Date.now() - cache.at < 30_000) return cache.value;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anon) return DEFAULT_SETTINGS;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return DEFAULT_SETTINGS;
   try {
-    const { data, error } = await createSupabase(url, anon, { auth: { persistSession: false } })
+    const { data, error } = await createSupabase(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
       .from('site_settings')
       .select('key, value');
     if (error) throw error;

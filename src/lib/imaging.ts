@@ -1,6 +1,6 @@
 import 'server-only';
 
-import sharp from 'sharp';
+import { openImage } from '@/lib/image-safety';
 import type { R2Bucket } from '@/lib/storage';
 
 /**
@@ -81,7 +81,7 @@ export function plannedSizes(width: number, height: number): { paid: SizeSpec[];
 
 /** Upright pixel dimensions (accounts for EXIF rotation). */
 async function uprightSize(original: Buffer): Promise<{ width: number; height: number }> {
-  const m = await sharp(original).metadata();
+  const m = await openImage(original).metadata();
   const w = m.width ?? 0;
   const h = m.height ?? 0;
   return (m.orientation ?? 1) >= 5 ? { width: h, height: w } : { width: w, height: h };
@@ -93,9 +93,9 @@ async function uprightSize(original: Buffer): Promise<{ width: number; height: n
  * upscaler — are stored as visually lossless JPEG q95 4:4:4 (~10× smaller).
  */
 export async function encodeMaster(original: Buffer): Promise<{ buffer: Buffer; contentType: string; ext: string }> {
-  const m = await sharp(original).metadata();
+  const m = await openImage(original).metadata();
   if (m.format === 'jpeg') return { buffer: original, contentType: 'image/jpeg', ext: 'jpg' };
-  const buffer = await sharp(original)
+  const buffer = await openImage(original)
     .rotate()
     .jpeg({ quality: 95, chromaSubsampling: '4:4:4', mozjpeg: true })
     .toBuffer();
@@ -128,7 +128,7 @@ async function cover(
   h: number,
   quality: number,
 ): Promise<Buffer> {
-  return sharp(original)
+  return openImage(original)
     .rotate()
     .resize(w, h, { fit: 'cover', position: 'attention' })
     .jpeg({ quality, mozjpeg: true })
@@ -169,7 +169,7 @@ export async function generateVariants(
   }
 
   // Preview: downscale to <=720 long edge, apply watermark, JPEG ~q70.
-  const base = sharp(original).rotate().resize(PREVIEW_MAX_LONG_EDGE, PREVIEW_MAX_LONG_EDGE, {
+  const base = openImage(original).rotate().resize(PREVIEW_MAX_LONG_EDGE, PREVIEW_MAX_LONG_EDGE, {
     fit: 'inside',
     withoutEnlargement: true,
   });
@@ -191,7 +191,7 @@ export async function generateVariants(
   });
 
   // Detail crop: centered 600×600, watermarked.
-  const cropBuffer = await sharp(original)
+  const cropBuffer = await openImage(original)
     .rotate()
     .resize(PREVIEW_CROP, PREVIEW_CROP, { fit: 'cover', position: 'attention' })
     .composite([{ input: watermarkSvg(PREVIEW_CROP, PREVIEW_CROP, brand), blend: 'over' }])

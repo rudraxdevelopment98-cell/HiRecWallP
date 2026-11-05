@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { wallpaperPath } from '@/lib/wallpaper-url';
+import { jsonForScript } from '@/lib/safe-json';
 import type { Metadata } from 'next';
 import { Check, Download, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -86,7 +87,7 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
 
   return (
     <main className="container py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(jsonLd) }} />
       <TrackEvent type="detail_view" wallpaperId={w.id} />
       <p className="mb-5 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground">Home</Link>

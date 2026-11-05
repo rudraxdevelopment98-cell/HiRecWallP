@@ -16,8 +16,8 @@ const schema = z.object({
     'free_download',
     'add_to_cart',
     'checkout_start',
-    'purchase',
-    'paid_download',
+    // 'purchase' and 'paid_download' are written server-side only (webhook /
+    // download route), so clients can't inflate sales analytics.
   ]),
   wallpaperId: z.string().uuid().optional(),
   anonId: z.string().max(64).optional(),

@@ -8,7 +8,7 @@ import { readUpload } from '@/lib/uploads';
 import { persistWallpaperAssets } from '@/lib/wallpaper-assets';
 import { dHash, isNearDuplicate } from '@/lib/phash';
 import { getVisionProvider } from '@/lib/ai';
-import sharp from 'sharp';
+import { openImage } from '@/lib/image-safety';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const original = upload.buffer;
 
     // 1) Resolution check.
-    const meta = await sharp(original).metadata();
+    const meta = await openImage(original).metadata();
     const longEdge = Math.max(meta.width ?? 0, meta.height ?? 0);
     if (longEdge < MIN_LONG_EDGE) {
       return NextResponse.json(

@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     // Load the order this event refers to.
     const { data: order } = await supabase
       .from('orders')
-      .select('id, user_id, status, provider, gift_email')
+      .select('id, user_id, status, provider, gift_email, amount_minor, currency')
       .eq('provider_order_id', result.providerOrderId)
       .maybeSingle();
     if (!order) return NextResponse.json({ ok: true, unknownOrder: true });
@@ -84,6 +84,18 @@ export async function POST(request: Request) {
         .eq('id', order.id)
         .eq('status', 'created');
       return NextResponse.json({ ok: true, refunded: true });
+    }
+
+    // Defence in depth: the captured amount must match what we priced. Razorpay
+    // ties payments to our order amount, but never grant on a mismatch.
+    if (
+      result.amountMinor != null &&
+      (result.amountMinor !== Number(order.amount_minor) || (result.currency && result.currency.toUpperCase() !== String(order.currency).toUpperCase()))
+    ) {
+      console.error('[webhook] amount mismatch', order.id, result.amountMinor, result.currency);
+      if (result.paymentId) await provider.refundPayment(result.paymentId, 'amount mismatch').catch(() => undefined);
+      await supabase.from('orders').update({ status: 'failed', provider_payment_id: result.paymentId }).eq('id', order.id).eq('status', 'created');
+      return NextResponse.json({ ok: true, mismatch: true });
     }
 
     // Claim the order atomically: only one concurrent event (payment.captured /

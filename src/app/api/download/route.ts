@@ -117,12 +117,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const { data: entitlement } = await supabase
+    // Personal and commercial can both exist for one wallpaper: use one with
+    // downloads left, commercial first.
+    const { data: owned } = await supabase
       .from('entitlements')
-      .select('id, order_id, licence')
+      .select('id, order_id, licence, max_downloads, downloads_used')
       .eq('user_id', user.id)
-      .eq('wallpaper_id', wallpaperId)
-      .maybeSingle();
+      .eq('wallpaper_id', wallpaperId);
+    const entitlement =
+      [...(owned ?? [])]
+        .sort((a, b) => (a.licence === b.licence ? 0 : a.licence === 'commercial' ? -1 : 1))
+        .find((e) => Number(e.downloads_used) < Number(e.max_downloads)) ?? owned?.[0] ?? null;
     if (!entitlement) {
       return NextResponse.json({ error: 'No entitlement' }, { status: 403 });
     }
