@@ -7,6 +7,7 @@ import { istToday } from '@/lib/daily';
 import { unsubscribeUrl } from '@/lib/unsubscribe';
 import { escapeHtml } from '@/lib/gift-rules';
 import { publicEnv } from '@/lib/env';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 /**
  * Nightly (00:05 IST): choose today's free wallpaper and email opted-in
@@ -21,15 +22,15 @@ export async function runDailyPick(): Promise<Record<string, unknown>> {
   const { data: id } = await supabase.rpc('pick_daily', { p_day: day });
   if (!id) return { day, picked: null, note: 'no published premium wallpapers' };
 
-  const { data: pick } = await supabase.from('daily_picks').select('emailed_at, wallpapers(slug, title)').eq('day', day).maybeSingle();
-  const w = (pick as unknown as { emailed_at: string | null; wallpapers: { slug: string; title: string } | null } | null);
+  const { data: pick } = await supabase.from('daily_picks').select('emailed_at, wallpapers(slug, code, title)').eq('day', day).maybeSingle();
+  const w = (pick as unknown as { emailed_at: string | null; wallpapers: { slug: string; code: string | null; title: string } | null } | null);
   if (!process.env.RESEND_API_KEY || !w?.wallpapers) return { day, picked: id, emailed: 0, note: 'email not configured' };
   if (w.emailed_at) return { day, picked: id, emailed: 0, note: 'already emailed today' };
 
   const cap = settings.growth.daily_email_cap;
   const { data: subs } = await supabase.from('newsletter_subscribers').select('email').eq('daily', true).order('created_at').limit(cap);
   const site = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '');
-  const link = `${site}/w/${w.wallpapers.slug}`;
+  const link = `${site}${wallpaperPath(w.wallpapers)}`;
   const brand = escapeHtml(publicEnv.NEXT_PUBLIC_BRAND_NAME);
   let sent = 0;
   let failed = 0;

@@ -8,6 +8,7 @@ import { countryForTimeZone } from '@/lib/timezones';
 import { isOnSale } from '@/lib/sale-window';
 import { getSettings } from '@/lib/settings';
 import { DEMO_CATEGORIES, demoWallpaperBySlug, demoWallpapers } from '@/lib/demo';
+import { parseWallpaperParam } from '@/lib/wallpaper-url';
 import type {
   Category,
   ExploreFilters,
@@ -301,21 +302,23 @@ export async function listWallpapersByIds(ids: string[], region: RegionCode): Pr
   }
 }
 
+/**
+ * Find a published wallpaper from a /w/[param] value: by its permanent code
+ * when the URL has one (/w/<slug>-<code>), else by slug (older links).
+ */
 export async function getWallpaperBySlug(
-  slug: string,
+  param: string,
   region: RegionCode,
 ): Promise<WallpaperCard | null> {
-  if (!(await catalogueLive())) return demoWallpaperBySlug(slug, region);
+  const { code, slug } = parseWallpaperParam(param);
+  if (!(await catalogueLive())) return demoWallpaperBySlug(slug, region, code) ?? (code ? demoWallpaperBySlug(param, region) : null);
   try {
-    const [{ data, error }, fallback] = await Promise.all([
-      (await createClient())
-        .from('wallpapers')
-        .select(CARD_SELECT)
-        .eq('slug', slug)
-        .eq('status', 'published')
-        .maybeSingle(),
-      globalBasePrice(region),
-    ]);
+    const db = await createClient();
+    const lookup = (by: 'code' | 'slug', v: string) =>
+      db.from('wallpapers').select(CARD_SELECT).eq(by, v).eq('status', 'published').maybeSingle();
+    const [first, fallback] = await Promise.all([code ? lookup('code', code) : lookup('slug', slug), globalBasePrice(region)]);
+    // A slug that merely looks like it ends in a code: try it as a plain slug.
+    const { data, error } = !first.data && code ? await lookup('slug', decodeURIComponent(param).toLowerCase()) : first;
     if (error || !data) return null;
     return toCard(data as WallpaperRow, region, fallback);
   } catch {

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { adminGuard, audit } from '@/lib/admin';
 import { createServiceClient } from '@/lib/supabase/service';
 import { deleteObject, type R2Bucket } from '@/lib/storage';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 export const runtime = 'nodejs';
 
@@ -21,9 +22,9 @@ const patch = z
   })
   .partial();
 
-function refresh(slug?: string) {
+function refresh(slug?: string, code?: string | null) {
   for (const p of ['/', '/explore', '/free', '/admin/catalogue']) revalidatePath(p);
-  if (slug) revalidatePath(`/w/${slug}`);
+  if (slug) revalidatePath(wallpaperPath({ slug, code }));
 }
 
 /** Edit wallpaper details or unpublish/archive. */
@@ -39,10 +40,10 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     .from('wallpapers')
     .update(parsed.data)
     .eq('id', params.id)
-    .select('slug')
+    .select('slug, code')
     .maybeSingle();
   if (error || !data) return NextResponse.json({ error: 'Could not save' }, { status: 400 });
-  refresh(data.slug as string);
+  refresh(data.slug as string, data.code as string | null);
   await audit('wallpaper.update', 'wallpaper', params.id, parsed.data);
   return NextResponse.json({ ok: true });
 }

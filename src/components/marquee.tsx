@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { WallpaperCard } from '@/types/catalogue';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 /**
  * Auto-scrolling strip of wallpapers (pure CSS, pauses on hover, halts under
@@ -21,7 +22,7 @@ export function Marquee({
         {loop.map((w, i) => (
           <Link
             key={`${w.id}-${i}`}
-            href={`/w/${w.slug}`}
+            href={wallpaperPath(w)}
             className="relative aspect-[3/4] w-28 shrink-0 overflow-hidden rounded-xl border sm:w-36"
             aria-hidden={i >= items.length}
             tabIndex={i >= items.length ? -1 : 0}

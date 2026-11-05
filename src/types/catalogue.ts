@@ -24,6 +24,8 @@ export interface WallpaperSet {
 export interface Wallpaper {
   id: string;
   slug: string;
+  /** Permanent 8-char code used in URLs (/w/<slug>-<code>). */
+  code?: string | null;
   title: string;
   description: string | null;
   alt_text: string | null;

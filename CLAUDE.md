@@ -397,6 +397,13 @@ Key Phase 3 decisions:
   webhook + autopay), welcome once for new accounts, bonus-expiry reminder (housekeeping, `credit_ledger.reminded_at`).
   Claims are released when no email provider is configured, so they go out once Resend is set.
 
+## Wallpaper URLs (2026-11-05) — migration 0023
+
+- Canonical URL `/w/<slug>-<code>`: `wallpapers.code` is a permanent 8-char id (DB default `new_wallpaper_code()`,
+  alphabet without 0/o/1/l/i, always has a digit). Build links with `wallpaperPath(w)` (src/lib/wallpaper-url.ts) — never
+  `/w/${slug}`; select `code` with `slug`. `/w/[slug]` resolves by code (else slug) and 308-redirects to the canonical
+  path, so old links and renamed titles keep working. Demo wallpapers use `demoCode(slug)`.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

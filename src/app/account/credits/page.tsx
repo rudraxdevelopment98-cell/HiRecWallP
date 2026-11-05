@@ -5,6 +5,7 @@ import { Coins } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 import { AutoRefresh } from '@/components/account/auto-refresh';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 export const metadata: Metadata = { title: 'Credits' };
 
@@ -51,9 +52,9 @@ export default async function CreditsPage(props: { searchParams: Promise<{ bough
   // Spends point at the entitlement: show which wallpaper they unlocked.
   const spendRefs = (ledger ?? []).filter((r) => r.reason === 'spend' && r.ref_id).map((r) => r.ref_id as string);
   const { data: ents } = spendRefs.length
-    ? await supabase.from('entitlements').select('id, wallpapers(title, slug)').in('id', [...new Set(spendRefs)])
+    ? await supabase.from('entitlements').select('id, wallpapers(title, slug, code)').in('id', [...new Set(spendRefs)])
     : { data: [] };
-  const unlocked = new Map((ents ?? []).map((e) => [e.id as string, e.wallpapers as unknown as { title: string; slug: string } | null]));
+  const unlocked = new Map((ents ?? []).map((e) => [e.id as string, e.wallpapers as unknown as { title: string; slug: string; code: string | null } | null]));
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PER_PAGE));
   const ORDER_REASONS = new Set(['purchase', 'bonus', 'refund']);
   // Unexpired bonus lots and what's left in each (bonus is spent first).
@@ -157,7 +158,7 @@ export default async function CreditsPage(props: { searchParams: Promise<{ bough
                       {w && (
                         <>
                           {' · '}
-                          <Link href={`/w/${w.slug}`} className="underline">{w.title}</Link>
+                          <Link href={wallpaperPath(w)} className="underline">{w.title}</Link>
                         </>
                       )}
                       {orderLink && (

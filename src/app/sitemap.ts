@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { publicEnv } from '@/lib/env';
 import { createServiceClient } from '@/lib/supabase/service';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 const STATIC_PATHS = [
   '',
@@ -30,13 +31,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = createServiceClient();
     const { data } = await supabase
       .from('wallpapers')
-      .select('slug, created_at')
+      .select('slug, code, created_at')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(5000);
     for (const w of data ?? []) {
       entries.push({
-        url: `${base}/w/${w.slug}`,
+        url: `${base}${wallpaperPath(w)}`,
         lastModified: w.created_at ? new Date(w.created_at) : now,
       });
     }

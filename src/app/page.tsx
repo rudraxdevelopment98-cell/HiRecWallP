@@ -13,6 +13,7 @@ import { getUser } from '@/lib/auth';
 import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listCategories, listPublishedWallpapers, listSets } from '@/lib/catalogue';
 import { getSettings } from '@/lib/settings';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 export default async function HomePage() {
   const region = (await getDisplayRegion());
@@ -37,7 +38,7 @@ export default async function HomePage() {
       {daily && (
         <section className="container py-6" aria-labelledby="daily-title">
           <div className="grid items-center gap-5 rounded-2xl border bg-card p-5 sm:grid-cols-[160px_1fr_auto]">
-            <Link href={`/w/${daily.slug}`} className="relative block aspect-[4/3] overflow-hidden rounded-xl bg-muted sm:aspect-square">
+            <Link href={wallpaperPath(daily)} className="relative block aspect-[4/3] overflow-hidden rounded-xl bg-muted sm:aspect-square">
               {daily.previewUrl && <Image src={daily.previewUrl} alt={daily.title} fill sizes="160px" className="object-cover" />}
             </Link>
             <div className="min-w-0">

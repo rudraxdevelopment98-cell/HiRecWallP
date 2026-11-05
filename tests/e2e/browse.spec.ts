@@ -51,3 +51,15 @@ test('wallpaper page previews the wallpaper on a device and full screen', async 
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
 });
+
+test('wallpaper URLs carry a permanent code; old and renamed links redirect', async ({ page }) => {
+  await page.goto('/w/canyon-river');
+  await expect(page).toHaveURL(/\/w\/canyon-river-[a-hjkmnp-z2-9]{8}$/);
+  const canonical = new URL(page.url()).pathname;
+  const code = canonical.split('-').pop()!;
+  await page.goto(`/w/an-old-title-${code}`);
+  await expect(page).toHaveURL(new RegExp(`${canonical}$`));
+  await expect(page.getByRole('heading', { level: 1, name: 'Canyon River' })).toBeVisible();
+  const card = page.locator('a[href^="/w/"]').first();
+  await expect(card).toHaveAttribute('href', /\/w\/[a-z0-9-]+-[a-hjkmnp-z2-9]{8}$/);
+});

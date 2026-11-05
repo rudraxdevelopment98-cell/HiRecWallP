@@ -3,6 +3,7 @@ import 'server-only';
 import { createServiceClient } from '@/lib/supabase/service';
 import { getSocialProvider } from '@/lib/social';
 import { publicEnv } from '@/lib/env';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 // Soft daily caps (well under API limits). IG 2–3/day, Pinterest 5–10/day.
 const DAILY_LIMIT: Record<string, number> = { instagram: 3, pinterest: 10, youtube_shorts: 2 };
@@ -37,7 +38,7 @@ export async function runSocialScheduler(): Promise<Record<string, unknown>> {
 
   const { data: due } = await supabase
     .from('social_posts')
-    .select('id, wallpaper_id, platform, caption, media_url, wallpapers(slug)')
+    .select('id, wallpaper_id, platform, caption, media_url, wallpapers(slug, code)')
     .eq('status', 'scheduled')
     .lte('scheduled_for', now.toISOString())
     .order('scheduled_for', { ascending: true })
@@ -56,7 +57,7 @@ export async function runSocialScheduler(): Promise<Record<string, unknown>> {
     }
     try {
       const link = post.wallpapers?.slug
-        ? `${publicEnv.NEXT_PUBLIC_SITE_URL}/w/${post.wallpapers.slug}?utm_source=${post.platform}`
+        ? `${publicEnv.NEXT_PUBLIC_SITE_URL}${wallpaperPath(post.wallpapers)}?utm_source=${post.platform}`
         : undefined;
       const result = await getSocialProvider(post.platform).publish({
         platform: post.platform,

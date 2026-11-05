@@ -9,6 +9,7 @@ import { getSettings } from '@/lib/settings';
 import { CopyField } from '@/components/account/copy-field';
 import { formatMoneyMinor } from '@/lib/format';
 import { publicEnv } from '@/lib/env';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 const STATUS_LABEL: Record<string, string> = {
   pending_review: 'In review',
@@ -51,7 +52,7 @@ export default async function CreatorDashboardPage() {
   const [{ data: submissions }, { data: code }, { data: comms }, settings] = await Promise.all([
     service
       .from('wallpapers')
-      .select('id, slug, title, status, created_at')
+      .select('id, slug, code, title, status, created_at')
       .eq('creator_id', creator.user_id)
       .order('created_at', { ascending: false })
       .limit(100),
@@ -128,7 +129,7 @@ export default async function CreatorDashboardPage() {
             {(submissions ?? []).map((w) => (
               <li key={w.id as string} className="flex items-center justify-between gap-3 p-3">
                 {w.status === 'published' ? (
-                  <Link href={`/w/${w.slug}`} className="font-medium hover:underline">
+                  <Link href={wallpaperPath({ slug: w.slug as string, code: w.code as string | null })} className="font-medium hover:underline">
                     {w.title as string}
                   </Link>
                 ) : (

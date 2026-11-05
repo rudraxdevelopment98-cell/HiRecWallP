@@ -5,6 +5,7 @@ import { getSettings } from '@/lib/settings';
 import { formatMoneyMinor } from '@/lib/format';
 import { istToday } from '@/lib/daily';
 import { RunJobButton } from '@/components/admin/run-job-button';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export default async function AdminGrowthPage() {
     count(supabase.from('gift_codes').select('id', { count: 'exact', head: true }).eq('status', 'redeemed').gte('redeemed_at', since)),
     count(supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true }).eq('daily', true)),
     count(supabase.from('entitlements').select('id', { count: 'exact', head: true }).eq('source', 'daily').gte('created_at', `${today}T00:00:00+05:30`)),
-    supabase.from('daily_picks').select('day, emailed_at, wallpapers(title, slug)').eq('day', today).maybeSingle(),
+    supabase.from('daily_picks').select('day, emailed_at, wallpapers(title, slug, code)').eq('day', today).maybeSingle(),
     supabase.from('affiliate_commissions').select('currency, commission_minor, status').gte('created_at', since),
   ]);
   const g = settings.growth;
@@ -65,7 +66,7 @@ export default async function AdminGrowthPage() {
           <h2 className="font-semibold">Daily free wallpaper</h2>
           {p?.wallpapers ? (
             <p className="mt-2">
-              Today: <Link href={`/w/${p.wallpapers.slug}`} className="underline">{p.wallpapers.title}</Link>
+              Today: <Link href={wallpaperPath(p.wallpapers)} className="underline">{p.wallpapers.title}</Link>
               {p.emailed_at ? ' · email sent' : process.env.RESEND_API_KEY ? ' · email goes out with the nightly job' : ' · email off (RESEND_API_KEY not set)'}
             </p>
           ) : (

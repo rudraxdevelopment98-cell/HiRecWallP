@@ -1,5 +1,6 @@
 import type { RegionCode } from '@/lib/geo';
 import type { Category, WallpaperCard } from '@/types/catalogue';
+import { demoCode } from '@/lib/wallpaper-url';
 
 /**
  * Built-in demo catalogue. Used as a graceful fallback when Supabase isn't
@@ -58,6 +59,7 @@ function toCard(def: DemoDef, i: number, region: RegionCode): WallpaperCard {
   return {
     id: `demo-${i}`,
     slug: def.slug,
+    code: demoCode(def.slug),
     title: def.title,
     description: `${def.title} — an ultra-HD landscape wallpaper for desktop and laptop screens.`,
     alt_text: def.title,
@@ -85,7 +87,7 @@ export function demoWallpapers(region: RegionCode): WallpaperCard[] {
   return DEFS.map((d, i) => toCard(d, i, region));
 }
 
-export function demoWallpaperBySlug(slug: string, region: RegionCode): WallpaperCard | null {
-  const i = DEFS.findIndex((d) => d.slug === slug);
+export function demoWallpaperBySlug(slug: string, region: RegionCode, code?: string | null): WallpaperCard | null {
+  const i = DEFS.findIndex((d) => (code ? demoCode(d.slug) === code : d.slug === slug));
   return i === -1 ? null : toCard(DEFS[i]!, i, region);
 }

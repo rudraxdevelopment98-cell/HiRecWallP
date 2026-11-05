@@ -3,14 +3,15 @@ import Link from 'next/link';
 import { FavouriteButton } from '@/components/favourite-button';
 import { formatRegionPrice } from '@/lib/format';
 import type { WallpaperCard as WallpaperCardData } from '@/types/catalogue';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 /** Marketplace product card: preview, resolution badge, title, price, favourite. */
 export function WallpaperCard({ wallpaper }: { wallpaper: WallpaperCardData }) {
-  const { slug, title, previewUrl, is_free, price, region, alt_text } = wallpaper;
+  const { title, previewUrl, is_free, price, region, alt_text } = wallpaper;
   const category = wallpaper.categoryName;
   return (
     <div className="hover-lift group relative overflow-hidden rounded-2xl border bg-card">
-      <Link href={`/w/${slug}`} className="block">
+      <Link href={wallpaperPath(wallpaper)} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
           {previewUrl ? (
             <Image

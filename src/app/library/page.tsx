@@ -10,6 +10,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { PAID_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
 import { previewUrlFor } from '@/lib/catalogue';
 import Image from 'next/image';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
 export const metadata: Metadata = { title: 'My Library' };
 
@@ -21,7 +22,7 @@ interface EntitlementRow {
   order_id: string | null;
   created_at: string;
   licence: string;
-  wallpapers: { slug: string; title: string; wallpaper_assets: { variant: string; storage_key: string }[] | null } | null;
+  wallpapers: { slug: string; code: string | null; title: string; wallpaper_assets: { variant: string; storage_key: string }[] | null } | null;
 }
 
 const SORTS = { newest: 'Newest', title: 'Title A–Z', left: 'Most downloads left' } as const;
@@ -39,7 +40,7 @@ export default async function LibraryPage(props: { searchParams: Promise<{ q?: s
   const [{ data: entitlements }, { data: balance }] = await Promise.all([
     supabase
       .from('entitlements')
-      .select('id, wallpaper_id, order_id, licence, max_downloads, downloads_used, created_at, wallpapers(slug, title, wallpaper_assets(variant, storage_key))')
+      .select('id, wallpaper_id, order_id, licence, max_downloads, downloads_used, created_at, wallpapers(slug, code, title, wallpaper_assets(variant, storage_key))')
       .order('created_at', { ascending: false })
       .returns<EntitlementRow[]>(),
     supabase.rpc('my_credit_balance'),
@@ -127,7 +128,7 @@ export default async function LibraryPage(props: { searchParams: Promise<{ q?: s
                     </div>
                     <div className="min-w-0">
                       {e.wallpapers?.slug ? (
-                        <Link href={`/w/${e.wallpapers.slug}`} className="font-medium hover:underline">
+                        <Link href={wallpaperPath(e.wallpapers)} className="font-medium hover:underline">
                           {e.wallpapers.title}
                         </Link>
                       ) : (

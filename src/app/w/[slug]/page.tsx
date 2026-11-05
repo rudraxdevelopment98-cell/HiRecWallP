@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 import type { Metadata } from 'next';
 import { Check, Download, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   if (!w) return { title: 'Wallpaper not found' };
   return {
     title: w.title,
+    alternates: { canonical: wallpaperPath(w) },
     description: w.description ?? `${w.title} — ultra-HD AI wallpaper.`,
     openGraph: { title: w.title, description: w.description ?? undefined, images: w.previewUrl ? [{ url: w.previewUrl }] : undefined },
   };
@@ -50,6 +52,9 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
   const region = (await getDisplayRegion());
   const w = await getWallpaperBySlug(params.slug, region);
   if (!w) notFound();
+  // One canonical URL per wallpaper: old slug-only links and renamed titles redirect.
+  const canonical = wallpaperPath(w);
+  if (`/w/${decodeURIComponent(params.slug)}` !== canonical) permanentRedirect(canonical);
 
   const related = (await listPublishedWallpapers({ sort: 'newest' }, region, 8)).filter((r) => r.id !== w.id).slice(0, 4);
   const freeVariants =
@@ -166,7 +171,7 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
               )
             ) : freeToday ? (
               <div className="flex flex-1 flex-col gap-1">
-                <DailyClaimButton size="lg" signedIn={Boolean(viewer)} next={`/w/${w.slug}`} />
+                <DailyClaimButton size="lg" signedIn={Boolean(viewer)} next={canonical} />
                 <p className="text-center text-xs text-muted-foreground">Today&rsquo;s free wallpaper · free until midnight IST</p>
               </div>
             ) : covering.length > 0 ? (
