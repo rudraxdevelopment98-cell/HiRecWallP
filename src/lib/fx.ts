@@ -33,10 +33,9 @@ export async function refreshFxRates(): Promise<{ updated: boolean; rates?: Reco
       if (!rates) continue;
       const supabase = createServiceClient();
       const now = new Date().toISOString();
-      await supabase.from('site_settings').upsert([
-        { key: 'fx_to_inr', value: rates, updated_at: now },
-        { key: 'fx_meta', value: { updated_at: now, source: `ECB reference rates ${json.date ?? ''}`.trim() }, updated_at: now },
-      ]);
+      // Rates go through save_setting() so changes show in the settings history (as automatic).
+      await supabase.rpc('save_setting', { p_key: 'fx_to_inr', p_value: rates, p_actor: null, p_actor_email: null, p_note: 'Automatic exchange-rate update' });
+      await supabase.from('site_settings').upsert({ key: 'fx_meta', value: { updated_at: now, source: `ECB reference rates ${json.date ?? ''}`.trim() }, updated_at: now });
       clearSettingsCache();
       return { updated: true, rates, source: base };
     } catch {

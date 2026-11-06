@@ -462,3 +462,24 @@ in the spec without asking the owner first.
 - **PostgREST embeds:** `orders`, `support_tickets`, `gift_codes` and `referral_rewards` each have two FKs to `profiles`;
   always embed with the FK hint (`profiles!orders_user_id_fkey(...)`), otherwise the query errors (PGRST201) and the page
   shows nothing.
+
+## Exact fit + admin functions (2026-11-06) — migrations 0026 + 0027
+
+- **Exact fit (B5):** `POST /api/download {wallpaperId, fit:{w,h}}` crops the private master (`wallpapers/<id>/master.jpg`, else the
+  largest size) to that screen with `ensureFitCrop()` (`src/lib/fit-server.ts`), cached at `fit/<id>/<w>x<h>.jpg` (30-day cleanup),
+  watermarked per buyer (`wm/<ent>/fit-WxH.jpg`) and counted as one download (`downloads.fit_size`). Size rules in `src/lib/fit.ts`
+  (`checkFitSize`: max 1.15× enlargement; free wallpapers ≤ 2560 px). UI: `FitDownload` (library + free wallpaper pages), "Fits these
+  screens" + Quality row on `/w/[slug]`. Admin uploads ≥2560 px may be upscaled 2× via `prepareOriginal()` (`src/lib/upscale.ts`) —
+  only with a real `UPSCALE_PROVIDER` (never the mock); `wallpapers.upscaled_from` is shown on the page. Creator uploads still need 3840 px.
+- **Staff roles (B6):** `profiles.role = 'admin'` = staff; `profiles.staff_role` (owner | manager | support | content; null = owner)
+  limits areas via `src/lib/staff.ts` (`areaForPath`, `canAccessPath`). Enforced in middleware for every `/admin` page and
+  `/api/admin` call, again in `requireAdmin()` (reads `x-hw-path`), and for manual job runs (`authorizeJob`). Unknown admin paths
+  fall to the business area (owner/manager) — **add new admin sections to `AREA_PREFIXES`**. Staff are managed only at
+  /admin/staff (owner); the customer page can't change or block staff accounts.
+- **2FA:** Supabase MFA TOTP. Middleware/`getStaff()` read the session AAL: a staff member with a factor must be at aal2; with
+  `site_settings.security.require_staff_mfa` everyone must set one up. `/admin/security` is the only page open before that.
+  Hosted Supabase must have *Authenticator app (TOTP)* enabled (Auth → MFA).
+- **Settings history:** write settings only through `save_setting()` (RPC: records old/new/actor in `site_settings_history`);
+  Settings → History shows changes with Revert (first changes revert to `DEFAULT_SETTINGS`).
+- **Customer timeline:** `customerTimeline()` (src/lib/customer-timeline.ts) merges orders, credits, tickets, downloads, sign-ins
+  (`admin_login_events()` reads the auth audit log when available), staff actions and staff emails (`/api/admin/customers/[id]/email`).

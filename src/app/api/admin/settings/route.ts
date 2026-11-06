@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getStaff } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { adminGuard, audit } from '@/lib/admin';
@@ -98,9 +99,15 @@ export async function PUT(request: Request) {
   if (denied) return denied;
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid setting' }, { status: 400 });
-  const { error } = await createServiceClient()
-    .from('site_settings')
-    .upsert({ key: parsed.data.key, value: parsed.data.value, updated_at: new Date().toISOString() });
+  // Saved through save_setting() so every change lands in the settings history (with who made it).
+  const me = await getStaff();
+  const { error } = await createServiceClient().rpc('save_setting', {
+    p_key: parsed.data.key,
+    p_value: parsed.data.value,
+    p_actor: me?.id ?? null,
+    p_actor_email: me?.email ?? null,
+    p_note: null,
+  });
   if (error) return NextResponse.json({ error: 'Could not save' }, { status: 400 });
   clearSettingsCache();
   await audit('settings.update', 'setting', parsed.data.key, { value: parsed.data.value as unknown });

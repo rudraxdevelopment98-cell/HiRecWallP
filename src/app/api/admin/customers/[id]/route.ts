@@ -12,7 +12,8 @@ const schema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('gift'), wallpaperId: z.string().uuid(), licence: z.enum(['personal', 'commercial']) }),
   z.object({ action: z.literal('block') }),
   z.object({ action: z.literal('unblock') }),
-  z.object({ action: z.literal('role'), role: z.enum(['buyer', 'creator', 'admin']) }),
+  // Staff (admin) roles are given and taken away only in Admin → Staff (owner).
+  z.object({ action: z.literal('role'), role: z.enum(['buyer', 'creator']) }),
   // Customer moved country: change (or clear) the locked price country.
   z.object({ action: z.literal('price_country'), country: z.string().trim().toUpperCase().regex(/^([A-Z]{2})?$/, 'Use a 2-letter country code, or leave blank to unlock') }),
 ]);
@@ -29,6 +30,10 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   const supabase = createServiceClient();
   const a = parsed.data;
   const me = await getUser();
+  const { data: target } = await supabase.from('profiles').select('role').eq('id', id).maybeSingle();
+  if (target?.role === 'admin' && (a.action === 'role' || a.action === 'block' || a.action === 'unblock')) {
+    return NextResponse.json({ error: 'This is a staff account — manage it in Admin → Staff.' }, { status: 400 });
+  }
 
   switch (a.action) {
     case 'credits': {
@@ -64,7 +69,6 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       break;
     }
     case 'role': {
-      if (me?.id === id && a.role !== 'admin') return NextResponse.json({ error: 'You cannot remove your own admin role.' }, { status: 400 });
       const { error } = await supabase.from('profiles').update({ role: a.role }).eq('id', id);
       if (error) return NextResponse.json({ error: 'Could not change role' }, { status: 400 });
       break;

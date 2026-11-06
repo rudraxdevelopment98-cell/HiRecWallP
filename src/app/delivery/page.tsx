@@ -19,7 +19,7 @@ export default async function DeliveryPage() {
             <ul>
               <li><strong>Credit packs</strong> — credits added to your account balance.</li>
               <li><strong>Memberships</strong> — a plan on your account with a monthly wallpaper allowance.</li>
-              <li><strong>Wallpapers</strong> — high-resolution image files in every listed size, downloadable from My Library.</li>
+              <li><strong>Wallpapers</strong> — high-resolution image files in every listed size, downloadable from My Library, plus an <strong>exact fit</strong> cropped to the resolution of a screen you choose (when the artwork is large enough).</li>
               <li><strong>Gifts</strong> — a redeemable code, emailed to the recipient and shown in your account.</li>
             </ul>
           ),
@@ -44,7 +44,7 @@ export default async function DeliveryPage() {
             <p>
               Each wallpaper includes {c.settings.downloads_per_purchase} downloads across your devices. For security, every download uses a
               private link that expires after 60 seconds — just press download again to get a fresh one. Files are full quality; each purchased
-              file carries an invisible mark linked to your order.
+              file carries an invisible mark linked to your order. An exact-fit file counts as one of those downloads, like any other size.
             </p>
           ),
         },

@@ -82,14 +82,20 @@ export function CustomerActions({ userId, blocked, role, priceCountry }: { userI
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground">Role</span>
-        {(['buyer', 'creator', 'admin'] as const).map((r) => (
-          <Button key={r} size="sm" variant={r === role ? 'default' : 'outline'} disabled={busy || refreshing || r === role} onClick={() => act({ action: 'role', role: r }, `Role set to ${r}`)}>
-            {r}
-          </Button>
-        ))}
+        {role === 'admin' ? (
+          <span className="text-xs text-muted-foreground">
+            Staff account — manage it in <a href="/admin/staff" className="underline">Staff</a>.
+          </span>
+        ) : (
+          (['buyer', 'creator'] as const).map((r) => (
+            <Button key={r} size="sm" variant={r === role ? 'default' : 'outline'} disabled={busy || refreshing || r === role} onClick={() => act({ action: 'role', role: r }, `Role set to ${r}`)}>
+              {r}
+            </Button>
+          ))
+        )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {blocked ? (
+        {role === 'admin' ? null : blocked ? (
           <Button size="sm" variant="outline" disabled={busy || refreshing} onClick={() => act({ action: 'unblock' }, 'Account unblocked')}>
             Unblock account
           </Button>

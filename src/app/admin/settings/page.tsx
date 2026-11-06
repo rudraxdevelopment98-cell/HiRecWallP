@@ -1,9 +1,11 @@
 import { requireAdmin } from '@/lib/auth';
 import Link from 'next/link';
 import { createServiceClient } from '@/lib/supabase/service';
-import { getSettings, sellerDetails, socialLinks } from '@/lib/settings';
+import { DEFAULT_SETTINGS, getSettings, sellerDetails, socialLinks } from '@/lib/settings';
 import { AdminForm, SettingToggle } from '@/components/admin/admin-form';
 import { FilterTabs, PageHeader, Section } from '@/components/admin/ui';
+import { RevertSettingButton } from '@/components/admin/revert-setting';
+import { SETTING_LABEL, settingDiff } from '@/lib/settings-history';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,18 +16,22 @@ const TABS = [
   { key: 'business', label: 'Business & legal' },
   { key: 'growth', label: 'Growth' },
   { key: 'prices', label: 'Prices & FX' },
+  { key: 'history', label: 'History' },
 ] as const;
 type Tab = (typeof TABS)[number]['key'];
 
 export default async function AdminSettingsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const { tab: rawTab } = await searchParams;
   const tab: Tab = TABS.some((t) => t.key === rawTab) ? (rawTab as Tab) : 'general';
   const supabase = createServiceClient();
-  const [settings, { data: rules }, { data: regions }] = await Promise.all([
+  const [settings, { data: rules }, { data: regions }, { data: history }] = await Promise.all([
     getSettings(),
     supabase.from('price_rules').select('region_code, base_price, min_price, max_price').eq('scope', 'global').order('region_code'),
     supabase.from('regions').select('code, commercial_multiplier'),
+    tab === 'history'
+      ? supabase.from('site_settings_history').select('id, key, old_value, new_value, actor_email, note, created_at').order('created_at', { ascending: false }).limit(100)
+      : Promise.resolve({ data: null }),
   ]);
   const s = sellerDetails(settings, '');
   const seller = { legal_name: s.name, address: s.address, gstin: s.gstin, gst_rate: s.rate, support_email: s.supportEmail };
@@ -226,6 +232,50 @@ export default async function AdminSettingsPage({ searchParams }: { searchParams
             />
           </Section>
         </>
+      )}
+      {tab === 'history' && (
+        <Section title="Change history" description="Every settings change, newest first — who made it and what changed. Revert puts a setting back to how it was before that change (and is recorded too)." flush>
+          {(history ?? []).length === 0 ? (
+            <p className="p-5 text-sm text-muted-foreground">No changes recorded yet.</p>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Who</th>
+                  <th>Setting</th>
+                  <th>What changed</th>
+                  <th className="text-right"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {(history ?? []).map((h) => (
+                  <tr key={h.id as number}>
+                    <td className="whitespace-nowrap text-xs text-muted-foreground">
+                      {new Date(h.created_at as string).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' })}
+                    </td>
+                    <td className="text-xs">{(h.actor_email as string | null) ?? <span className="text-muted-foreground">automatic</span>}</td>
+                    <td className="font-medium">{SETTING_LABEL[h.key as string] ?? (h.key as string)}</td>
+                    <td className="max-w-md text-xs">
+                      {h.note && <p className="text-muted-foreground">{h.note as string}</p>}
+                      {h.old_value === null && <p className="text-muted-foreground">First change from the built-in default</p>}
+                      {settingDiff(h.old_value ?? (DEFAULT_SETTINGS as unknown as Record<string, unknown>)[h.key as string] ?? null, h.new_value)
+                        .slice(0, 6)
+                        .map((line) => (
+                          <p key={line} className="break-words font-mono">
+                            {line}
+                          </p>
+                        ))}
+                    </td>
+                    <td className="text-right">
+                      {(h.old_value !== null || h.key in DEFAULT_SETTINGS) && (h.key !== 'security' || me.role === 'owner') && <RevertSettingButton id={h.id as number} />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Section>
       )}
     </div>
   );

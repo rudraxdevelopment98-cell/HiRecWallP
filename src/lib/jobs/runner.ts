@@ -2,7 +2,17 @@ import 'server-only';
 
 import crypto from 'node:crypto';
 import { createServiceClient } from '@/lib/supabase/service';
-import { isAdminUser } from '@/lib/auth';
+import { staffCan } from '@/lib/auth';
+import type { Area } from '@/lib/staff';
+
+/** Which staff area may run each job by hand (cron always can). */
+const JOB_AREA: Record<string, Area> = {
+  'generate-batch': 'catalogue',
+  'publish-approved': 'catalogue',
+  'social-scheduler': 'marketing',
+  'daily-pick': 'marketing',
+  'dynamic-pricing': 'pricing',
+};
 
 /**
  * Authorize a job invocation: either a Vercel Cron / scheduled call carrying
@@ -21,7 +31,9 @@ export async function authorizeJob(request: Request): Promise<boolean> {
       if (a.length === b.length && crypto.timingSafeEqual(a, b)) return true;
     }
   }
-  return isAdminUser();
+  // Signed-in staff: by the job's area (payouts, FX, reports, housekeeping → owner/manager).
+  const name = new URL(request.url).pathname.split('/').filter(Boolean).pop() ?? '';
+  return staffCan(JOB_AREA[name] ?? 'business');
 }
 
 /**

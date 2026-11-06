@@ -31,8 +31,9 @@ import {
   Tags,
   Upload,
   Users,
-  X, BookOpen } from 'lucide-react';
+  X, BookOpen, ShieldCheck, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { canAccessPath } from '@/lib/staff';
 import { BrandMark } from '@/components/brand-mark';
 
 export const ADMIN_NAV = [
@@ -88,6 +89,8 @@ export const ADMIN_NAV = [
       { href: '/admin/settings', label: 'Settings', icon: Settings },
       { href: '/admin/health', label: 'System health', icon: Activity },
       { href: '/admin/activity', label: 'Activity log', icon: History },
+      { href: '/admin/staff', label: 'Staff', icon: UserCog },
+      { href: '/admin/security', label: 'Security (2FA)', icon: ShieldCheck },
       { href: '/admin/guide', label: 'Guide', icon: BookOpen },
     ],
   },
@@ -105,12 +108,14 @@ function currentItem(pathname: string) {
 
 export type NavCounts = Partial<Record<string, number>>;
 
-function NavLinks({ counts, onNavigate }: { counts: NavCounts; onNavigate?: () => void }) {
+function NavLinks({ counts, staffRole, onNavigate }: { counts: NavCounts; staffRole: string | null; onNavigate?: () => void }) {
   const pathname = usePathname();
   const active = currentItem(pathname)?.href;
   return (
     <nav aria-label="Admin" className="space-y-5">
-      {ADMIN_NAV.map((g) => (
+      {ADMIN_NAV.map((g) => ({ ...g, items: g.items.filter((i) => canAccessPath(staffRole, i.href)) }))
+        .filter((g) => g.items.length > 0)
+        .map((g) => (
         <div key={g.group}>
           <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/80">{g.group}</p>
           <ul className="space-y-0.5">
@@ -161,17 +166,17 @@ function Brand() {
 }
 
 /** Desktop sidebar (full height, scrolls on its own). */
-export function AdminSidebar({ counts }: { counts: NavCounts }) {
+export function AdminSidebar({ counts, staffRole }: { counts: NavCounts; staffRole: string | null }) {
   return (
     <aside className="sticky top-0 hidden h-screen flex-col gap-6 overflow-y-auto overscroll-contain border-r bg-card px-3 py-5 [scrollbar-width:thin] lg:flex">
       <Brand />
-      <NavLinks counts={counts} />
+      <NavLinks counts={counts} staffRole={staffRole} />
     </aside>
   );
 }
 
 /** Top bar: current section/page, store link, account; menu button on mobile. */
-export function AdminTopbar({ counts, email }: { counts: NavCounts; email: string | null }) {
+export function AdminTopbar({ counts, email, staffRole, roleLabel }: { counts: NavCounts; email: string | null; staffRole: string | null; roleLabel?: string }) {
   const pathname = usePathname();
   const item = currentItem(pathname);
   const [open, setOpen] = useState(false);
@@ -207,7 +212,12 @@ export function AdminTopbar({ counts, email }: { counts: NavCounts; email: strin
           <Link href="/" target="_blank" className="hidden items-center gap-1.5 rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground sm:inline-flex">
             <ExternalLink className="h-4 w-4" /> View store
           </Link>
-          {email && <span className="hidden max-w-[14rem] truncate px-2 text-muted-foreground md:inline">{email}</span>}
+          {email && (
+            <span className="hidden max-w-[16rem] truncate px-2 text-muted-foreground md:inline">
+              {email}
+              {roleLabel && <span className="ml-1.5 rounded bg-secondary px-1.5 py-0.5 text-[11px] font-medium text-foreground">{roleLabel}</span>}
+            </span>
+          )}
           <form action="/auth/signout" method="post">
             <button type="submit" className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground" aria-label="Sign out">
               <LogOut className="h-4 w-4" />
@@ -227,7 +237,7 @@ export function AdminTopbar({ counts, email }: { counts: NavCounts; email: strin
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <NavLinks counts={counts} onNavigate={() => setOpen(false)} />
+            <NavLinks counts={counts} staffRole={staffRole} onNavigate={() => setOpen(false)} />
           </div>
         </div>
       )}

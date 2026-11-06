@@ -111,8 +111,10 @@ export default async function PrivacyPage() {
           heading: 'Security',
           body: (
             <p>
-              Data is encrypted in transit, access is limited to people who need it, payments are handled by a PCI-DSS-certified provider, and IP
-              addresses are stored only as one-way hashes. If a breach affects you, we will tell you and the Data Protection Board as the law requires.
+              Data is encrypted in transit, payments are handled by a PCI-DSS-certified provider, and IP addresses are stored only as one-way hashes.
+              Inside HirecWallp, staff see only what their role needs (for example, support sees orders, credits, sign-in times and support requests to
+              help you), every staff action is recorded, and the admin area can require two-factor sign-in. If a breach affects you, we will tell you
+              and the Data Protection Board as the law requires.
             </p>
           ),
         },

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { normaliseCountry, regionForCountry } from '@/lib/geo';
+import { canAccessPath, isMfaExempt } from '@/lib/staff';
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -23,6 +24,9 @@ export async function middleware(request: NextRequest) {
   const adminPath = path === '/admin' || path.startsWith('/admin/') || path.startsWith('/api/admin/');
   let isAdmin = false;
   let signedIn = false;
+  let staffRole: string | null = null;
+  // 'verify': has an authenticator but hasn't used it this session; 'setup': 2FA required but not set up.
+  let mfa: 'ok' | 'verify' | 'setup' = 'ok';
   if (supabaseUrl && supabaseAnon && hasSession) {
     try {
       const supabase = createServerClient(supabaseUrl, supabaseAnon, {
@@ -41,8 +45,17 @@ export async function middleware(request: NextRequest) {
       signedIn = Boolean(data.user);
       // First line of the admin gate (pages and APIs re-check server-side; RLS too).
       if (adminPath && data.user) {
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+        const { data: profile } = await supabase.from('profiles').select('role, staff_role').eq('id', data.user.id).maybeSingle();
         isAdmin = profile?.role === 'admin';
+        staffRole = (profile?.staff_role as string | null) ?? null;
+        if (isAdmin) {
+          const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') mfa = 'verify';
+          else if (aal?.nextLevel !== 'aal2') {
+            const { data: sec } = await supabase.from('site_settings').select('value').eq('key', 'security').maybeSingle();
+            if ((sec?.value as { require_staff_mfa?: boolean } | null)?.require_staff_mfa) mfa = 'setup';
+          }
+        }
       }
     } catch {
       // Never block a page on auth refresh.
@@ -53,6 +66,16 @@ export async function middleware(request: NextRequest) {
       ? NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       : // Signed in but not an admin: sending them to /login would bounce straight back here (redirect loop).
         NextResponse.redirect(new URL(signedIn ? '/' : '/login?next=/admin', request.url));
+  } else if (adminPath && mfa !== 'ok' && !isMfaExempt(path)) {
+    // Staff must finish (or set up) two-factor sign-in before anything else.
+    response = path.startsWith('/api/')
+      ? NextResponse.json({ error: 'Two-factor sign-in required', code: 'mfa_required' }, { status: 403 })
+      : NextResponse.redirect(new URL('/admin/security', request.url));
+  } else if (adminPath && !canAccessPath(staffRole, path)) {
+    // Staff role doesn't include this area (src/lib/staff.ts).
+    response = path.startsWith('/api/')
+      ? NextResponse.json({ error: 'Your staff role does not include this area' }, { status: 403 })
+      : NextResponse.redirect(new URL('/admin?denied=1', request.url));
   }
 
   // --- Creator affiliate attribution: ?via=CODE on any link (last click, 30 days)

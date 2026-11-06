@@ -82,6 +82,8 @@ export async function emailsFor(userIds: string[]): Promise<Map<string, string |
 
 /** Find an account by email (case-insensitive). */
 export async function userIdByEmail(email: string): Promise<string | null> {
-  const { data } = await createServiceClient().from('profiles').select('id').ilike('email', email.trim()).limit(1).maybeSingle();
+  // Exact, case-insensitive match: escape LIKE wildcards so "a_b@x.com" can't match someone else.
+  const exact = email.trim().replace(/[\\%_]/g, (c) => `\\${c}`);
+  const { data } = await createServiceClient().from('profiles').select('id').ilike('email', exact).limit(1).maybeSingle();
   return (data?.id as string | undefined) ?? null;
 }

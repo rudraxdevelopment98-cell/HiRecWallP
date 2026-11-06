@@ -45,15 +45,15 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 
 ## B5 — Resolution
 - ✅ Device preview on the wallpaper page: auto-detects your phone/tablet/computer, lock & home screen, full-screen try-on, sharpness hint (owner idea)
-- ⬜ Exact-fit downloads: choose your device (or auto-detect) → exact resolution crop from the master, cached
-- ⬜ Device catalogue (popular phones, tablets, monitors) and per-wallpaper "fits" list
-- ⬜ Quality badge from source resolution; AI upscale path for slightly-small uploads (adapter)
+- ✅ Exact-fit downloads: this screen (auto-detected), a listed device or a custom size → crop from the master, cached under fit/, watermarked per buyer; free wallpapers up to 2560 px
+- ✅ Device catalogue (`src/lib/fit.ts`) and a "Fits these screens" list on every wallpaper page
+- ✅ Quality row (Ultra HD 4K/5K + original size); admin uploads ≥2560 px are upscaled 2× only with a real AI upscaler (never the mock) and the page says so
 
 ## B6 — Admin (functions)
-- ⬜ Staff accounts with roles (owner, manager, support, content) and per-area permissions
-- ⬜ Two-factor sign-in for admins (TOTP)
-- ⬜ Customer timeline (orders, credits, tickets, logins) and email-the-customer
-- ⬜ Settings change history with one-click revert
+- ✅ Staff roles (owner, manager, support, content) with per-area permissions enforced in middleware for every admin page and API (`src/lib/staff.ts`); Admin → Staff (owner)
+- ✅ Two-factor sign-in (authenticator app, Supabase MFA): Admin → Security; owner can require it for all staff; owner can reset a lost one
+- ✅ Customer timeline (orders, credits, tickets, downloads, sign-ins, staff actions, emails) + email the customer
+- ✅ Settings change history (who/what/when) with one-click revert (`save_setting()`, migration 0027)
 
 ## B7 — Admin UI/UX (owner: "messy, not clean")
 - ✅ App-style shell: own sidebar (grouped, badges for work waiting) + top bar (breadcrumb, view store, sign out, mobile drawer); store header/footer hidden on /admin

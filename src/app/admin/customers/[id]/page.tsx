@@ -5,6 +5,8 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { formatMoneyMinor } from '@/lib/format';
 import { Badge } from '@/components/ui/badge';
 import { CustomerActions } from '@/components/admin/customer-actions';
+import { CustomerTimeline, EmailCustomerForm } from '@/components/admin/customer-timeline';
+import { customerTimeline } from '@/lib/customer-timeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +15,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
   const { id } = await props.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const supabase = createServiceClient();
-  const [{ data: profile }, authUser, { data: orders }, { data: ents }, { data: balance }, { data: ledger }, { data: passes }, { data: log }] = await Promise.all([
+  const [{ data: profile }, authUser, { data: orders }, { data: ents }, { data: balance }, { data: ledger }, { data: passes }, timeline] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', id).maybeSingle(),
     supabase.auth.admin.getUserById(id),
     supabase.from('orders').select('id, status, currency, amount_minor, created_at, invoice_no').eq('user_id', id).order('created_at', { ascending: false }).limit(50),
@@ -21,7 +23,7 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
     supabase.rpc('credit_balance', { p_user: id }),
     supabase.from('credit_ledger').select('delta, reason, created_at').eq('user_id', id).order('created_at', { ascending: false }).limit(20),
     supabase.from('memberships').select('id, ends_at, status, downloads_used, download_limit, note').eq('user_id', id).order('ends_at', { ascending: false }),
-    supabase.from('admin_audit').select('action, actor_email, created_at').eq('target_type', 'user').eq('target_id', id).order('created_at', { ascending: false }).limit(20),
+    customerTimeline(id),
   ]);
   if (!profile) notFound();
   const u = authUser.data?.user;
@@ -141,18 +143,16 @@ export default async function AdminCustomerPage(props: { params: Promise<{ id: s
         </section>
       </div>
 
-      {(log ?? []).length > 0 && (
-        <section className="admin-card p-5 text-sm">
-          <h2 className="mb-2 font-semibold">Admin history</h2>
-          <ul className="space-y-1 text-muted-foreground">
-            {(log ?? []).map((l, i) => (
-              <li key={i}>
-                {new Date(l.created_at as string).toLocaleString('en-IN')} · {l.action as string} by {(l.actor_email as string) ?? 'system'}
-              </li>
-            ))}
-          </ul>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="admin-card p-5">
+          <h2 className="mb-3 font-semibold">Timeline</h2>
+          <CustomerTimeline events={timeline} />
         </section>
-      )}
+        <section className="admin-card h-fit p-5">
+          <h2 className="mb-3 font-semibold">Email this customer</h2>
+          <EmailCustomerForm userId={id} email={(profile.email as string | null) ?? null} />
+        </section>
+      </div>
     </div>
   );
 }

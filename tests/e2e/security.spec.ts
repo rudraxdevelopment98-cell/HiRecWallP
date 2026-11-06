@@ -89,3 +89,15 @@ test('exact-fit download validates the size and needs a real wallpaper', async (
   const missing = await request.post('/api/download', { headers: { origin }, data: { wallpaperId: '00000000-0000-0000-0000-000000000000', fit: { w: 1170, h: 2532 } } });
   expect([404, 503]).toContain(missing.status());
 });
+
+test('staff and security admin pages are protected', async ({ page, request, baseURL }) => {
+  for (const path of ['/admin/staff', '/admin/security', '/admin/settings?tab=history']) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/login/);
+  }
+  const origin = baseURL ?? 'http://127.0.0.1:3000';
+  const staff = await request.post('/api/admin/staff', { headers: { origin }, data: { action: 'add', email: 'x@example.com', staffRole: 'owner' } });
+  expect(staff.status()).toBe(403);
+  const revert = await request.post('/api/admin/settings/history/1/revert', { headers: { origin } });
+  expect(revert.status()).toBe(403);
+});
