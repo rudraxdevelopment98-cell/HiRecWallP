@@ -21,6 +21,6 @@ export interface StorageProvider {
   signedPutUrl(key: string, contentType: string, contentLength: number): Promise<string>;
   /** One-time bucket setup (CORS/lifecycle/buckets). Returns a summary. */
   applyRules(allowedOrigins: string[]): Promise<string>;
-  /** Delete expired temp objects (incoming/, wm/, generation/). Returns count. */
+  /** Delete expired temp objects (incoming/, wm/, fit/, generation/). Returns count. */
   cleanupTemporary(): Promise<number>;
 }

@@ -9,7 +9,8 @@ import { readUpload } from '@/lib/uploads';
 import { persistWallpaperAssets } from '@/lib/wallpaper-assets';
 import { deleteObject, getObject, objectExists, type R2Bucket } from '@/lib/storage';
 import { dHash } from '@/lib/phash';
-import { openImage } from '@/lib/image-safety';
+import { prepareOriginal, tooSmallMessage } from '@/lib/upscale';
+import { deleteFitCache } from '@/lib/fit-server';
 import { findDuplicate } from '@/lib/duplicates';
 import { wallpaperPath } from '@/lib/wallpaper-url';
 import { serverEnv } from '@/lib/env';
@@ -66,8 +67,8 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       }
     }
 
-    const meta = await openImage(original).metadata();
-    const variants = await generateVariants(original, serverEnv().BRAND_NAME);
+    const prepared = await prepareOriginal(original);
+    const variants = await generateVariants(prepared.buffer, serverEnv().BRAND_NAME);
 
     // Drop the old size rows/files, then store the new set (same key layout).
     const { data: old } = await s.from('wallpaper_assets').select('id, variant, storage_bucket, storage_key').eq('wallpaper_id', id);
@@ -76,20 +77,22 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     for (const a of old ?? []) {
       if (!keep.has(a.storage_key as string)) await deleteObject(a.storage_bucket as R2Bucket, a.storage_key as string).catch(() => undefined);
     }
-    await persistWallpaperAssets(s, id, original, variants);
-    await s.from('wallpapers').update({ phash, source_width: meta.width ?? null, source_height: meta.height ?? null }).eq('id', id);
+    await persistWallpaperAssets(s, id, prepared.buffer, variants);
+    await s.from('wallpapers').update({ phash, source_width: prepared.width || null, source_height: prepared.height || null, upscaled_from: prepared.upscaledFrom }).eq('id', id);
 
     // Buyers' cached watermarked copies were made from the old image.
     const { data: ents } = await s.from('entitlements').select('id').eq('wallpaper_id', id);
     for (const e of ents ?? []) {
       for (const v of old ?? []) await deleteObject('private', `wm/${e.id}/${v.variant}.jpg`).catch(() => undefined);
     }
+    // Exact-fit crops (and their watermarked copies) are made on demand again from the new master.
+    await deleteFitCache(s, id, (ents ?? []).map((e) => e.id as string));
 
     for (const p of ['/', '/explore', '/admin/catalogue', `/admin/catalogue/${id}`, wallpaperPath({ slug: w.slug as string, code: w.code as string | null })]) revalidatePath(p);
     await audit(mode === 'replace' ? 'wallpaper.replace_image' : 'wallpaper.regenerate', 'wallpaper', id, { variants: variants.map((v) => v.variant), forced: force });
     return NextResponse.json({ ok: true, variants: variants.map((v) => v.variant) });
   } catch (err) {
-    if (err instanceof ImageTooSmallError) return NextResponse.json({ error: `${err.message}. Use at least 3840px on the long edge.` }, { status: 422 });
+    if (err instanceof ImageTooSmallError) return NextResponse.json({ error: tooSmallMessage(err.message) }, { status: 422 });
     console.error('[media] failed', err);
     return NextResponse.json({ error: 'Processing failed — check storage in System health' }, { status: 503 });
   } finally {

@@ -107,7 +107,7 @@ export const r2Provider: StorageProvider = {
       new PutBucketLifecycleConfigurationCommand({
         Bucket: name('private'),
         LifecycleConfiguration: {
-          Rules: [expire('incoming-1d', 'incoming/', 1), expire('wm-cache-7d', 'wm/', 7), expire('generation-45d', 'generation/', 45)],
+          Rules: [expire('incoming-1d', 'incoming/', 1), expire('wm-cache-7d', 'wm/', 7), expire('fit-cache-30d', 'fit/', 30), expire('generation-45d', 'generation/', 45)],
         },
       }),
     );

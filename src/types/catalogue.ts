@@ -42,6 +42,10 @@ export interface Wallpaper {
   max_long_edge?: number | null;
   /** Paid device variants included, e.g. ['phone','tablet'] or ['desktop_4k','desktop_5k']. */
   devices?: string[];
+  /** Uploaded original size (migration 0025) and, when it was AI-upscaled, the size it started from (0026). */
+  source_width?: number | null;
+  source_height?: number | null;
+  upscaled_from?: string | null;
 }
 
 /** A wallpaper plus its public preview URL and current price in a region. */

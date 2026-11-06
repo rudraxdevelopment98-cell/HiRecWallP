@@ -12,6 +12,7 @@ import { findDuplicate, titleFromFilename, uniqueSlug } from '@/lib/duplicates';
 import { getVisionProvider } from '@/lib/ai';
 import { wallpaperPath } from '@/lib/wallpaper-url';
 import { audit } from '@/lib/admin';
+import { prepareOriginal, tooSmallMessage } from '@/lib/upscale';
 
 export const runtime = 'nodejs';
 // Image processing (and the optional AI description) of large originals takes a while.
@@ -88,8 +89,10 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2) Sizes, previews, watermarks (throws when too small).
-    const variants = await generateVariants(original, serverEnv().BRAND_NAME);
+    // 2) Sizes, previews, watermarks (throws when too small). Slightly small art is
+    //    upscaled first when a real AI upscaler is configured.
+    const prepared = await prepareOriginal(original);
+    const variants = await generateVariants(prepared.buffer, serverEnv().BRAND_NAME);
 
     // 3) Metadata: what the admin typed wins; AI (or the file name) fills the rest.
     const supabase = createServiceClient();
@@ -130,8 +133,9 @@ export async function POST(request: Request) {
         status: 'draft',
         is_ai_generated: true,
         phash,
-        source_width: meta.width ?? null,
-        source_height: meta.height ?? null,
+        source_width: prepared.width || meta.width || null,
+        source_height: prepared.height || meta.height || null,
+        upscaled_from: prepared.upscaledFrom,
         ai_filled: aiFilled,
       })
       .select('id, code')
@@ -140,8 +144,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Could not create the wallpaper record' }, { status: 400 });
     }
 
-    await persistWallpaperAssets(supabase, wallpaper.id, original, variants);
-    await audit('wallpaper.upload', 'wallpaper', wallpaper.id, { title, forced: force, aiFilled });
+    await persistWallpaperAssets(supabase, wallpaper.id, prepared.buffer, variants);
+    await audit('wallpaper.upload', 'wallpaper', wallpaper.id, { title, forced: force, aiFilled, upscaledFrom: prepared.upscaledFrom });
 
     return NextResponse.json({
       ok: true,
@@ -156,7 +160,7 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (err instanceof ImageTooSmallError) {
-      return NextResponse.json({ error: `${err.message}. Use at least 3840px on the long edge.`, code: 'too_small' }, { status: 422 });
+      return NextResponse.json({ error: tooSmallMessage(err.message), code: 'too_small' }, { status: 422 });
     }
     console.error('[upload] failed', err);
     return NextResponse.json({ error: 'Upload/processing failed — check storage in System health' }, { status: 503 });

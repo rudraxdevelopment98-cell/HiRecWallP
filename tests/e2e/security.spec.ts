@@ -81,3 +81,11 @@ test('admin area redirects anonymous visitors to sign-in (no redirect loop)', as
   await page.goto('/admin');
   await expect(page).toHaveURL(/\/login\?next=%2Fadmin|\/login\?next=\/admin/);
 });
+
+test('exact-fit download validates the size and needs a real wallpaper', async ({ request, baseURL }) => {
+  const origin = baseURL ?? 'http://127.0.0.1:3000';
+  const bad = await request.post('/api/download', { headers: { origin }, data: { wallpaperId: '00000000-0000-0000-0000-000000000000', fit: { w: 1170.5, h: 2532 } } });
+  expect(bad.status()).toBe(400);
+  const missing = await request.post('/api/download', { headers: { origin }, data: { wallpaperId: '00000000-0000-0000-0000-000000000000', fit: { w: 1170, h: 2532 } } });
+  expect([404, 503]).toContain(missing.status());
+});

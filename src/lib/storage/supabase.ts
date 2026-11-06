@@ -19,6 +19,7 @@ const storage = () => createServiceClient().storage;
 const TEMP_RULES: { bucket: Bucket; prefix: string; days: number }[] = [
   { bucket: 'private', prefix: 'incoming', days: 1 },
   { bucket: 'private', prefix: 'wm', days: 7 },
+  { bucket: 'private', prefix: 'fit', days: 30 },
   { bucket: 'private', prefix: 'generation', days: 45 },
   { bucket: 'public', prefix: 'generation', days: 45 },
 ];

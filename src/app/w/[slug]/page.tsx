@@ -19,6 +19,8 @@ import { FREE_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { Reveal } from '@/components/reveal';
 import { DevicePreview } from '@/components/device-preview';
+import { FitDownload } from '@/components/fit-download';
+import { approxSource, fittingDevices, qualityLabel } from '@/lib/fit';
 import { TrackEvent } from '@/components/track-event';
 import { getDisplayRegion, getWallpaperBySlug, listPublishedWallpapers } from '@/lib/catalogue';
 import { formatRegionPrice } from '@/lib/format';
@@ -63,6 +65,10 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
       ? ((await downloadableVariants([w.id])).get(w.id) ?? ['free_phone', 'free_desktop']).filter((v) => v in FREE_VARIANT_LABELS)
       : [];
   const sizes = (w.devices ?? []).filter((d) => d in SIZE_INFO);
+  // Exact fit (B5): which popular screens this artwork covers sharply, from its source size.
+  const src = approxSource(w.source_width, w.source_height, w.devices ?? []);
+  const fits = fittingDevices(src.w, src.h);
+  const quality = qualityLabel(w.max_long_edge);
   const [passes, settings, daily, viewer] = await Promise.all([
     !w.is_free && UUID.test(w.id) ? getMyPasses() : Promise.resolve([]),
     getSettings(),
@@ -148,6 +154,11 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
                   </div>
                 ))}
               </div>
+              {fits.length > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Plus an <strong>exact fit</strong> for your own screen — choose it in My Library after unlocking.
+                </p>
+              )}
             </div>
           )}
 
@@ -168,6 +179,7 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
                   {freeVariants.map((v) => (
                     <DownloadButton key={v} wallpaperId={w.id} variant={v as 'free_phone'} label={FREE_VARIANT_LABELS[v] ?? v} />
                   ))}
+                  <FitDownload wallpaperId={w.id} srcW={src.w} srcH={src.h} free />
                 </div>
               )
             ) : freeToday ? (
@@ -245,11 +257,29 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
               ))}
             </div>
           )}
+          {fits.length > 0 && (
+            <div className="mt-8">
+              <h3 className="mb-1 font-display text-base font-semibold">Fits these screens</h3>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Sharp at full resolution — we crop the original to the exact size of your screen.
+              </p>
+              <ul className="flex flex-wrap gap-2 text-xs">
+                {fits.slice(0, 14).map((d) => (
+                  <li key={d.id} className="rounded-full border bg-card px-3 py-1" title={`${d.w} × ${d.h}`}>
+                    {d.name}
+                  </li>
+                ))}
+                {fits.length > 14 && <li className="px-2 py-1 text-muted-foreground">+{fits.length - 14} more</li>}
+              </ul>
+            </div>
+          )}
         </div>
         <dl className="h-fit rounded-2xl border bg-card p-5 text-sm">
           <Row k="Category" v={w.categoryName ?? '—'} />
           <Row k="Orientation" v={w.orientation ? w.orientation[0]!.toUpperCase() + w.orientation.slice(1) : '—'} />
           <Row k="Largest size" v={w.max_long_edge ? `${w.max_long_edge}px (${w.resolution})` : '—'} />
+          {quality && <Row k="Quality" v={src.w ? `${quality.label} · ${src.w}×${src.h}` : quality.label} />}
+          {w.upscaled_from && <Row k="Upscaled" v={`Enlarged with an AI upscaler from ${w.upscaled_from.replace('x', ' × ')}`} />}
           <Row k="File type" v="JPG (high quality)" />
           <Row k="Licence" v={w.is_free ? 'Free personal use' : 'Personal (commercial available)'} last />
         </dl>

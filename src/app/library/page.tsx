@@ -6,6 +6,8 @@ import { getUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { AccountSidebar } from '@/components/account-sidebar';
 import { DownloadButton } from '@/components/download-button';
+import { FitDownload } from '@/components/fit-download';
+import { approxSource } from '@/lib/fit';
 import { buttonVariants } from '@/components/ui/button';
 import { PAID_VARIANT_LABELS, downloadableVariants } from '@/lib/variants';
 import { previewUrlFor } from '@/lib/catalogue';
@@ -22,7 +24,7 @@ interface EntitlementRow {
   order_id: string | null;
   created_at: string;
   licence: string;
-  wallpapers: { slug: string; code: string | null; title: string; wallpaper_assets: { variant: string; storage_key: string }[] | null } | null;
+  wallpapers: { slug: string; code: string | null; title: string; source_width: number | null; source_height: number | null; wallpaper_assets: { variant: string; storage_key: string }[] | null } | null;
 }
 
 const SORTS = { newest: 'Newest', title: 'Title A–Z', left: 'Most downloads left' } as const;
@@ -40,7 +42,7 @@ export default async function LibraryPage(props: { searchParams: Promise<{ q?: s
   const [{ data: entitlements }, { data: balance }] = await Promise.all([
     supabase
       .from('entitlements')
-      .select('id, wallpaper_id, order_id, licence, max_downloads, downloads_used, created_at, wallpapers(slug, code, title, wallpaper_assets(variant, storage_key))')
+      .select('id, wallpaper_id, order_id, licence, max_downloads, downloads_used, created_at, wallpapers(slug, code, title, source_width, source_height, wallpaper_assets(variant, storage_key))')
       .order('created_at', { ascending: false })
       .returns<EntitlementRow[]>(),
     supabase.rpc('my_credit_balance'),
@@ -159,6 +161,10 @@ export default async function LibraryPage(props: { searchParams: Promise<{ q?: s
                           label={PAID_VARIANT_LABELS[v] ?? v}
                         />
                       ))}
+                    {(() => {
+                      const src = approxSource(e.wallpapers?.source_width, e.wallpapers?.source_height, variants.get(e.wallpaper_id) ?? []);
+                      return <FitDownload wallpaperId={e.wallpaper_id} srcW={src.w} srcH={src.h} />;
+                    })()}
                   </div>
                 </li>
               ))}
