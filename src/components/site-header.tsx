@@ -1,6 +1,7 @@
 import { isAdminRoute } from '@/lib/route';
 import Link from 'next/link';
-import { Heart, Mountain, Search, User } from 'lucide-react';
+import { Heart, Search, User } from 'lucide-react';
+import { BrandMark } from '@/components/brand-mark';
 import { publicEnv } from '@/lib/env';
 import { getDisplayCountry } from '@/lib/catalogue';
 import { CountrySwitcher } from '@/components/country-switcher';
@@ -21,7 +22,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 w-full border-b bg-background/85 backdrop-blur">
       <div className="container flex h-16 items-center gap-4">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <Mountain className="h-5 w-5" />
+          <BrandMark />
           <span>{publicEnv.NEXT_PUBLIC_BRAND_NAME}</span>
         </Link>
 

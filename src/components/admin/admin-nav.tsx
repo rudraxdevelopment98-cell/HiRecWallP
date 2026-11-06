@@ -23,7 +23,6 @@ import {
   Mail,
   Megaphone,
   Menu,
-  Mountain,
   Palette,
   Receipt,
   Rocket,
@@ -35,6 +34,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { BrandMark } from '@/components/brand-mark';
 
 export const ADMIN_NAV = [
   {
@@ -151,7 +151,7 @@ function Brand() {
   return (
     <Link href="/admin" className="flex items-center gap-2 px-3 font-semibold">
       <span className="grid h-7 w-7 place-items-center rounded-lg bg-foreground text-background">
-        <Mountain className="h-4 w-4" />
+        <BrandMark className="h-4 w-4" />
       </span>
       <span>
         HirecWallp <span className="font-normal text-muted-foreground">Admin</span>

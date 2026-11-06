@@ -435,6 +435,15 @@ Key Phase 3 decisions:
   k-anonymity breach check from the browser (CSP allows api.pwnedpasswords.com). Settings → "Password" sets/changes it.
 - Supabase's own leaked-password protection is a paid-plan feature; keep Supabase's minimum length at 10 to match.
 
+## Brand (2026-11-06) — public/brand/
+
+- Final logo = "peaks" line mark (twin peaks + sun) + "HirecWallp" in Inter Display Bold (text as outlines).
+  In the app use `<BrandMark />` (src/components/brand-mark.tsx, inherits text colour). Favicon `src/app/icon.svg`
+  (switches colour in dark mode), `apple-icon.png`, default share image `opengraph-image.png`.
+- Logo files: `public/brand/simple/hirecwallp-peaks-{black,white}.svg` (horizontal), `public/brand/stacked/
+  hirecwallp-peaks-stacked-{black,white}.svg` (with tagline "Ultra-HD wallpapers for every screen"), `-icon-*` (mark only),
+  each with a 4K PNG. black = for light backgrounds, white = for dark backgrounds.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

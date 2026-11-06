@@ -1,6 +1,7 @@
 import { isAdminRoute } from '@/lib/route';
 import Link from 'next/link';
-import { Facebook, Heart, Instagram, Mountain, Pin, Twitter, Youtube } from 'lucide-react';
+import { Facebook, Heart, Instagram, Pin, Twitter, Youtube } from 'lucide-react';
+import { BrandMark } from '@/components/brand-mark';
 import { publicEnv } from '@/lib/env';
 import { getDisplayCountry } from '@/lib/catalogue';
 import { CountrySwitcher } from '@/components/country-switcher';
@@ -38,10 +39,10 @@ export async function SiteFooter() {
       <div className="container flex flex-col gap-6 py-10 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-2 font-semibold">
-            <Mountain className="h-5 w-5" />
+            <BrandMark />
             {publicEnv.NEXT_PUBLIC_BRAND_NAME}
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">Premium wallpapers for every screen</p>
+          <p className="mt-1 text-sm text-muted-foreground">Ultra-HD wallpapers for every screen</p>
         </div>
 
         <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
