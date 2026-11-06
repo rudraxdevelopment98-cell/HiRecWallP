@@ -76,3 +76,8 @@ test('storage rules endpoint is admin-only', async ({ request, baseURL }) => {
   });
   expect(res.status()).toBe(403);
 });
+
+test('admin area redirects anonymous visitors to sign-in (no redirect loop)', async ({ page }) => {
+  await page.goto('/admin');
+  await expect(page).toHaveURL(/\/login\?next=%2Fadmin|\/login\?next=\/admin/);
+});

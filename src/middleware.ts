@@ -22,6 +22,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const adminPath = path === '/admin' || path.startsWith('/admin/') || path.startsWith('/api/admin/');
   let isAdmin = false;
+  let signedIn = false;
   if (supabaseUrl && supabaseAnon && hasSession) {
     try {
       const supabase = createServerClient(supabaseUrl, supabaseAnon, {
@@ -37,6 +38,7 @@ export async function middleware(request: NextRequest) {
         },
       });
       const { data } = await supabase.auth.getUser();
+      signedIn = Boolean(data.user);
       // First line of the admin gate (pages and APIs re-check server-side; RLS too).
       if (adminPath && data.user) {
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
@@ -49,7 +51,8 @@ export async function middleware(request: NextRequest) {
   if (adminPath && !isAdmin) {
     response = path.startsWith('/api/')
       ? NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      : NextResponse.redirect(new URL('/login?next=/admin', request.url));
+      : // Signed in but not an admin: sending them to /login would bounce straight back here (redirect loop).
+        NextResponse.redirect(new URL(signedIn ? '/' : '/login?next=/admin', request.url));
   }
 
   // --- Creator affiliate attribution: ?via=CODE on any link (last click, 30 days)

@@ -53,5 +53,7 @@ export async function requireUser(next: string): Promise<SessionUser> {
 
 /** Admin or redirect. Call in every admin page (see requireUser). */
 export async function requireAdmin(): Promise<void> {
-  if (!(await isAdminUser())) redirect('/login?next=/admin');
+  if (await isAdminUser()) return;
+  // Signed-in non-admins go home; /login would send them straight back (redirect loop).
+  redirect((await getUser()) ? '/' : '/login?next=/admin');
 }
