@@ -142,10 +142,10 @@ export default async function AdminOverviewPage() {
   if (counts._takedowns > 0) todos.push({ href: '/admin/messages', label: 'Takedown reports open', detail: 'Copyright/abuse reports — review quickly.', icon: ShieldAlert, n: counts._takedowns, urgent: true });
   if (o && o.failedJobs > 0) todos.push({ href: '/admin/health', label: 'Background jobs failed', detail: 'In the last 7 days — see System health.', icon: AlertTriangle, n: o.failedJobs, urgent: true });
   if (counts._messages > 0) todos.push({ href: '/admin/messages', label: 'New messages', detail: 'Customer contact form — reply within 48 hours.', icon: Inbox, n: counts._messages });
-  if (counts._submissions > 0) todos.push({ href: '/admin/catalogue?status=pending_review', label: 'Wallpapers to review', detail: 'Creator uploads waiting for approval.', icon: Images, n: counts._submissions });
+  if (counts._submissions > 0) todos.push({ href: '/admin/drafts?tab=creators', label: 'Wallpapers to review', detail: 'Creator uploads waiting for approval.', icon: Images, n: counts._submissions });
   if (counts._review > 0) todos.push({ href: '/admin/review-queue', label: 'AI images to review', detail: 'Generated images awaiting approve/reject.', icon: ListChecks, n: counts._review });
   if (counts._kyc > 0) todos.push({ href: '/admin/creators', label: 'Creator KYC pending', detail: 'Verify before their first payout.', icon: Palette, n: counts._kyc });
-  if (o && o.drafts > 0) todos.push({ href: '/admin/catalogue?status=draft', label: 'Drafts not published', detail: 'Uploaded but not live yet.', icon: Images, n: o.drafts });
+  if (o && o.drafts > 0) todos.push({ href: '/admin/drafts', label: 'Drafts not published', detail: 'Uploaded but not live yet.', icon: Images, n: o.drafts });
 
   // One-time setup the store still needs.
   const setup: { label: string; done: boolean; href: string }[] = [

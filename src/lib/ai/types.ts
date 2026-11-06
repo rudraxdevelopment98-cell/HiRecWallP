@@ -44,6 +44,13 @@ export interface SuggestedMetadata {
   altText: string;
   tags: string[];
   suggestedFree: boolean;
+  /** Category id picked from `context.categories` (null when none fits). */
+  categoryId?: string | null;
+}
+
+export interface CategoryOption {
+  id: string;
+  name: string;
 }
 
 export interface Moderation {
@@ -56,7 +63,7 @@ export interface VisionProvider {
   /** Score composition/quality 1–10 (drop < 7). */
   score(image: Buffer): Promise<QualityReview>;
   /** Title, tags, alt text, description, SEO slug, suggested free/paid. */
-  describe(image: Buffer, context: { prompt: string; niche: string }): Promise<SuggestedMetadata>;
+  describe(image: Buffer, context: { prompt: string; niche: string; categories?: CategoryOption[] }): Promise<SuggestedMetadata>;
   /**
    * Content screening for creator uploads: rejects NSFW, trademarked
    * characters/brand logos, and real people/celebrities.

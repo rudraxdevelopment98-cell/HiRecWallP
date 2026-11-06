@@ -1,6 +1,6 @@
 import 'server-only';
 
-import sharp from 'sharp';
+import { openImage } from '@/lib/image-safety';
 
 /**
  * Perceptual hashing for near-duplicate detection.
@@ -12,7 +12,7 @@ import sharp from 'sharp';
 export async function dHash(image: Buffer): Promise<string> {
   const w = 9;
   const h = 8;
-  const raw = await sharp(image)
+  const raw = await openImage(image)
     .greyscale()
     .resize(w, h, { fit: 'fill' })
     .raw()

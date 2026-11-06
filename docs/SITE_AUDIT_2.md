@@ -26,7 +26,7 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 - ✅ SLA timers: 48 h acknowledgement, 30-day resolution; overdue tab, sidebar badge, dashboard alert
 - ✅ Self-serve instant refund (unused pack ≤14 d, unused pay-once pass ≤7 d, unredeemed gift ≤14 d; max 2 per 90 days, then reviewed)
 - ✅ Admin Support queue: priority, assign, reply / internal note, resolve/close, refund (Razorpay or access-only), add credits, restore downloads
-- ⬜ Replace file (comes with B4 "replace master")
+- ✅ Replace file (Admin → wallpaper → Image → Replace image)
 
 ## B3 — Accounts & credits
 - ✅ Close my account (consequences shown first; personal data erased, orders kept 8 years without name) + download my data (JSON)
@@ -36,12 +36,12 @@ from 14 May 2027 (notice, consent records, erasure, grievance).
 - ✅ Library: search, licence filter, sort, downloads left, "need more?" → support request
 
 ## B4 — Uploading
-- ⬜ Batch upload: many files at once, per-file progress, queue, retry failed
-- ⬜ Pre-flight checks in the browser (type, size, dimensions) before uploading
-- ⬜ Duplicate detection (pHash) for admin uploads too, with a link to the existing wallpaper
-- ⬜ AI auto-fill: title, description, tags, alt text, category (vision adapter; mock by default)
-- ⬜ Review grid: edit all drafts together, publish selected
-- ⬜ Replace master / regenerate sizes for an existing wallpaper
+- ✅ Batch upload: drag-drop many files, queue (2 at a time), per-file progress, retry failed, leave-page warning
+- ✅ Pre-flight checks in the browser (type, size, ≥3840px long edge, 4K-only note) before anything uploads
+- ✅ Duplicate detection (dHash of the clean original, `wallpapers.phash`) for admin, creator and AI uploads, with "see existing / upload anyway / skip"
+- ✅ AI auto-fill: title, description, tags, alt text, category — Claude vision when `ANTHROPIC_API_KEY` is set, file-name title otherwise
+- ✅ Drafts review grid (/admin/drafts): edit everything inline, save, publish selected; creator submissions tab
+- ✅ Replace image / regenerate sizes on a wallpaper (same URL, price and buyers; stale files and watermark caches removed)
 
 ## B5 — Resolution
 - ✅ Device preview on the wallpaper page: auto-detects your phone/tablet/computer, lock & home screen, full-screen try-on, sharpness hint (owner idea)

@@ -26,3 +26,11 @@ test('refund policy explains instant refunds and support requests', async ({ pag
   await expect(page.getByText('Instant:')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Account → Help & support' })).toBeVisible();
 });
+
+test('upload, drafts and image replacement are admin-only', async ({ page, request, baseURL }) => {
+  const h = { origin: baseURL! };
+  expect((await request.post('/api/admin/upload', { multipart: { auto: '1' }, headers: h })).status()).toBe(403);
+  expect((await request.post('/api/admin/wallpapers/00000000-0000-4000-8000-000000000000/media', { multipart: { mode: 'regenerate' }, headers: h })).status()).toBe(403);
+  await page.goto('/admin/drafts');
+  await expect(page).toHaveURL(/\/login/);
+});

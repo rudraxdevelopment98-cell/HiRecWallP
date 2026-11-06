@@ -6,7 +6,8 @@ import { serverEnv } from '@/lib/env';
 import { ImageTooSmallError, generateVariants } from '@/lib/imaging';
 import { readUpload } from '@/lib/uploads';
 import { persistWallpaperAssets } from '@/lib/wallpaper-assets';
-import { dHash, isNearDuplicate } from '@/lib/phash';
+import { dHash } from '@/lib/phash';
+import { findDuplicate } from '@/lib/duplicates';
 import { getVisionProvider } from '@/lib/ai';
 import { openImage } from '@/lib/image-safety';
 
@@ -78,13 +79,8 @@ export async function POST(request: Request) {
 
     // 3) Perceptual-hash duplicate check against existing assets.
     const phash = await dHash(original);
-    const { data: existing } = await supabase
-      .from('wallpaper_assets')
-      .select('phash')
-      .not('phash', 'is', null)
-      .limit(2000);
-    if ((existing ?? []).some((r) => r.phash && isNearDuplicate(r.phash as string, phash))) {
-      return NextResponse.json({ error: 'Near-duplicate of an existing wallpaper' }, { status: 409 });
+    if (await findDuplicate(phash)) {
+      return NextResponse.json({ error: 'This looks like a wallpaper that is already on the site.' }, { status: 409 });
     }
 
     // Passed checks → derive variants and submit for manual review.
@@ -110,6 +106,9 @@ export async function POST(request: Request) {
         creator_id: user.id,
         is_ai_generated: true,
         human_edited: true,
+        phash,
+        source_width: meta.width ?? null,
+        source_height: meta.height ?? null,
       })
       .select('id')
       .single();

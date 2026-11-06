@@ -9,6 +9,7 @@ import {
   Coins,
   Crown,
   ExternalLink,
+  FileStack,
   FolderTree,
   Globe2,
   History,
@@ -57,6 +58,7 @@ export const ADMIN_NAV = [
     items: [
       { href: '/admin/catalogue', label: 'Wallpapers', icon: Images },
       { href: '/admin/upload', label: 'Upload', icon: Upload },
+      { href: '/admin/drafts', label: 'Drafts', icon: FileStack },
       { href: '/admin/categories', label: 'Categories & sets', icon: FolderTree },
       { href: '/admin/review-queue', label: 'AI review queue', icon: ListChecks },
       { href: '/admin/prompts', label: 'AI prompts', icon: Sparkles },

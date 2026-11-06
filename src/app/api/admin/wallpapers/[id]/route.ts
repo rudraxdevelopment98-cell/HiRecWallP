@@ -38,7 +38,8 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
   }
   const { data, error } = await createServiceClient()
     .from('wallpapers')
-    .update(parsed.data)
+    // A person reviewed the details: no longer "AI-suggested".
+    .update({ ...parsed.data, ...(Object.keys(parsed.data).some((k) => k !== 'status') ? { ai_filled: false, human_edited: true } : {}) })
     .eq('id', params.id)
     .select('slug, code')
     .maybeSingle();

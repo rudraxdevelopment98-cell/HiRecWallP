@@ -80,6 +80,7 @@ export async function runPublishApproved(jobId: string): Promise<Record<string, 
       status: 'published',
       is_ai_generated: true,
       launch_at: new Date().toISOString(),
+      phash: await dHash(original),
     })
     .select('id')
     .single();

@@ -7,6 +7,7 @@ import { previewUrlFor } from '@/lib/catalogue';
 import { Badge } from '@/components/ui/badge';
 import { WallpaperActions } from '@/components/admin/wallpaper-actions';
 import { WallpaperEditForm, type EditableWallpaper } from '@/components/admin/wallpaper-edit-form';
+import { MediaPanel } from '@/components/admin/media-panel';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,8 +53,14 @@ export default async function AdminWallpaperEditPage(props: { params: Promise<{ 
           categories={(categories ?? []) as { id: string; name: string }[]}
           sets={(sets ?? []) as { id: string; title: string }[]}
         />
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border bg-muted">
-          {preview && <Image src={preview} alt="" fill sizes="320px" className="object-cover" />}
+        <div className="space-y-4">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border bg-muted">
+            {preview && <Image src={preview} alt="" fill sizes="320px" className="object-cover" />}
+          </div>
+          <section className="admin-card space-y-2 p-4">
+            <h2 className="text-sm font-semibold">Image</h2>
+            <MediaPanel id={w.id as string} sold={sales ?? 0} />
+          </section>
         </div>
       </div>
     </div>

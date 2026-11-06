@@ -414,6 +414,18 @@ Key Phase 3 decisions:
   `getSettings()` reads with the service key server-side. TRUNCATE/TRIGGER/REFERENCES revoked from API roles.
 - Unsubscribe: GET = confirm page, POST = unsubscribe (also RFC 8058 one-click).
 
+## Upload pipeline (2026-11-05) — migration 0025
+
+- `/admin/upload` = `BatchUploader` (browser pre-flight → `stageUpload` presigned PUT → `POST /api/admin/upload` one file
+  per request, queue of 2). Route: dHash of the original → `findDuplicate()` (src/lib/duplicates.ts; 409 with the match
+  unless `force`, staged file kept for "upload anyway") → `generateVariants` → AI/filename metadata → `uniqueSlug()` → draft.
+- `wallpapers.phash` (original, not preview), `source_width/height`, `ai_filled` (cleared when an admin edits via PATCH).
+- Vision: `getVisionProvider()` → `claudeVisionProvider` (src/lib/ai/claude.ts, official SDK, `claude-opus-5-5`, effort low,
+  structured output, `fallbacks: "default"`, 1024px JPEG, one memoised analysis for describe/moderate/score) when
+  `ANTHROPIC_API_KEY` is set; `VISION_PROVIDER=mock` forces the mock.
+- `/admin/drafts` (`DraftsGrid`): inline edit + bulk publish. `/api/admin/wallpapers/[id]/media`: replace image /
+  regenerate sizes (deletes old asset rows/files + `wm/` caches).
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

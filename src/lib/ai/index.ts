@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { mockImageProvider, mockUpscaleProvider, mockVisionProvider } from './mock';
+import { claudeVisionProvider } from './claude';
 import type { ImageProvider, UpscaleProvider, VisionProvider } from './types';
 
 /**
@@ -30,9 +31,12 @@ export function getUpscaleProvider(): UpscaleProvider {
   }
 }
 
+/** Claude vision when ANTHROPIC_API_KEY is set (VISION_PROVIDER=mock forces the mock). */
 export function getVisionProvider(): VisionProvider {
-  // A real Claude-vision provider slots in when ANTHROPIC_API_KEY is set.
-  return mockVisionProvider;
+  if ((process.env.VISION_PROVIDER ?? '').toLowerCase() === 'mock') return mockVisionProvider;
+  return process.env.ANTHROPIC_API_KEY ? claudeVisionProvider : mockVisionProvider;
 }
+
+export const visionIsReal = () => getVisionProvider().id !== 'mock';
 
 export type { ImageProvider, UpscaleProvider, VisionProvider } from './types';

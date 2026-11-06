@@ -10,7 +10,7 @@ export const getAdminCounts = cache(async (): Promise<NavCounts & { _takedowns: 
     const s = createServiceClient();
     const head = { count: 'exact' as const, head: true };
     const now = new Date().toISOString();
-    const [messages, takedowns, submissions, review, kyc, support, overdue] = await Promise.all([
+    const [messages, takedowns, submissions, review, kyc, support, overdue, drafts] = await Promise.all([
       s.from('contact_messages').select('id', head).eq('status', 'new'),
       s.from('takedown_reports').select('id', head).in('status', ['open', 'reviewing']),
       s.from('wallpapers').select('id', head).eq('status', 'pending_review'),
@@ -22,12 +22,13 @@ export const getAdminCounts = cache(async (): Promise<NavCounts & { _takedowns: 
         .select('id', head)
         .in('status', ['open', 'waiting_customer'])
         .or(`resolve_due_at.lt.${now},and(first_response_at.is.null,ack_due_at.lt.${now})`),
+      s.from('wallpapers').select('id', head).eq('status', 'draft'),
     ]);
     const m = messages.count ?? 0;
     const t = takedowns.count ?? 0;
     return {
       '/admin/messages': m + t,
-      '/admin/catalogue': submissions.count ?? 0,
+      '/admin/drafts': (drafts.count ?? 0) + (submissions.count ?? 0),
       '/admin/review-queue': review.count ?? 0,
       '/admin/creators': kyc.count ?? 0,
       '/admin/support': support.count ?? 0,
