@@ -87,7 +87,10 @@ export default async function CreatorDashboardPage() {
             {creator.kyc_status}
           </Badge>
         </Card>
-        <Card label="Commission">{creator.commission_pct}%</Card>
+        <Card label="Your share of each sale">
+          {100 - Number(creator.commission_pct)}%
+          <span className="ml-2 text-xs font-normal text-muted-foreground">platform fee {Number(creator.commission_pct)}%</span>
+        </Card>
         <Card label="Payout method">{creator.payout_provider ?? '—'}</Card>
       </div>
 

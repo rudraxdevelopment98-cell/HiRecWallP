@@ -62,10 +62,10 @@ export default async function LibraryPage(props: { searchParams: Promise<{ q?: s
   const name = user.email?.split('@')[0] ?? 'there';
 
   return (
-    <main className="container grid gap-8 py-10 lg:grid-cols-[210px_1fr]">
+    <main className="container grid grid-cols-1 gap-8 py-10 lg:grid-cols-[210px_1fr]">
       <AccountSidebar />
 
-      <div className="space-y-8">
+      <div className="min-w-0 space-y-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-display text-2xl font-semibold">Welcome back, {name}</h1>

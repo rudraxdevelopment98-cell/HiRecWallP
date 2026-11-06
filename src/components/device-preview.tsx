@@ -84,7 +84,7 @@ export function DevicePreview({ src, alt, orientation, maxLongEdge, badges }: Pr
   }
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <div className="flex gap-1 overflow-x-auto rounded-xl border bg-card p-1 text-sm [scrollbar-width:none]" role="tablist" aria-label="Preview on a device">
         {tabs.map((t) => (
           <button

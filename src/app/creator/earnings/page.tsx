@@ -37,13 +37,13 @@ export default async function CreatorEarningsPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Lifetime gross" value={formatRupees(lifetimeGross)} />
         <Stat label="Lifetime net" value={formatRupees(lifetimeNet)} />
-        <Stat label="Commission" value={`${creator.commission_pct}%`} />
+        <Stat label="Your share" value={`${100 - Number(creator.commission_pct)}% (fee ${Number(creator.commission_pct)}%)`} />
       </div>
 
       {rows.length === 0 ? (
         <p className="glass rounded-2xl p-6 text-sm text-muted-foreground">
-          No earnings yet. Earnings are computed monthly from paid sales of your approved
-          wallpapers. (Credit-based international sales are valued into payouts in a later update.)
+          No earnings yet. Earnings are worked out monthly from paid sales of your approved
+          wallpapers — credit unlocks, membership downloads and affiliate orders.
         </p>
       ) : (
         <table className="w-full text-sm">

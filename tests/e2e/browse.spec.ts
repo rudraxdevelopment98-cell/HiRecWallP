@@ -63,3 +63,15 @@ test('wallpaper URLs carry a permanent code; old and renamed links redirect', as
   const card = page.locator('a[href^="/w/"]').first();
   await expect(card).toHaveAttribute('href', /\/w\/[a-z0-9-]+-[a-hjkmnp-z2-9]{8}$/);
 });
+
+test.describe('phone layout', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  for (const path of ['/', '/explore', '/pricing', '/w/alpine-serenity']) {
+    test(`no sideways scrolling on ${path}`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForLoadState('networkidle');
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+  }
+});

@@ -21,7 +21,7 @@ const NAV = [
 export function AccountSidebar() {
   const pathname = usePathname();
   return (
-    <aside className="lg:sticky lg:top-20 lg:self-start">
+    <aside className="min-w-0 lg:sticky lg:top-20 lg:self-start">
       <nav className="flex gap-1 overflow-x-auto text-sm lg:flex-col lg:space-y-1 lg:overflow-visible">
         {NAV.map((item) => {
           const active = item.href === '/account' ? pathname === '/account' : pathname.startsWith(item.href);

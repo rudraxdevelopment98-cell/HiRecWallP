@@ -48,7 +48,7 @@ export default async function AdminCreatorsPage() {
                 <th>Joined</th>
                 <th>Uploads</th>
                 <th>Payout via</th>
-                <th>Commission</th>
+                <th>Platform fee</th>
                 <th>KYC</th>
               </tr>
             </thead>

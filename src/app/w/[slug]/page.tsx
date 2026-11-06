@@ -105,7 +105,7 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
         {w.title}
       </p>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Preview — on the visitor's own device */}
         <DevicePreview
           src={w.previewUrl ?? null}
