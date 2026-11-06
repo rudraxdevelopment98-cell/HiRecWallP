@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function LoginPage(
   props: {
-    searchParams: Promise<{ next?: string; error?: string }>;
+    searchParams: Promise<{ next?: string; error?: string; mode?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -29,9 +29,9 @@ export default async function LoginPage(
 
   return (
     <main className="container flex max-w-md flex-col items-center gap-4 py-20 text-center">
-      <h1 className="font-display text-3xl font-semibold tracking-tight">Sign in</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">{searchParams.mode === 'signup' ? 'Create your account' : 'Sign in'}</h1>
       <p className="text-sm text-muted-foreground">
-        Sign in to buy wallpapers, spend credits and re-download from your library.
+        Sign in or create an account to buy wallpapers, spend credits and re-download from your library.
       </p>
       {freeCredits > 0 && (
         <p className="w-full rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">
@@ -46,7 +46,7 @@ export default async function LoginPage(
       )}
       {configured ? (
         <div className="w-full rounded-2xl border bg-card p-6">
-          <LoginForm next={next} google={settings.google_login} />
+          <LoginForm next={next} google={settings.google_login} initialMode={searchParams.mode === 'signup' || searchParams.mode === 'forgot' || searchParams.mode === 'link' ? searchParams.mode : 'signin'} />
           <p className="mt-4 text-xs text-muted-foreground">
             By continuing you agree to our <Link href="/terms" className="underline">Terms</Link> and{' '}
             <Link href="/privacy" className="underline">Privacy Policy</Link>.

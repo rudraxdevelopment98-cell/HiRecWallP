@@ -23,7 +23,7 @@ export default async function PrivacyPage() {
           heading: 'What we collect',
           body: (
             <ul>
-              <li><strong>Account:</strong> email address, display name, optional country and GSTIN.</li>
+              <li><strong>Account:</strong> email address, display name, optional country and GSTIN. If you use a password, our sign-in provider stores only a one-way hash of it; we never see it. When you choose a new password, your browser checks it against known data breaches by sending only the first 5 characters of its hash to Have I Been Pwned — never the password.</li>
               <li><strong>Purchases:</strong> what you bought, amount, currency, billing country, invoice details, payment reference. Card and UPI details stay with Razorpay; we never see or store them.</li>
               <li><strong>Usage:</strong> wallpapers you add, favourite and download (with a hashed — not raw — IP address), and anonymous page events.</li>
               <li><strong>Location signals:</strong> the country of your connection and your device time zone, to show the right prices.</li>

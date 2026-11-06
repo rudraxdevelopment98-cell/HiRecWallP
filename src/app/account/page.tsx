@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { ProfileForm } from '@/components/account/profile-form';
 import { ChangeEmailForm, CloseAccountForm, SignOutEverywhere } from '@/components/account/account-controls';
+import { SetPasswordForm } from '@/components/auth/set-password-form';
 import { closeBlocker, getAccountSummary } from '@/lib/account';
 
 export const metadata: Metadata = { title: 'Account settings' };
@@ -49,9 +50,16 @@ export default async function AccountPage() {
       <section className="space-y-4 rounded-2xl border bg-card p-6">
         <div>
           <h2 className="font-semibold">Email &amp; sign-in</h2>
-          <p className="text-sm text-muted-foreground">We sign you in with a one-time code sent to your email — there’s no password to leak.</p>
+          <p className="text-sm text-muted-foreground">Sign in with your password, a one-time email link, or Google.</p>
         </div>
         <ChangeEmailForm current={user.email ?? ''} />
+        <div className="border-t pt-4">
+          <p className="mb-1 text-sm font-medium">Password</p>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Set or change the password for email + password sign-in. Email links and Google keep working too.
+          </p>
+          <SetPasswordForm email={user.email ?? ''} label="Save password" />
+        </div>
         <div className="border-t pt-4">
           <p className="mb-2 text-sm text-muted-foreground">Lost a phone or used a shared computer? End every session at once.</p>
           <SignOutEverywhere />

@@ -426,6 +426,15 @@ Key Phase 3 decisions:
 - `/admin/drafts` (`DraftsGrid`): inline edit + bulk publish. `/api/admin/wallpapers/[id]/media`: replace image /
   regenerate sizes (deletes old asset rows/files + `wm/` caches).
 
+## Password sign-in (2026-11-06)
+
+- `/login` (`LoginForm`): Sign in (email + password) · Create account (`signUp`, email confirmation) · Forgot password
+  (`resetPasswordForEmail` → `/auth/callback?next=/auth/reset` → `/auth/reset` `SetPasswordForm`) · Email link (OTP) · Google.
+  `?mode=signup|forgot|link` opens a tab. Password sign-in calls `POST /api/account/welcome` (welcome bonus + consents).
+- Rules in `src/lib/password-rules.ts` (min 10, letters + numbers/symbols, not email name, not common) + free HIBP
+  k-anonymity breach check from the browser (CSP allows api.pwnedpasswords.com). Settings → "Password" sets/changes it.
+- Supabase's own leaked-password protection is a paid-plan feature; keep Supabase's minimum length at 10 to match.
+
 ## Manual setup owner must do (grows as we go)
 
 Tracked in the final Phase-1 checklist: API keys, Razorpay (with International

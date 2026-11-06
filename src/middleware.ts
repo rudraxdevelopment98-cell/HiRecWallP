@@ -84,7 +84,8 @@ export async function middleware(request: NextRequest) {
     `img-src 'self' data: blob: ${razorpay} ${publicBase} ${supabaseUrl}`.trim(),
     `font-src 'self' data:`,
     // R2 S3 endpoint: browsers PUT large originals via presigned URLs.
-    `connect-src 'self' ${razorpay} https://*.r2.cloudflarestorage.com ${supabaseUrl}`.trim(),
+    // api.pwnedpasswords.com: k-anonymity breach check for new passwords (only a 5-char hash prefix is sent).
+    `connect-src 'self' ${razorpay} https://*.r2.cloudflarestorage.com https://api.pwnedpasswords.com ${supabaseUrl}`.trim(),
     `frame-src ${razorpay}`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
