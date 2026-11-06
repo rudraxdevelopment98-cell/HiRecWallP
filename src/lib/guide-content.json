@@ -1,0 +1,1120 @@
+{
+ "chapters": [
+  {
+   "slug": "getting-around",
+   "audience": "customer",
+   "title": "Getting around",
+   "summary": "The menu, search, your region, account, favourites and cart — and what's on the home page.",
+   "steps": [
+    {
+     "title": "The main menu",
+     "body": "The logo always takes you back home. Use the menu to open Explore (every wallpaper), Collections (themed sets), Studio and Pricing.",
+     "image": "/guide/getting-around-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0389,
+      "y": 0.0494,
+      "w": 0.3512,
+      "h": 0.0593
+     },
+     "href": "/"
+    },
+    {
+     "title": "Search",
+     "body": "Type a mood, colour or subject — for example “gold”, “mountains” or “minimal” — and press Enter to see matching wallpapers.",
+     "image": "/guide/getting-around-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.556,
+      "y": 0.0457,
+      "w": 0.2778,
+      "h": 0.0667
+     }
+    },
+    {
+     "title": "Your region and prices",
+     "body": "Prices are shown for the country you are in. At checkout we also look at your billing country, and after your first purchase prices follow your account.",
+     "image": "/guide/getting-around-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.8338,
+      "y": 0.0506,
+      "w": 0.0606,
+      "h": 0.0568
+     }
+    },
+    {
+     "title": "Account, favourites and cart",
+     "body": "The person icon opens sign-in or your account, the heart opens wallpapers you saved, and the bag opens your cart.",
+     "image": "/guide/getting-around-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.8889,
+      "y": 0.0469,
+      "w": 0.0917,
+      "h": 0.0642
+     }
+    },
+    {
+     "title": "Start exploring",
+     "body": "The big button on the home page takes you straight to every wallpaper, with filters for your device.",
+     "image": "/guide/getting-around-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.2481,
+      "w": 0.4111,
+      "h": 0.4494
+     }
+    },
+    {
+     "title": "Today's free wallpaper",
+     "body": "Every day one premium wallpaper is free until midnight (India time). Sign in and press the button — it stays in your library for good.",
+     "image": "/guide/getting-around-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.0753,
+      "w": 0.9611,
+      "h": 0.2691
+     }
+    },
+    {
+     "title": "Browse by category",
+     "body": "Jump into a category such as Nature, Abstract or Dark AMOLED & Minimal. The number shows how many wallpapers it has.",
+     "image": "/guide/getting-around-07.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.1753,
+      "w": 0.4806,
+      "h": 0.3375
+     }
+    },
+    {
+     "title": "Reading a wallpaper card",
+     "body": "Each card shows the top resolution (4K or 5K), the category, the price in credits and the shape (landscape or portrait). The heart saves it to Favourites.",
+     "image": "/guide/getting-around-08.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0201,
+      "y": 0.2661,
+      "w": 0.1666,
+      "h": 0.3332
+     }
+    },
+    {
+     "title": "Help and policies",
+     "body": "The footer has the Guide, FAQ, contact, all our policies (terms, privacy, refunds, licence) and the page to sell your own art.",
+     "image": "/guide/getting-around-09.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0,
+      "y": 0.7454,
+      "w": 1,
+      "h": 0.2546
+     }
+    }
+   ]
+  },
+  {
+   "slug": "finding-wallpapers",
+   "audience": "customer",
+   "title": "Finding the right wallpaper",
+   "summary": "Search, sort and filter by category, price, device, orientation and resolution.",
+   "steps": [
+    {
+     "title": "Search inside Explore",
+     "body": "Narrow the catalogue with a word. It searches titles, tags and descriptions.",
+     "image": "/guide/finding-wallpapers-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.2679,
+      "w": 0.1708,
+      "h": 0.0667
+     },
+     "href": "/explore"
+    },
+    {
+     "title": "Sort",
+     "body": "Sort by newest, most popular or price.",
+     "image": "/guide/finding-wallpapers-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.379,
+      "w": 0.1708,
+      "h": 0.0704
+     }
+    },
+    {
+     "title": "Category and price",
+     "body": "Tick one or more categories, and choose free or premium wallpapers.",
+     "image": "/guide/finding-wallpapers-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.2679,
+      "w": 0.1708,
+      "h": 0.7321
+     }
+    },
+    {
+     "title": "Device, orientation and resolution",
+     "body": "Filter for your phone, tablet or desktop, portrait or landscape, and 4K or 5K. Then press Apply Filters (Reset clears them).",
+     "image": "/guide/finding-wallpapers-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.0889,
+      "w": 0.1708,
+      "h": 0.9111
+     }
+    },
+    {
+     "title": "Open a wallpaper",
+     "body": "Click any wallpaper to open its page with the live device preview, sizes and price.",
+     "image": "/guide/finding-wallpapers-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2021,
+      "y": 0.3136,
+      "w": 0.1934,
+      "h": 0.369
+     }
+    },
+    {
+     "title": "Free wallpapers",
+     "body": "The Free page lists wallpapers you can download without paying (no account needed; downloads are rate-limited).",
+     "image": "/guide/finding-wallpapers-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.1593,
+      "w": 0.9611,
+      "h": 0.0642
+     },
+     "href": "/free"
+    }
+   ]
+  },
+  {
+   "slug": "wallpaper-page",
+   "audience": "customer",
+   "title": "The wallpaper page",
+   "summary": "Preview a wallpaper on your own device, check the sizes, then add it to your cart or save it.",
+   "steps": [
+    {
+     "title": "Preview on your device",
+     "body": "The first tab shows the wallpaper on the device you are using right now. Switch to Phone, Tablet, Desktop or the Original image.",
+     "image": "/guide/wallpaper-page-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.2086,
+      "w": 0.475,
+      "h": 0.0716
+     }
+    },
+    {
+     "title": "Lock screen or home screen",
+     "body": "See it behind the clock (lock screen) or behind your apps (home screen). The preview is small and watermarked — your download is the full-quality file.",
+     "image": "/guide/wallpaper-page-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0215,
+      "y": 0.2148,
+      "w": 0.1847,
+      "h": 0.7852
+     }
+    },
+    {
+     "title": "Try it full screen",
+     "body": "Opens the preview across your whole screen, so you can see it at real size. A note below tells you if the wallpaper is sharp on your screen.",
+     "image": "/guide/wallpaper-page-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1636,
+      "y": 0.9393,
+      "w": 0.1045,
+      "h": 0.0519
+     }
+    },
+    {
+     "title": "Price and sizes",
+     "body": "One credit unlocks the wallpaper in every size listed under “Sizes included”. It's marked AI-generated, as all our wallpapers are.",
+     "image": "/guide/wallpaper-page-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.5056,
+      "y": 0.2407,
+      "w": 0.475,
+      "h": 0.1827
+     }
+    },
+    {
+     "title": "Add to cart or save",
+     "body": "Add to Cart to unlock it with credits at checkout, or Save to keep it in Favourites for later.",
+     "image": "/guide/wallpaper-page-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.5056,
+      "y": 0.5148,
+      "w": 0.475,
+      "h": 0.079
+     }
+    },
+    {
+     "title": "Commercial licence",
+     "body": "The normal licence is for personal use. For products, ads or client work add the commercial licence (5 credits). Read the licence terms for details.",
+     "image": "/guide/wallpaper-page-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.5056,
+      "y": 0.7333,
+      "w": 0.475,
+      "h": 0.1802
+     }
+    },
+    {
+     "title": "Details and tags",
+     "body": "Read the description, the category, largest size and file type. Tap a tag to see similar wallpapers.",
+     "image": "/guide/wallpaper-page-07.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.1751,
+      "w": 0.7306,
+      "h": 0.1457
+     }
+    },
+    {
+     "title": "Related wallpapers",
+     "body": "More wallpapers in the same style, to keep browsing.",
+     "image": "/guide/wallpaper-page-08.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.3306,
+      "w": 0.9611,
+      "h": 0.0543
+     }
+    }
+   ]
+  },
+  {
+   "slug": "buying",
+   "audience": "customer",
+   "title": "Credits, plans and checkout",
+   "summary": "How credits work, which pack or plan to pick, and how to unlock wallpapers at checkout.",
+   "steps": [
+    {
+     "title": "Credit packs",
+     "body": "Everything is bought with credits: 1 credit = 1 wallpaper in every size. Bigger packs include bonus credits (valid 12 months); credits you pay for never expire.",
+     "image": "/guide/buying-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.4889,
+      "w": 0.9611,
+      "h": 0.5074
+     },
+     "href": "/pricing"
+    },
+    {
+     "title": "Plans",
+     "body": "Prefer a monthly allowance? Pick Monthly, Long-term (3–12 months for less per month), a Category pass, or Business (includes the commercial licence).",
+     "image": "/guide/buying-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2638,
+      "y": 0.384,
+      "w": 0.4725,
+      "h": 0.0642
+     }
+    },
+    {
+     "title": "Add to cart",
+     "body": "On any wallpaper press Add to Cart. You can keep browsing and add more.",
+     "image": "/guide/buying-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.9444,
+      "y": 0.0469,
+      "w": 0.0361,
+      "h": 0.0642
+     }
+    },
+    {
+     "title": "Your cart",
+     "body": "Check what's in your cart and the total in credits, then continue to checkout.",
+     "image": "/guide/buying-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0083,
+      "y": 0.1099,
+      "w": 0.9833,
+      "h": 0.4827
+     },
+     "href": "/cart"
+    },
+    {
+     "title": "Unlock with credits",
+     "body": "At checkout, confirm and the wallpapers are unlocked with your credits straight away. If you don't have enough credits, we show the packs that cover it.",
+     "image": "/guide/buying-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.0194,
+      "y": 0.3198,
+      "w": 0.9611,
+      "h": 0.3815
+     },
+     "href": "/checkout"
+    },
+    {
+     "title": "Done — it's in your library",
+     "body": "Unlocked wallpapers appear in My Library right away, ready to download.",
+     "image": "/guide/buying-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1882,
+      "y": 0.5333,
+      "w": 0.7917,
+      "h": 0.1185
+     },
+     "href": "/library"
+    }
+   ]
+  },
+  {
+   "slug": "signing-in",
+   "audience": "customer",
+   "title": "Signing in and your password",
+   "summary": "Create an account, sign in with a password or an email link, and reset a forgotten password.",
+   "steps": [
+    {
+     "title": "Sign in or create an account",
+     "body": "Switch between Sign in and Create account. New accounts get free welcome credits.",
+     "image": "/guide/signing-in-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.3674,
+      "y": 0.4741,
+      "w": 0.2653,
+      "h": 0.0716
+     },
+     "href": "/login"
+    },
+    {
+     "title": "Choose a strong password",
+     "body": "Use at least 10 characters with letters and numbers or symbols. The meter shows how strong it is, and we check that it hasn't appeared in a known data breach.",
+     "image": "/guide/signing-in-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.3674,
+      "y": 0.5457,
+      "w": 0.2653,
+      "h": 0.3086
+     }
+    },
+    {
+     "title": "Forgot your password?",
+     "body": "Press “Forgot password?”, enter your email, and open the link we send to set a new one.",
+     "image": "/guide/signing-in-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.5511,
+      "y": 0.6481,
+      "w": 0.0816,
+      "h": 0.0395
+     }
+    },
+    {
+     "title": "Sign in without a password",
+     "body": "Prefer no password? Ask for a one-time sign-in link by email and open it on the same device.",
+     "image": "/guide/signing-in-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.4306,
+      "y": 0.8148,
+      "w": 0.1387,
+      "h": 0.0395
+     }
+    }
+   ]
+  },
+  {
+   "slug": "your-account",
+   "audience": "customer",
+   "title": "Your library and account",
+   "summary": "Download what you own, see credits and receipts, invite friends, send gifts, get help and manage your settings.",
+   "steps": [
+    {
+     "title": "My Library",
+     "body": "Your home after signing in: how many wallpapers you own, downloads used, and your credit balance.",
+     "image": "/guide/your-account-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1875,
+      "y": 0.1593,
+      "w": 0.7931,
+      "h": 0.0741
+     },
+     "href": "/library"
+    },
+    {
+     "title": "Download a size",
+     "body": "Press a size to download it. Each purchase includes up to 5 downloads, so you can set it up on new devices too. Search, filter by licence and sort the list above.",
+     "image": "/guide/your-account-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1882,
+      "y": 0.2309,
+      "w": 0.7917,
+      "h": 0.1185
+     }
+    },
+    {
+     "title": "Credits",
+     "body": "See your balance, bonus credits that expire soon, and the full history of credits added and spent.",
+     "image": "/guide/your-account-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1875,
+      "y": 0.2099,
+      "w": 0.4778,
+      "h": 0.179
+     },
+     "href": "/account/credits"
+    },
+    {
+     "title": "Orders, receipts and refunds",
+     "body": "Open a printable receipt for any order. “Get help” starts a support request about that order; unused packs and passes can be refunded right here within the refund window.",
+     "image": "/guide/your-account-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.8762,
+      "y": 0.284,
+      "w": 0.0925,
+      "h": 0.0444
+     },
+     "href": "/account/orders"
+    },
+    {
+     "title": "Invite friends",
+     "body": "Share your link (or send it on WhatsApp). Your friend gets extra free credits, and you get bonus credits after their first purchase.",
+     "image": "/guide/your-account-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1875,
+      "y": 0.2778,
+      "w": 0.4778,
+      "h": 0.2309
+     },
+     "href": "/account/referrals"
+    },
+    {
+     "title": "Gifts",
+     "body": "Send credits as a gift, see gifts you've sent, or redeem a gift code someone gave you.",
+     "image": "/guide/your-account-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1875,
+      "y": 0.2284,
+      "w": 0.4778,
+      "h": 0.2247
+     },
+     "href": "/account/gifts"
+    },
+    {
+     "title": "Help and support",
+     "body": "Open a new request or follow an existing one. We reply within 48 hours; you'll see our answers here and by email.",
+     "image": "/guide/your-account-07.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1882,
+      "y": 0.1593,
+      "w": 0.7924,
+      "h": 0.2481
+     },
+     "href": "/account/support"
+    },
+    {
+     "title": "Settings",
+     "body": "Edit your name, country and GSTIN (for GST invoices), change your email and password, and sign out of every device.",
+     "image": "/guide/your-account-08.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2049,
+      "y": 0.2938,
+      "w": 0.3764,
+      "h": 0.5963
+     },
+     "href": "/account"
+    },
+    {
+     "title": "Your data and closing your account",
+     "body": "Download a copy of your data at any time. Closing your account is permanent: unused credits are lost, and orders are kept only as tax law requires.",
+     "image": "/guide/your-account-09.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2049,
+      "y": 0.1753,
+      "w": 0.3764,
+      "h": 0.5086
+     }
+    }
+   ]
+  },
+  {
+   "slug": "selling-your-art",
+   "audience": "creator",
+   "title": "Selling your art",
+   "summary": "Become a creator, upload wallpapers, share your affiliate link and follow your earnings and payouts.",
+   "steps": [
+    {
+     "title": "Become a creator",
+     "body": "From Account → Sell your art: enter your creator name, how you want to be paid, your PAN (India) and accept the creator agreement.",
+     "image": "/guide/selling-your-art-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1667,
+      "y": 0.2531,
+      "w": 0.3667,
+      "h": 0.7469
+     },
+     "href": "/creator"
+    },
+    {
+     "title": "Your dashboard",
+     "body": "Your dashboard shows KYC status, your share of each sale (70% by default) and how you get paid.",
+     "image": "/guide/selling-your-art-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.4525,
+      "y": 0.2642,
+      "w": 0.2421,
+      "h": 0.0444
+     }
+    },
+    {
+     "title": "Your affiliate link",
+     "body": "Add your code to any HirecWallp link. You earn 10% of orders placed within 30 days of a click, paid with your monthly payout.",
+     "image": "/guide/selling-your-art-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1667,
+      "y": 0.384,
+      "w": 0.8139,
+      "h": 0.258
+     }
+    },
+    {
+     "title": "Your submissions",
+     "body": "Every upload and its status: In review or Live.",
+     "image": "/guide/selling-your-art-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1667,
+      "y": 0.5247,
+      "w": 0.8139,
+      "h": 0.1062
+     }
+    },
+    {
+     "title": "Upload a wallpaper",
+     "body": "Add a title, tags and description and pick the file (at least 3840 px on the long edge). We check quality, duplicates and content automatically, then review it.",
+     "image": "/guide/selling-your-art-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1667,
+      "y": 0.2531,
+      "w": 0.4111,
+      "h": 0.5753
+     },
+     "href": "/creator/upload"
+    },
+    {
+     "title": "Earnings",
+     "body": "Earnings are worked out every month from paid sales of your wallpapers, membership downloads and affiliate orders.",
+     "image": "/guide/selling-your-art-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1667,
+      "y": 0.1593,
+      "w": 0.8139,
+      "h": 0.2099
+     },
+     "href": "/creator/earnings"
+    },
+    {
+     "title": "Payouts",
+     "body": "Payouts are sent monthly once your KYC is verified. TDS is deducted where the law requires it, and each payout lists it.",
+     "image": "/guide/selling-your-art-07.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1667,
+      "y": 0.1593,
+      "w": 0.8139,
+      "h": 0.2222
+     },
+     "href": "/creator/payouts"
+    }
+   ]
+  },
+  {
+   "slug": "admin-dashboard",
+   "audience": "admin",
+   "title": "The admin dashboard",
+   "summary": "What needs your attention, store setup, sales at a glance, and how the admin menu is organised.",
+   "steps": [
+    {
+     "title": "The admin menu",
+     "body": "The left menu is grouped: Overview, Sales & customers, Catalogue, Pricing, Marketing and Business. Badges show how many items wait for you.",
+     "image": "/guide/admin-dashboard-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0,
+      "y": 0,
+      "w": 0.1833,
+      "h": 1
+     }
+    },
+    {
+     "title": "Numbers at a glance",
+     "body": "Revenue and paid orders for the last 30 days, new customers and how many wallpapers are live.",
+     "image": "/guide/admin-dashboard-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.1975,
+      "w": 0.7667,
+      "h": 0.1506
+     }
+    },
+    {
+     "title": "Needs attention",
+     "body": "Everything waiting on you, most urgent first: overdue support, messages, takedowns, failed jobs, creator submissions and drafts. Click a row to open it.",
+     "image": "/guide/admin-dashboard-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.358,
+      "w": 0.4544,
+      "h": 0.4377
+     }
+    },
+    {
+     "title": "Store setup checklist",
+     "body": "A checklist of what the store needs before launch — wallpapers, Razorpay keys, business details, grievance officer, store open.",
+     "image": "/guide/admin-dashboard-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.6655,
+      "y": 0.358,
+      "w": 0.3067,
+      "h": 0.4377
+     }
+    },
+    {
+     "title": "Recent orders",
+     "body": "The latest orders; click one to open it, or All orders for the full list.",
+     "image": "/guide/admin-dashboard-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.6655,
+      "y": 0.4685,
+      "w": 0.3067,
+      "h": 0.4228
+     }
+    },
+    {
+     "title": "Analytics",
+     "body": "Sales by day, top sellers, most viewed wallpapers, the shopping funnel and sales by country.",
+     "image": "/guide/admin-dashboard-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1833,
+      "y": 0.0593,
+      "w": 0.8111,
+      "h": 0.9407
+     }
+    }
+   ]
+  },
+  {
+   "slug": "admin-wallpapers",
+   "audience": "admin",
+   "title": "Adding and managing wallpapers",
+   "summary": "Batch upload, duplicate checks, AI-filled details, drafts, publishing and editing.",
+   "steps": [
+    {
+     "title": "Upload in batches",
+     "body": "Drop many files at once. Each is checked (size, near-duplicates), resized into every variant and saved as a draft. With “Let AI choose”, the title, description, tags and category are filled in for you.",
+     "image": "/guide/admin-wallpapers-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1833,
+      "y": 0.0593,
+      "w": 0.8111,
+      "h": 0.6444
+     }
+    },
+    {
+     "title": "Review drafts",
+     "body": "Edit title, description, category, tags and Free inline. Cards filled by AI carry an AI badge until you edit them.",
+     "image": "/guide/admin-wallpapers-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.3951,
+      "w": 0.2556,
+      "h": 0.5997
+     }
+    },
+    {
+     "title": "Publish",
+     "body": "Tick the drafts to publish and press Save & publish. Save changes keeps them as drafts.",
+     "image": "/guide/admin-wallpapers-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.7702,
+      "y": 0.3173,
+      "w": 0.1958,
+      "h": 0.0642
+     }
+    },
+    {
+     "title": "Creator submissions",
+     "body": "Wallpapers uploaded by creators wait here for your review before they go live.",
+     "image": "/guide/admin-wallpapers-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2904,
+      "y": 0.2284,
+      "w": 0.1335,
+      "h": 0.0593
+     }
+    },
+    {
+     "title": "The catalogue and bulk actions",
+     "body": "Search and filter every wallpaper. Select several to publish, unpublish, archive, make free or premium, or change category in one go.",
+     "image": "/guide/admin-wallpapers-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2662,
+      "y": 0.3296,
+      "w": 0.577,
+      "h": 0.0642
+     }
+    },
+    {
+     "title": "Edit a wallpaper",
+     "body": "Change the title, description, alt text, tags, category, set and Free. Deleting is blocked once a wallpaper has sold (archive it instead).",
+     "image": "/guide/admin-wallpapers-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.2593,
+      "w": 0.4111,
+      "h": 0.7407
+     }
+    },
+    {
+     "title": "Replace the image",
+     "body": "Upload a better file or regenerate all sizes. Old files and cached downloads are cleaned up automatically.",
+     "image": "/guide/admin-wallpapers-07.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.7389,
+      "y": 0.5753,
+      "w": 0.2333,
+      "h": 0.3111
+     }
+    }
+   ]
+  },
+  {
+   "slug": "admin-orders-support",
+   "audience": "admin",
+   "title": "Orders, customers and support",
+   "summary": "Find orders, refund them, help a customer and answer support requests.",
+   "steps": [
+    {
+     "title": "Orders",
+     "body": "Switch between paid, not completed, refunded and failed orders, and search by email, order id or invoice number. Export CSV for your records.",
+     "image": "/guide/admin-orders-support-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.1926,
+      "w": 0.7667,
+      "h": 0.0716
+     }
+    },
+    {
+     "title": "Order details and refunds",
+     "body": "See what was bought, the payment id and receipt. Refund sends the money back through Razorpay and removes what was granted.",
+     "image": "/guide/admin-orders-support-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1833,
+      "y": 0.0593,
+      "w": 0.8111,
+      "h": 0.9383
+     }
+    },
+    {
+     "title": "Help a customer",
+     "body": "Add or remove credits, gift a wallpaper, change the price country after a move, set the role, or block the account.",
+     "image": "/guide/admin-orders-support-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.4025,
+      "w": 0.7222,
+      "h": 0.5086
+     }
+    },
+    {
+     "title": "Support inbox",
+     "body": "Requests are sorted into Needs reply, Overdue, Waiting on customer and Resolved. Answer within 48 hours; resolve within 30 days.",
+     "image": "/guide/admin-orders-support-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.2222,
+      "w": 0.3923,
+      "h": 0.0716
+     }
+    },
+    {
+     "title": "Reply to a request",
+     "body": "Reply to the customer (they get an email) or add an internal note only staff can see, and set the status.",
+     "image": "/guide/admin-orders-support-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.3753,
+      "w": 0.5278,
+      "h": 0.4315
+     }
+    },
+    {
+     "title": "Make it right",
+     "body": "Fix the problem from the ticket: refund the order, add credits, or restore downloads. Each action is noted in the thread and the activity log.",
+     "image": "/guide/admin-orders-support-06.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.7389,
+      "y": 0.4673,
+      "w": 0.2333,
+      "h": 0.5327
+     }
+    }
+   ]
+  },
+  {
+   "slug": "admin-prices-growth",
+   "audience": "admin",
+   "title": "Prices, plans and growth",
+   "summary": "Credit packs, memberships, country tiers and the growth tools.",
+   "steps": [
+    {
+     "title": "Credit packs",
+     "body": "Set each pack's credits, bonus credits, price and currency per country tier (or a single country). Optional sale dates make festival offers.",
+     "image": "/guide/admin-prices-growth-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.1926,
+      "w": 0.7667,
+      "h": 0.5716
+     }
+    },
+    {
+     "title": "Membership plans",
+     "body": "Create monthly, long-term, category and business plans with a monthly allowance; manage members (add days, add wallpapers, revoke).",
+     "image": "/guide/admin-prices-growth-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.3728,
+      "w": 0.7667,
+      "h": 0.6272
+     }
+    },
+    {
+     "title": "Pricing by country",
+     "body": "See which tier each country is in and move a country to another tier. Here you also set the credit value used for creator earnings.",
+     "image": "/guide/admin-prices-growth-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1833,
+      "y": 0.0593,
+      "w": 0.8111,
+      "h": 0.9407
+     }
+    },
+    {
+     "title": "Growth tools",
+     "body": "Today's free wallpaper (run it now if needed), creator affiliate commissions, referrals and gifts — switched on and tuned in Settings → Growth.",
+     "image": "/guide/admin-prices-growth-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.3531,
+      "w": 0.3806,
+      "h": 0.2444
+     }
+    }
+   ]
+  },
+  {
+   "slug": "admin-settings",
+   "audience": "admin",
+   "title": "Settings, tax and system health",
+   "summary": "Store switches, business details, the tax centre, system health and the activity log.",
+   "steps": [
+    {
+     "title": "Store switches",
+     "body": "Open or close the store, and switch membership, creator sign-ups, free downloads and the newsletter on or off. Tabs hold business & legal details, growth settings and prices & FX.",
+     "image": "/guide/admin-settings-01.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.1975,
+      "w": 0.7667,
+      "h": 0.6698
+     }
+    },
+    {
+     "title": "Announcement bar",
+     "body": "The message shown at the top of every page, with an optional link.",
+     "image": "/guide/admin-settings-02.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.6969,
+      "w": 0.3806,
+      "h": 0.3031
+     }
+    },
+    {
+     "title": "Tax centre",
+     "body": "Turnover against the GST limit, upcoming filing dates, sales and TDS registers to download, and tax settings. Rules are encoded for you, but have a CA check them.",
+     "image": "/guide/admin-settings-03.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.0988,
+      "w": 0.7667,
+      "h": 0.5642
+     }
+    },
+    {
+     "title": "System health",
+     "body": "Checks the database, storage, payments and email, shows orders waiting for payment confirmation and when each scheduled job last ran.",
+     "image": "/guide/admin-settings-04.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.2056,
+      "y": 0.0988,
+      "w": 0.7667,
+      "h": 0.9012
+     }
+    },
+    {
+     "title": "Activity log",
+     "body": "Every change made in the admin — who did what, and when.",
+     "image": "/guide/admin-settings-05.webp",
+     "width": 1600,
+     "height": 900,
+     "box": {
+      "x": 0.1833,
+      "y": 0.0593,
+      "w": 0.8111,
+      "h": 0.9407
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -16,7 +16,7 @@ export default async function AdminOrderPage(props: { params: Promise<{ id: stri
   const [{ data: o }, { data: ents }, { data: log }] = await Promise.all([
     supabase
       .from('orders')
-      .select('*, profiles(id, email, display_name), order_items(unit_price, licence, wallpapers(id, title, slug), credit_packs(credits), membership_plans(name, duration_days))')
+      .select('*, profiles!orders_user_id_fkey(id, email, display_name), order_items(unit_price, licence, wallpapers(id, title, slug), credit_packs(credits), membership_plans(name, duration_days))')
       .eq('id', id)
       .maybeSingle(),
     supabase.from('entitlements').select('id, licence, downloads_used, max_downloads, wallpapers(title)').eq('order_id', id),

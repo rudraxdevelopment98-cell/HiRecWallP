@@ -34,7 +34,7 @@ export default async function AdminOrdersPage(props: { searchParams: Promise<{ s
   const page = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1);
 
   const select =
-    'id, status, currency, amount_minor, billing_country, invoice_no, created_at, profiles!inner(email), order_items(licence, wallpapers(title), credit_packs(credits), membership_plans(name))';
+    'id, status, currency, amount_minor, billing_country, invoice_no, created_at, profiles!orders_user_id_fkey!inner(email), order_items(licence, wallpapers(title), credit_packs(credits), membership_plans(name))';
   let query = createServiceClient()
     .from('orders')
     .select(select, { count: 'exact' })

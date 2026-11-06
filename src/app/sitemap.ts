@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { publicEnv } from '@/lib/env';
 import { createServiceClient } from '@/lib/supabase/service';
 import { wallpaperPath } from '@/lib/wallpaper-url';
+import { guideChapters } from '@/lib/guide';
 
 const STATIC_PATHS = [
   '',
@@ -14,6 +15,9 @@ const STATIC_PATHS = [
   '/privacy',
   '/refunds',
   '/contact-takedown',
+  '/faq',
+  '/guide',
+  ...guideChapters(['customer', 'creator']).map((c) => `/guide/${c.slug}`),
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

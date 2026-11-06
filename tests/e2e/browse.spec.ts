@@ -75,3 +75,15 @@ test.describe('phone layout', () => {
     });
   }
 });
+
+test('guide: chapters with pictures, admin guide stays private', async ({ page }) => {
+  await page.goto('/guide');
+  await expect(page.getByRole('heading', { level: 1, name: 'Guide' })).toBeVisible();
+  await page.getByRole('link', { name: /Getting around/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Getting around' })).toBeVisible();
+  await expect(page.getByRole('img', { name: /Step 1:/ })).toBeVisible();
+  const r = await page.request.get('/guide/admin-dashboard');
+  expect(r.status()).toBe(404);
+  await page.goto('/admin/guide');
+  await expect(page).toHaveURL(/\/login/);
+});

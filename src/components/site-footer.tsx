@@ -11,6 +11,7 @@ const LINKS = [
   { href: '/about', label: 'About Us' },
   { href: '/contact', label: 'Contact' },
   { href: '/faq', label: 'FAQ' },
+  { href: '/guide', label: 'Guide' },
   { href: '/terms', label: 'Terms & Conditions' },
   { href: '/privacy', label: 'Privacy Policy' },
   { href: '/licence', label: 'Licence' },

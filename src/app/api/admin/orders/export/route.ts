@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
   let query = createServiceClient()
     .from('orders')
-    .select('id, invoice_no, created_at, paid_at, status, provider, currency, amount_minor, billing_country, buyer_gstin, profiles(email), order_items(licence, wallpapers(title), credit_packs(credits), membership_plans(name))')
+    .select('id, invoice_no, created_at, paid_at, status, provider, currency, amount_minor, billing_country, buyer_gstin, profiles!orders_user_id_fkey(email), order_items(licence, wallpapers(title), credit_packs(credits), membership_plans(name))')
     .order('created_at', { ascending: true })
     .limit(50000);
   if (status && status !== 'all') query = query.eq('status', status);

@@ -1,0 +1,1021 @@
+{
+ "chapters": [
+  {
+   "slug": "getting-around",
+   "audience": "customer",
+   "who": "anon",
+   "title": "Getting around",
+   "summary": "The menu, search, your region, account, favourites and cart — and what's on the home page.",
+   "intro": {
+    "en": "Welcome to Hi Rec Wall P. Here is a quick tour of the home page.",
+    "hi": "हाय रेक वॉल पी में आपका स्वागत है। चलिए, होम पेज का एक छोटा सा टूर करते हैं।"
+   },
+   "steps": [
+    {
+     "url": "/",
+     "hl": [
+      "header nav",
+      "text=HirecWallp >> nth=0"
+     ],
+     "title": "The main menu",
+     "body": "The logo always takes you back home. Use the menu to open Explore (every wallpaper), Collections (themed sets), Studio and Pricing.",
+     "en": "The logo always brings you back home. The menu opens Explore, Collections, Studio and Pricing.",
+     "hi": "लोगो पर क्लिक करते ही आप होम पेज पर आ जाते हैं। मेन्यू से एक्सप्लोर, कलेक्शन्स, स्टूडियो और प्राइसिंग खुलते हैं।"
+    },
+    {
+     "url": "/",
+     "hl": [
+      "input[placeholder^=\"Search wallpapers\"]"
+     ],
+     "title": "Search",
+     "body": "Type a mood, colour or subject — for example “gold”, “mountains” or “minimal” — and press Enter to see matching wallpapers.",
+     "en": "Search by mood, colour or subject, like gold or mountains, and press Enter.",
+     "hi": "सर्च बॉक्स में मूड, रंग या टॉपिक लिखिए — जैसे गोल्ड या माउंटेन्स — और एंटर दबाइए।"
+    },
+    {
+     "url": "/",
+     "hl": [
+      "header a[href=\"/faq#payments\"]"
+     ],
+     "title": "Your region and prices",
+     "body": "Prices are shown for the country you are in. At checkout we also look at your billing country, and after your first purchase prices follow your account.",
+     "en": "This shows your region. Prices are set fairly for your country.",
+     "hi": "यहाँ आपका रीजन दिखता है। कीमतें आपके देश के हिसाब से तय होती हैं।"
+    },
+    {
+     "url": "/",
+     "hl": [
+      "[aria-label=\"My account\"]",
+      "[aria-label=\"Favourites\"]",
+      "[aria-label=\"Cart\"]"
+     ],
+     "title": "Account, favourites and cart",
+     "body": "The person icon opens sign-in or your account, the heart opens wallpapers you saved, and the bag opens your cart.",
+     "en": "On the right: your account, your saved favourites, and your cart.",
+     "hi": "दाईं तरफ़: आपका अकाउंट, सेव किए हुए फ़ेवरेट्स, और आपकी कार्ट।"
+    },
+    {
+     "url": "/",
+     "hl": [
+      "h1",
+      "text=Explore Wallpapers →"
+     ],
+     "title": "Start exploring",
+     "body": "The big button on the home page takes you straight to every wallpaper, with filters for your device.",
+     "en": "Explore Wallpapers takes you straight to the full catalogue.",
+     "hi": "एक्सप्लोर वॉलपेपर्स बटन से सीधे पूरा कैटलॉग खुलता है।"
+    },
+    {
+     "url": "/",
+     "scroll": "text=Sign in to get it free",
+     "hl": [
+      "up:text=Sign in to get it free"
+     ],
+     "title": "Today's free wallpaper",
+     "body": "Every day one premium wallpaper is free until midnight (India time). Sign in and press the button — it stays in your library for good.",
+     "en": "Every day, one premium wallpaper is free. Sign in and it's yours to keep.",
+     "hi": "हर दिन एक प्रीमियम वॉलपेपर फ्री होता है। साइन इन कीजिए, और वो हमेशा के लिए आपका।"
+    },
+    {
+     "url": "/",
+     "scroll": "h2:has-text(\"Browse by Category\")",
+     "hl": [
+      "h2:has-text(\"Browse by Category\")",
+      "text=Nature >> nth=0"
+     ],
+     "title": "Browse by category",
+     "body": "Jump into a category such as Nature, Abstract or Dark AMOLED & Minimal. The number shows how many wallpapers it has.",
+     "en": "Browse by category, like Nature, Abstract or AMOLED and minimal.",
+     "hi": "कैटेगरी से ब्राउज़ कीजिए — जैसे नेचर, एब्स्ट्रैक्ट, या एमोलेड मिनिमल।"
+    },
+    {
+     "url": "/",
+     "scroll": "h2:has-text(\"Featured Wallpapers\")",
+     "hl": [
+      "main a[href^=\"/w/\"] >> nth=1"
+     ],
+     "title": "Reading a wallpaper card",
+     "body": "Each card shows the top resolution (4K or 5K), the category, the price in credits and the shape (landscape or portrait). The heart saves it to Favourites.",
+     "en": "Each card shows the resolution, the price in credits, and the shape. The heart saves it.",
+     "hi": "हर कार्ड पर रेज़ोल्यूशन, क्रेडिट्स में कीमत, और शेप दिखती है। दिल वाला बटन उसे सेव करता है।"
+    },
+    {
+     "url": "/",
+     "scroll": "bottom",
+     "hl": [
+      "footer"
+     ],
+     "title": "Help and policies",
+     "body": "The footer has the Guide, FAQ, contact, all our policies (terms, privacy, refunds, licence) and the page to sell your own art.",
+     "en": "At the bottom you'll find help, our policies, and the page to sell your own art.",
+     "hi": "सबसे नीचे हेल्प, हमारी पॉलिसीज़, और अपनी आर्ट बेचने का पेज मिलता है।"
+    }
+   ]
+  },
+  {
+   "slug": "finding-wallpapers",
+   "audience": "customer",
+   "who": "anon",
+   "title": "Finding the right wallpaper",
+   "summary": "Search, sort and filter by category, price, device, orientation and resolution.",
+   "intro": {
+    "en": "Let's find the perfect wallpaper for your screen.",
+    "hi": "चलिए, आपकी स्क्रीन के लिए परफ़ेक्ट वॉलपेपर ढूँढते हैं।"
+   },
+   "steps": [
+    {
+     "url": "/explore",
+     "hl": [
+      "[aria-label=\"Search wallpapers\"]"
+     ],
+     "title": "Search inside Explore",
+     "body": "Narrow the catalogue with a word. It searches titles, tags and descriptions.",
+     "en": "On Explore, search by any word. It looks at titles and tags.",
+     "hi": "एक्सप्लोर पेज पर किसी भी शब्द से सर्च कीजिए। ये टाइटल और टैग्स में ढूँढता है।"
+    },
+    {
+     "url": "/explore",
+     "hl": [
+      "select >> nth=0"
+     ],
+     "title": "Sort",
+     "body": "Sort by newest, most popular or price.",
+     "en": "Sort by newest, most popular, or price.",
+     "hi": "नए, सबसे पॉपुलर, या कीमत के हिसाब से सॉर्ट कीजिए।"
+    },
+    {
+     "url": "/explore",
+     "hl": [
+      "up:input[name=\"category\"] >> nth=0",
+      "input[name=\"free\"] >> nth=2"
+     ],
+     "title": "Category and price",
+     "body": "Tick one or more categories, and choose free or premium wallpapers.",
+     "en": "Pick categories, and choose free or premium.",
+     "hi": "कैटेगरी चुनिए, और फ्री या प्रीमियम सेलेक्ट कीजिए।"
+    },
+    {
+     "url": "/explore",
+     "scroll": "input[name=\"device\"] >> nth=0",
+     "hl": [
+      "up:input[name=\"device\"] >> nth=0",
+      "up:input[name=\"res\"] >> nth=0",
+      "role=button[name=\"Apply Filters\"]"
+     ],
+     "title": "Device, orientation and resolution",
+     "body": "Filter for your phone, tablet or desktop, portrait or landscape, and 4K or 5K. Then press Apply Filters (Reset clears them).",
+     "en": "Filter by device, orientation and resolution, then press Apply Filters.",
+     "hi": "डिवाइस, ओरिएंटेशन और रेज़ोल्यूशन से फ़िल्टर कीजिए, फिर अप्लाई फ़िल्टर्स दबाइए।"
+    },
+    {
+     "url": "/explore",
+     "hl": [
+      "main a[href^=\"/w/\"] >> nth=0"
+     ],
+     "title": "Open a wallpaper",
+     "body": "Click any wallpaper to open its page with the live device preview, sizes and price.",
+     "en": "Click any wallpaper to open its page.",
+     "hi": "किसी भी वॉलपेपर पर क्लिक करके उसका पेज खोलिए।"
+    },
+    {
+     "url": "/free",
+     "hl": [
+      "h1"
+     ],
+     "title": "Free wallpapers",
+     "body": "The Free page lists wallpapers you can download without paying (no account needed; downloads are rate-limited).",
+     "en": "The Free page has wallpapers you can download without paying.",
+     "hi": "फ्री पेज पर ऐसे वॉलपेपर्स हैं जिन्हें आप बिना पैसे दिए डाउनलोड कर सकते हैं।"
+    }
+   ]
+  },
+  {
+   "slug": "wallpaper-page",
+   "audience": "customer",
+   "who": "anon",
+   "title": "The wallpaper page",
+   "summary": "Preview a wallpaper on your own device, check the sizes, then add it to your cart or save it.",
+   "intro": {
+    "en": "Here's everything on a wallpaper's page.",
+    "hi": "अब देखते हैं, एक वॉलपेपर के पेज पर क्या-क्या है।"
+   },
+   "steps": [
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "hl": [
+      "[role=tablist] >> nth=0"
+     ],
+     "title": "Preview on your device",
+     "body": "The first tab shows the wallpaper on the device you are using right now. Switch to Phone, Tablet, Desktop or the Original image.",
+     "en": "The preview shows the wallpaper on your own device. You can also switch to phone, tablet or desktop.",
+     "hi": "प्रीव्यू में वॉलपेपर आपके अपने डिवाइस पर दिखता है। चाहें तो फ़ोन, टैबलेट या डेस्कटॉप पर स्विच कीजिए।"
+    },
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "do": [
+      {
+       "click": "role=tab[name=\"Phone\"]"
+      },
+      {
+       "wait": 700
+      }
+     ],
+     "hl": [
+      "role=tab[name=\"Phone\"]",
+      "up:role=button[name=\"Lock screen\"]"
+     ],
+     "title": "Lock screen or home screen",
+     "body": "See it behind the clock (lock screen) or behind your apps (home screen). The preview is small and watermarked — your download is the full-quality file.",
+     "en": "Check how it looks on the lock screen or behind your apps.",
+     "hi": "देखिए लॉक स्क्रीन पर कैसा लगेगा, या ऐप्स के पीछे होम स्क्रीन पर।"
+    },
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "hl": [
+      "role=button[name=\"Try it full screen\"]"
+     ],
+     "title": "Try it full screen",
+     "body": "Opens the preview across your whole screen, so you can see it at real size. A note below tells you if the wallpaper is sharp on your screen.",
+     "en": "Try it full screen to see it at real size.",
+     "hi": "फ़ुल स्क्रीन पर ट्राई करके असली साइज़ में देखिए।",
+     "scroll": "[role=tablist] >> nth=0"
+    },
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "hl": [
+      "h1",
+      "text=Sizes included"
+     ],
+     "title": "Price and sizes",
+     "body": "One credit unlocks the wallpaper in every size listed under “Sizes included”. It's marked AI-generated, as all our wallpapers are.",
+     "en": "One credit unlocks every size listed here.",
+     "hi": "एक क्रेडिट में यहाँ लिखे सारे साइज़ मिल जाते हैं।"
+    },
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "hl": [
+      "role=button[name=\"Add to Cart\"]",
+      "role=button[name=/Save/]"
+     ],
+     "title": "Add to cart or save",
+     "body": "Add to Cart to unlock it with credits at checkout, or Save to keep it in Favourites for later.",
+     "en": "Add it to your cart, or save it for later.",
+     "hi": "इसे कार्ट में डालिए, या बाद के लिए सेव कीजिए।"
+    },
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "hl": [
+      "up:role=button[name=\"Add commercial licence\"]"
+     ],
+     "title": "Commercial licence",
+     "body": "The normal licence is for personal use. For products, ads or client work add the commercial licence (5 credits). Read the licence terms for details.",
+     "en": "For business use, add the commercial licence.",
+     "hi": "बिज़नेस में इस्तेमाल के लिए कमर्शियल लाइसेंस लीजिए।"
+    },
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "scroll": "h2:has-text(\"About This Wallpaper\")",
+     "hl": [
+      "h2:has-text(\"About This Wallpaper\")",
+      "text=#gold"
+     ],
+     "title": "Details and tags",
+     "body": "Read the description, the category, largest size and file type. Tap a tag to see similar wallpapers.",
+     "en": "Below are the details. Tap a tag to see similar wallpapers.",
+     "hi": "नीचे पूरी जानकारी है। टैग पर टैप करके मिलते-जुलते वॉलपेपर्स देखिए।"
+    },
+    {
+     "url": "/w/liquid-gold-2t8f25uq",
+     "scroll": "h2:has-text(\"Related Wallpapers\")",
+     "hl": [
+      "h2:has-text(\"Related Wallpapers\")"
+     ],
+     "title": "Related wallpapers",
+     "body": "More wallpapers in the same style, to keep browsing.",
+     "en": "And related wallpapers, to keep exploring.",
+     "hi": "और मिलते-जुलते वॉलपेपर्स, आगे देखने के लिए।"
+    }
+   ]
+  },
+  {
+   "slug": "buying",
+   "audience": "customer",
+   "who": "priya",
+   "title": "Credits, plans and checkout",
+   "summary": "How credits work, which pack or plan to pick, and how to unlock wallpapers at checkout.",
+   "intro": {
+    "en": "Now let's see how buying works.",
+    "hi": "अब देखते हैं कि ख़रीदारी कैसे होती है।"
+   },
+   "steps": [
+    {
+     "url": "/pricing",
+     "hl": [
+      "h2:has-text(\"Credit packs\")",
+      "up:main >> text=Starter >> nth=0",
+      "up:main >> text=Mega >> nth=0"
+     ],
+     "title": "Credit packs",
+     "body": "Everything is bought with credits: 1 credit = 1 wallpaper in every size. Bigger packs include bonus credits (valid 12 months); credits you pay for never expire.",
+     "en": "Credits are simple. One credit is one wallpaper, in every size. Bigger packs come with bonus credits.",
+     "hi": "क्रेडिट्स बहुत आसान हैं। एक क्रेडिट यानी एक वॉलपेपर, हर साइज़ में। बड़े पैक में बोनस क्रेडिट्स भी मिलते हैं।"
+    },
+    {
+     "url": "/pricing",
+     "hl": [
+      "main a:has-text(\"Credit packs\")",
+      "main a:has-text(\"Business\")"
+     ],
+     "title": "Plans",
+     "body": "Prefer a monthly allowance? Pick Monthly, Long-term (3–12 months for less per month), a Category pass, or Business (includes the commercial licence).",
+     "en": "Or choose a plan: monthly, long-term, a category pass, or business.",
+     "hi": "या कोई प्लान चुनिए: मंथली, लॉन्ग-टर्म, कैटेगरी पास, या बिज़नेस।"
+    },
+    {
+     "url": "/w/emerald-silk",
+     "do": [
+      {
+       "click": "role=button[name=\"Add to Cart\"]"
+      },
+      {
+       "wait": 900
+      }
+     ],
+     "hl": [
+      "header [aria-label=\"Cart\"]"
+     ],
+     "title": "Add to cart",
+     "body": "On any wallpaper press Add to Cart. You can keep browsing and add more.",
+     "en": "Add the wallpapers you like to your cart.",
+     "hi": "जो वॉलपेपर्स पसंद आएँ, उन्हें कार्ट में डालिए।"
+    },
+    {
+     "url": "/cart",
+     "hl": [
+      "h1",
+      "main"
+     ],
+     "title": "Your cart",
+     "body": "Check what's in your cart and the total in credits, then continue to checkout.",
+     "en": "Your cart shows the total in credits.",
+     "hi": "कार्ट में कुल क्रेडिट्स दिखते हैं।"
+    },
+    {
+     "url": "/checkout",
+     "hl": [
+      "main form button[type=submit]",
+      "main form"
+     ],
+     "title": "Unlock with credits",
+     "body": "At checkout, confirm and the wallpapers are unlocked with your credits straight away. If you don't have enough credits, we show the packs that cover it.",
+     "en": "At checkout, unlock with your credits. If you need more, we show the packs.",
+     "hi": "चेकआउट पर अपने क्रेडिट्स से अनलॉक कीजिए। कम पड़ें, तो पैक्स दिख जाते हैं।"
+    },
+    {
+     "url": "/library",
+     "hl": [
+      "main ul li >> nth=0"
+     ],
+     "title": "Done — it's in your library",
+     "body": "Unlocked wallpapers appear in My Library right away, ready to download.",
+     "en": "And it's in your library, ready to download.",
+     "hi": "और वॉलपेपर आपकी लाइब्रेरी में, डाउनलोड के लिए तैयार।"
+    }
+   ]
+  },
+  {
+   "slug": "signing-in",
+   "audience": "customer",
+   "who": "anon",
+   "title": "Signing in and your password",
+   "summary": "Create an account, sign in with a password or an email link, and reset a forgotten password.",
+   "intro": {
+    "en": "Here's how signing in works.",
+    "hi": "अब देखते हैं, साइन इन कैसे होता है।"
+   },
+   "steps": [
+    {
+     "url": "/login",
+     "hl": [
+      "role=tablist"
+     ],
+     "title": "Sign in or create an account",
+     "body": "Switch between Sign in and Create account. New accounts get free welcome credits.",
+     "en": "Choose sign in, or create a new account. New accounts get free credits.",
+     "hi": "साइन इन चुनिए, या नया अकाउंट बनाइए। नए अकाउंट पर फ्री क्रेडिट्स मिलते हैं।"
+    },
+    {
+     "url": "/login",
+     "do": [
+      {
+       "click": "role=tab[name=\"Create account\"]"
+      },
+      {
+       "fill": [
+        "#email",
+        "you@example.com"
+       ]
+      },
+      {
+       "fill": [
+        "#password",
+        "Mountain-river-42"
+       ]
+      },
+      {
+       "wait": 1500
+      }
+     ],
+     "hl": [
+      "up:#password"
+     ],
+     "title": "Choose a strong password",
+     "body": "Use at least 10 characters with letters and numbers or symbols. The meter shows how strong it is, and we check that it hasn't appeared in a known data breach.",
+     "en": "Pick a strong password. We check it hasn't leaked in a known breach.",
+     "hi": "मज़बूत पासवर्ड चुनिए। हम चेक करते हैं कि ये किसी डेटा लीक में तो नहीं आया।"
+    },
+    {
+     "url": "/login",
+     "hl": [
+      "role=button[name=\"Forgot password?\"]"
+     ],
+     "title": "Forgot your password?",
+     "body": "Press “Forgot password?”, enter your email, and open the link we send to set a new one.",
+     "en": "Forgot your password? We'll email you a link to set a new one.",
+     "hi": "पासवर्ड भूल गए? हम ईमेल पर नया पासवर्ड सेट करने का लिंक भेजते हैं।"
+    },
+    {
+     "url": "/login",
+     "hl": [
+      "role=button[name=\"Sign in with an email link instead\"]"
+     ],
+     "title": "Sign in without a password",
+     "body": "Prefer no password? Ask for a one-time sign-in link by email and open it on the same device.",
+     "en": "Or sign in with a one-time link by email, no password needed.",
+     "hi": "या ईमेल पर आए एक-बार वाले लिंक से साइन इन कीजिए, बिना पासवर्ड।"
+    }
+   ]
+  },
+  {
+   "slug": "your-account",
+   "audience": "customer",
+   "who": "priya",
+   "title": "Your library and account",
+   "summary": "Download what you own, see credits and receipts, invite friends, send gifts, get help and manage your settings.",
+   "intro": {
+    "en": "Now, your library and account.",
+    "hi": "अब आपकी लाइब्रेरी और अकाउंट।"
+   },
+   "steps": [
+    {
+     "url": "/library",
+     "hl": [
+      "h1",
+      "text=Credits: >> nth=0"
+     ],
+     "title": "My Library",
+     "body": "Your home after signing in: how many wallpapers you own, downloads used, and your credit balance.",
+     "en": "My Library shows your wallpapers, downloads, and credit balance.",
+     "hi": "माय लाइब्रेरी में आपके वॉलपेपर्स, डाउनलोड्स, और क्रेडिट बैलेंस दिखता है।"
+    },
+    {
+     "url": "/library",
+     "scroll": "h2:has-text(\"My library\")",
+     "hl": [
+      "main ul li >> nth=0"
+     ],
+     "title": "Download a size",
+     "body": "Press a size to download it. Each purchase includes up to 5 downloads, so you can set it up on new devices too. Search, filter by licence and sort the list above.",
+     "en": "Press a size to download. You can download again when you switch devices.",
+     "hi": "साइज़ पर दबाइए और डाउनलोड कीजिए। डिवाइस बदलें तो फिर से डाउनलोड कर सकते हैं।"
+    },
+    {
+     "url": "/account/credits",
+     "hl": [
+      "h2:has-text(\"Bonus credits expiring\")",
+      "main >> text=Buy credits"
+     ],
+     "title": "Credits",
+     "body": "See your balance, bonus credits that expire soon, and the full history of credits added and spent.",
+     "en": "Credits shows your balance, expiring bonus credits, and full history.",
+     "hi": "क्रेडिट्स पेज पर बैलेंस, ख़त्म होने वाले बोनस क्रेडिट्स, और पूरी हिस्ट्री दिखती है।"
+    },
+    {
+     "url": "/account/orders",
+     "hl": [
+      "role=link[name=\"Receipt\"] >> nth=0",
+      "role=link[name=\"Get help\"] >> nth=0"
+     ],
+     "title": "Orders, receipts and refunds",
+     "body": "Open a printable receipt for any order. “Get help” starts a support request about that order; unused packs and passes can be refunded right here within the refund window.",
+     "en": "Every order has a receipt, and a Get help button if something's wrong.",
+     "hi": "हर ऑर्डर की रसीद है, और कुछ गड़बड़ हो तो गेट हेल्प बटन।"
+    },
+    {
+     "url": "/account/referrals",
+     "hl": [
+      "up:role=button[name=\"Copy\"]"
+     ],
+     "title": "Invite friends",
+     "body": "Share your link (or send it on WhatsApp). Your friend gets extra free credits, and you get bonus credits after their first purchase.",
+     "en": "Invite friends with your link. You both get free credits.",
+     "hi": "अपने लिंक से दोस्तों को बुलाइए। दोनों को फ्री क्रेडिट्स मिलते हैं।"
+    },
+    {
+     "url": "/account/gifts",
+     "hl": [
+      "main >> text=Send a gift",
+      "h2:has-text(\"Redeem a gift\")"
+     ],
+     "title": "Gifts",
+     "body": "Send credits as a gift, see gifts you've sent, or redeem a gift code someone gave you.",
+     "en": "Send credits as a gift, or redeem a gift code.",
+     "hi": "क्रेडिट्स गिफ़्ट कीजिए, या गिफ़्ट कोड रिडीम कीजिए।"
+    },
+    {
+     "url": "/account/support",
+     "hl": [
+      "main >> text=New request",
+      "main a:has-text(\"HW-T\")"
+     ],
+     "title": "Help and support",
+     "body": "Open a new request or follow an existing one. We reply within 48 hours; you'll see our answers here and by email.",
+     "en": "Need help? Open a request. We reply within 48 hours.",
+     "hi": "मदद चाहिए? रिक्वेस्ट खोलिए। हम अड़तालीस घंटे में जवाब देते हैं।"
+    },
+    {
+     "url": "/account",
+     "hl": [
+      "h2:has-text(\"Profile\")",
+      "h2:has-text(\"Email & sign-in\")"
+     ],
+     "title": "Settings",
+     "body": "Edit your name, country and GSTIN (for GST invoices), change your email and password, and sign out of every device.",
+     "en": "In settings, update your profile, email and password.",
+     "hi": "सेटिंग्स में प्रोफ़ाइल, ईमेल और पासवर्ड बदलिए।"
+    },
+    {
+     "url": "/account",
+     "scroll": "h2:has-text(\"Your data\")",
+     "hl": [
+      "h2:has-text(\"Your data\")",
+      "h2:has-text(\"Close account\")"
+     ],
+     "title": "Your data and closing your account",
+     "body": "Download a copy of your data at any time. Closing your account is permanent: unused credits are lost, and orders are kept only as tax law requires.",
+     "en": "You can download your data, or close your account any time.",
+     "hi": "आप अपना डेटा डाउनलोड कर सकते हैं, या कभी भी अकाउंट बंद कर सकते हैं।"
+    }
+   ]
+  },
+  {
+   "slug": "selling-your-art",
+   "audience": "creator",
+   "who": "studio",
+   "title": "Selling your art",
+   "summary": "Become a creator, upload wallpapers, share your affiliate link and follow your earnings and payouts.",
+   "intro": {
+    "en": "This part is for creators who want to sell their art.",
+    "hi": "ये हिस्सा उन क्रिएटर्स के लिए है जो अपनी आर्ट बेचना चाहते हैं।"
+   },
+   "steps": [
+    {
+     "url": "/creator",
+     "who": "priya",
+     "hl": [
+      "form:has(input[name=\"displayName\"])"
+     ],
+     "title": "Become a creator",
+     "body": "From Account → Sell your art: enter your creator name, how you want to be paid, your PAN (India) and accept the creator agreement.",
+     "en": "Fill in your creator name, payout details and PAN, and accept the agreement.",
+     "hi": "अपना क्रिएटर नाम, पेमेंट डिटेल्स और पैन भरिए, और एग्रीमेंट स्वीकार कीजिए।"
+    },
+    {
+     "url": "/creator",
+     "hl": [
+      "text=Your share of each sale"
+     ],
+     "title": "Your dashboard",
+     "body": "Your dashboard shows KYC status, your share of each sale (70% by default) and how you get paid.",
+     "en": "Your dashboard shows your KYC status and your share of each sale.",
+     "hi": "डैशबोर्ड पर आपका केवाईसी स्टेटस और हर सेल में आपका हिस्सा दिखता है।"
+    },
+    {
+     "url": "/creator",
+     "hl": [
+      "up:role=button[name=\"Copy\"]"
+     ],
+     "title": "Your affiliate link",
+     "body": "Add your code to any HirecWallp link. You earn 10% of orders placed within 30 days of a click, paid with your monthly payout.",
+     "en": "Share your affiliate link and earn ten percent on orders it brings.",
+     "hi": "अपना एफ़िलिएट लिंक शेयर कीजिए, और उससे आए ऑर्डर्स पर दस प्रतिशत कमाइए।"
+    },
+    {
+     "url": "/creator",
+     "scroll": "h2:has-text(\"Your submissions\")",
+     "hl": [
+      "h2:has-text(\"Your submissions\")",
+      "a:has-text(\"Northern Aurora\")"
+     ],
+     "title": "Your submissions",
+     "body": "Every upload and its status: In review or Live.",
+     "en": "Here's every wallpaper you've submitted, and whether it's live.",
+     "hi": "यहाँ आपके सारे वॉलपेपर्स हैं, और कौन सा लाइव है।"
+    },
+    {
+     "url": "/creator/upload",
+     "hl": [
+      "form:has(input[name=\"title\"])"
+     ],
+     "title": "Upload a wallpaper",
+     "body": "Add a title, tags and description and pick the file (at least 3840 px on the long edge). We check quality, duplicates and content automatically, then review it.",
+     "en": "Upload your art with a title and tags. We check quality and duplicates, then review it.",
+     "hi": "टाइटल और टैग्स के साथ आर्ट अपलोड कीजिए। हम क्वालिटी और डुप्लिकेट चेक करके रिव्यू करते हैं।"
+    },
+    {
+     "url": "/creator/earnings",
+     "hl": [
+      "h1",
+      "h1 + *"
+     ],
+     "title": "Earnings",
+     "body": "Earnings are worked out every month from paid sales of your wallpapers, membership downloads and affiliate orders.",
+     "en": "Earnings are worked out every month.",
+     "hi": "कमाई का हिसाब हर महीने होता है।"
+    },
+    {
+     "url": "/creator/payouts",
+     "hl": [
+      "h1",
+      "h1 + *"
+     ],
+     "title": "Payouts",
+     "body": "Payouts are sent monthly once your KYC is verified. TDS is deducted where the law requires it, and each payout lists it.",
+     "en": "Payouts arrive every month after KYC, with tax shown clearly.",
+     "hi": "केवाईसी के बाद हर महीने पेमेंट आता है, टैक्स साफ़ दिखता है।"
+    }
+   ]
+  },
+  {
+   "slug": "admin-dashboard",
+   "audience": "admin",
+   "who": "admin",
+   "title": "The admin dashboard",
+   "summary": "What needs your attention, store setup, sales at a glance, and how the admin menu is organised.",
+   "intro": {
+    "en": "This is the admin area. Let's start with the dashboard.",
+    "hi": "ये एडमिन एरिया है। शुरुआत करते हैं डैशबोर्ड से।"
+   },
+   "steps": [
+    {
+     "url": "/admin",
+     "hl": [
+      "aside nav",
+      "aside"
+     ],
+     "title": "The admin menu",
+     "body": "The left menu is grouped: Overview, Sales & customers, Catalogue, Pricing, Marketing and Business. Badges show how many items wait for you.",
+     "en": "The menu on the left is grouped by job. Badges show what's waiting.",
+     "hi": "बाईं तरफ़ मेन्यू काम के हिसाब से बँटा है। बैज बताते हैं क्या पेंडिंग है।"
+    },
+    {
+     "url": "/admin",
+     "hl": [
+      "main a:has-text(\"Revenue\")",
+      "main a:has-text(\"Live wallpapers\")"
+     ],
+     "title": "Numbers at a glance",
+     "body": "Revenue and paid orders for the last 30 days, new customers and how many wallpapers are live.",
+     "en": "At the top: revenue, orders, customers and live wallpapers.",
+     "hi": "ऊपर: रेवेन्यू, ऑर्डर्स, कस्टमर्स, और लाइव वॉलपेपर्स।"
+    },
+    {
+     "url": "/admin",
+     "hl": [
+      "up:h2:has-text(\"Needs attention\")"
+     ],
+     "title": "Needs attention",
+     "body": "Everything waiting on you, most urgent first: overdue support, messages, takedowns, failed jobs, creator submissions and drafts. Click a row to open it.",
+     "en": "Needs attention lists everything waiting on you, most urgent first.",
+     "hi": "नीड्स अटेंशन में वो सब है जो आपका इंतज़ार कर रहा है, सबसे ज़रूरी पहले।"
+    },
+    {
+     "url": "/admin",
+     "hl": [
+      "up:h2:has-text(\"Store setup\")"
+     ],
+     "title": "Store setup checklist",
+     "body": "A checklist of what the store needs before launch — wallpapers, Razorpay keys, business details, grievance officer, store open.",
+     "en": "The setup checklist shows what's left before launch.",
+     "hi": "सेटअप चेकलिस्ट बताती है कि लॉन्च से पहले क्या बाक़ी है।"
+    },
+    {
+     "url": "/admin",
+     "scroll": "h2:has-text(\"Recent orders\")",
+     "hl": [
+      "up:h2:has-text(\"Recent orders\")"
+     ],
+     "title": "Recent orders",
+     "body": "The latest orders; click one to open it, or All orders for the full list.",
+     "en": "Recent orders are here, one click away.",
+     "hi": "हाल के ऑर्डर्स यहाँ हैं, बस एक क्लिक दूर।"
+    },
+    {
+     "url": "/admin/analytics",
+     "hl": [
+      "h1",
+      "main"
+     ],
+     "title": "Analytics",
+     "body": "Sales by day, top sellers, most viewed wallpapers, the shopping funnel and sales by country.",
+     "en": "Analytics shows sales, top sellers, and your shopping funnel.",
+     "hi": "एनालिटिक्स में सेल्स, टॉप सेलर्स, और शॉपिंग फ़नल दिखता है।"
+    }
+   ]
+  },
+  {
+   "slug": "admin-wallpapers",
+   "audience": "admin",
+   "who": "admin",
+   "title": "Adding and managing wallpapers",
+   "summary": "Batch upload, duplicate checks, AI-filled details, drafts, publishing and editing.",
+   "intro": {
+    "en": "Now, adding and managing wallpapers.",
+    "hi": "अब वॉलपेपर्स जोड़ना और मैनेज करना।"
+   },
+   "steps": [
+    {
+     "url": "/admin/upload",
+     "hl": [
+      "main"
+     ],
+     "title": "Upload in batches",
+     "body": "Drop many files at once. Each is checked (size, near-duplicates), resized into every variant and saved as a draft. With “Let AI choose”, the title, description, tags and category are filled in for you.",
+     "en": "Drop many files at once. Each one is checked, resized, and saved as a draft.",
+     "hi": "एक साथ कई फ़ाइलें डालिए। हर फ़ाइल चेक होकर, रीसाइज़ होकर, ड्राफ़्ट में सेव होती है।"
+    },
+    {
+     "url": "/admin/drafts",
+     "hl": [
+      "main ul li >> nth=0"
+     ],
+     "title": "Review drafts",
+     "body": "Edit title, description, category, tags and Free inline. Cards filled by AI carry an AI badge until you edit them.",
+     "en": "In Drafts, fix the details right on the card.",
+     "hi": "ड्राफ़्ट्स में, कार्ड पर ही डिटेल्स ठीक कीजिए।"
+    },
+    {
+     "url": "/admin/drafts",
+     "hl": [
+      "role=button[name=\"Save changes\"]",
+      "role=button[name=/Save & publish/]"
+     ],
+     "title": "Publish",
+     "body": "Tick the drafts to publish and press Save & publish. Save changes keeps them as drafts.",
+     "en": "Select the drafts and press Save and publish.",
+     "hi": "ड्राफ़्ट्स सेलेक्ट कीजिए और सेव एंड पब्लिश दबाइए।"
+    },
+    {
+     "url": "/admin/drafts",
+     "hl": [
+      "role=tab[name=/Creator submissions/i]"
+     ],
+     "title": "Creator submissions",
+     "body": "Wallpapers uploaded by creators wait here for your review before they go live.",
+     "en": "Creator uploads wait here for your review.",
+     "hi": "क्रिएटर्स के अपलोड यहाँ आपके रिव्यू का इंतज़ार करते हैं।"
+    },
+    {
+     "url": "/admin/catalogue",
+     "hl": [
+      "role=button[name=\"Publish\"]",
+      "role=button[name=\"Apply\"]"
+     ],
+     "title": "The catalogue and bulk actions",
+     "body": "Search and filter every wallpaper. Select several to publish, unpublish, archive, make free or premium, or change category in one go.",
+     "en": "The catalogue lets you change many wallpapers at once.",
+     "hi": "कैटलॉग में एक साथ कई वॉलपेपर्स बदल सकते हैं।"
+    },
+    {
+     "url": "/admin/catalogue/633a2acc-014c-4a01-8607-293a4cfee84f",
+     "hl": [
+      "main form >> nth=0"
+     ],
+     "title": "Edit a wallpaper",
+     "body": "Change the title, description, alt text, tags, category, set and Free. Deleting is blocked once a wallpaper has sold (archive it instead).",
+     "en": "Open a wallpaper to edit its details.",
+     "hi": "किसी वॉलपेपर को खोलकर उसकी डिटेल्स एडिट कीजिए।"
+    },
+    {
+     "url": "/admin/catalogue/633a2acc-014c-4a01-8607-293a4cfee84f",
+     "hl": [
+      "up:h2:has-text(\"Image\")"
+     ],
+     "title": "Replace the image",
+     "body": "Upload a better file or regenerate all sizes. Old files and cached downloads are cleaned up automatically.",
+     "en": "You can also replace the image or regenerate the sizes.",
+     "hi": "चाहें तो इमेज बदलिए, या साइज़ दोबारा बनाइए।"
+    }
+   ]
+  },
+  {
+   "slug": "admin-orders-support",
+   "audience": "admin",
+   "who": "admin",
+   "title": "Orders, customers and support",
+   "summary": "Find orders, refund them, help a customer and answer support requests.",
+   "intro": {
+    "en": "Next: orders, customers and support.",
+    "hi": "अब: ऑर्डर्स, कस्टमर्स, और सपोर्ट।"
+   },
+   "steps": [
+    {
+     "url": "/admin/orders",
+     "hl": [
+      "role=tablist",
+      "[aria-label=\"Search orders\"]"
+     ],
+     "title": "Orders",
+     "body": "Switch between paid, not completed, refunded and failed orders, and search by email, order id or invoice number. Export CSV for your records.",
+     "en": "Filter orders by status, and search by email or invoice number.",
+     "hi": "ऑर्डर्स को स्टेटस से फ़िल्टर कीजिए, और ईमेल या इनवॉइस नंबर से सर्च कीजिए।"
+    },
+    {
+     "url": "/admin/orders/6283dcbe-04b2-4e39-8d0e-5540c28277cb",
+     "hl": [
+      "h1",
+      "main"
+     ],
+     "title": "Order details and refunds",
+     "body": "See what was bought, the payment id and receipt. Refund sends the money back through Razorpay and removes what was granted.",
+     "en": "An order shows the payment, receipt, and the refund button.",
+     "hi": "ऑर्डर में पेमेंट, रसीद, और रिफ़ंड बटन दिखता है।"
+    },
+    {
+     "url": "/admin/customers/5436bbc0-0fea-4abc-8575-c0138af5858d",
+     "hl": [
+      "up:h2:has-text(\"Actions\")"
+     ],
+     "title": "Help a customer",
+     "body": "Add or remove credits, gift a wallpaper, change the price country after a move, set the role, or block the account.",
+     "en": "On a customer's page, add credits, gift a wallpaper, or block the account.",
+     "hi": "कस्टमर के पेज पर क्रेडिट्स जोड़िए, वॉलपेपर गिफ़्ट कीजिए, या अकाउंट ब्लॉक कीजिए।"
+    },
+    {
+     "url": "/admin/support",
+     "hl": [
+      "role=tablist"
+     ],
+     "title": "Support inbox",
+     "body": "Requests are sorted into Needs reply, Overdue, Waiting on customer and Resolved. Answer within 48 hours; resolve within 30 days.",
+     "en": "The support inbox sorts requests by what needs a reply.",
+     "hi": "सपोर्ट इनबॉक्स रिक्वेस्ट्स को इस हिसाब से छाँटता है कि किसे जवाब चाहिए।"
+    },
+    {
+     "url": "/admin/support/7bdf4a46-f817-4d77-8794-2562196faa50",
+     "hl": [
+      "up:h2:has-text(\"Respond\")"
+     ],
+     "title": "Reply to a request",
+     "body": "Reply to the customer (they get an email) or add an internal note only staff can see, and set the status.",
+     "en": "Reply to the customer, or add a private note for staff.",
+     "hi": "कस्टमर को जवाब दीजिए, या स्टाफ़ के लिए प्राइवेट नोट लिखिए।"
+    },
+    {
+     "url": "/admin/support/7bdf4a46-f817-4d77-8794-2562196faa50",
+     "scroll": "h2:has-text(\"Make it right\")",
+     "hl": [
+      "up:h2:has-text(\"Make it right\")"
+     ],
+     "title": "Make it right",
+     "body": "Fix the problem from the ticket: refund the order, add credits, or restore downloads. Each action is noted in the thread and the activity log.",
+     "en": "Fix it right from the ticket: refund, add credits, or restore downloads.",
+     "hi": "टिकट से ही ठीक कीजिए: रिफ़ंड, क्रेडिट्स, या डाउनलोड्स वापस।"
+    }
+   ]
+  },
+  {
+   "slug": "admin-prices-growth",
+   "audience": "admin",
+   "who": "admin",
+   "title": "Prices, plans and growth",
+   "summary": "Credit packs, memberships, country tiers and the growth tools.",
+   "intro": {
+    "en": "Now, prices, plans and growth tools.",
+    "hi": "अब: कीमतें, प्लान्स, और ग्रोथ टूल्स।"
+   },
+   "steps": [
+    {
+     "url": "/admin/credit-packs",
+     "hl": [
+      "h2:has-text(\"IN — India\")",
+      "main form >> nth=0"
+     ],
+     "title": "Credit packs",
+     "body": "Set each pack's credits, bonus credits, price and currency per country tier (or a single country). Optional sale dates make festival offers.",
+     "en": "Set credit packs, bonus credits and prices for each region.",
+     "hi": "हर रीजन के लिए क्रेडिट पैक, बोनस क्रेडिट्स और कीमत तय कीजिए।"
+    },
+    {
+     "url": "/admin/membership",
+     "hl": [
+      "up:h2:has-text(\"Plans\")"
+     ],
+     "title": "Membership plans",
+     "body": "Create monthly, long-term, category and business plans with a monthly allowance; manage members (add days, add wallpapers, revoke).",
+     "en": "Create membership plans, and manage your members.",
+     "hi": "मेंबरशिप प्लान्स बनाइए, और मेंबर्स मैनेज कीजिए।"
+    },
+    {
+     "url": "/admin/countries",
+     "hl": [
+      "h1",
+      "main"
+     ],
+     "title": "Pricing by country",
+     "body": "See which tier each country is in and move a country to another tier. Here you also set the credit value used for creator earnings.",
+     "en": "Move countries between price tiers here.",
+     "hi": "यहाँ देशों को एक प्राइस टियर से दूसरे में डाल सकते हैं।"
+    },
+    {
+     "url": "/admin/growth",
+     "hl": [
+      "up:h2:has-text(\"Daily free wallpaper\")"
+     ],
+     "title": "Growth tools",
+     "body": "Today's free wallpaper (run it now if needed), creator affiliate commissions, referrals and gifts — switched on and tuned in Settings → Growth.",
+     "en": "Growth shows the daily free wallpaper, affiliates, referrals and gifts.",
+     "hi": "ग्रोथ में डेली फ्री वॉलपेपर, एफ़िलिएट्स, रेफ़रल्स और गिफ़्ट्स हैं।"
+    }
+   ]
+  },
+  {
+   "slug": "admin-settings",
+   "audience": "admin",
+   "who": "admin",
+   "title": "Settings, tax and system health",
+   "summary": "Store switches, business details, the tax centre, system health and the activity log.",
+   "intro": {
+    "en": "Finally, settings, tax and system health.",
+    "hi": "आख़िर में: सेटिंग्स, टैक्स, और सिस्टम हेल्थ।"
+   },
+   "steps": [
+    {
+     "url": "/admin/settings",
+     "hl": [
+      "role=tablist",
+      "up:h2:has-text(\"Store switches\")"
+     ],
+     "title": "Store switches",
+     "body": "Open or close the store, and switch membership, creator sign-ups, free downloads and the newsletter on or off. Tabs hold business & legal details, growth settings and prices & FX.",
+     "en": "Settings has the store switches, and tabs for business details, growth and prices.",
+     "hi": "सेटिंग्स में स्टोर स्विचेज़ हैं, और बिज़नेस डिटेल्स, ग्रोथ और प्राइसेज़ के टैब्स।"
+    },
+    {
+     "url": "/admin/settings",
+     "hl": [
+      "up:h2:has-text(\"Announcement bar\")"
+     ],
+     "title": "Announcement bar",
+     "body": "The message shown at the top of every page, with an optional link.",
+     "en": "Edit the announcement shown at the top of the site.",
+     "hi": "साइट के ऊपर दिखने वाली अनाउंसमेंट यहाँ बदलिए।",
+     "scroll": "h2:has-text(\"Announcement bar\")"
+    },
+    {
+     "url": "/admin/tax",
+     "hl": [
+      "h1",
+      "h2:has-text(\"Upcoming dates\")"
+     ],
+     "title": "Tax centre",
+     "body": "Turnover against the GST limit, upcoming filing dates, sales and TDS registers to download, and tax settings. Rules are encoded for you, but have a CA check them.",
+     "en": "The tax centre tracks turnover, due dates, and registers for your returns.",
+     "hi": "टैक्स सेंटर टर्नओवर, ड्यू डेट्स, और रिटर्न के लिए रजिस्टर्स संभालता है।"
+    },
+    {
+     "url": "/admin/health",
+     "hl": [
+      "h1",
+      "h2:has-text(\"Scheduled jobs\")"
+     ],
+     "title": "System health",
+     "body": "Checks the database, storage, payments and email, shows orders waiting for payment confirmation and when each scheduled job last ran.",
+     "en": "System health checks every service and scheduled job.",
+     "hi": "सिस्टम हेल्थ हर सर्विस और शेड्यूल्ड जॉब को चेक करता है।"
+    },
+    {
+     "url": "/admin/activity",
+     "hl": [
+      "h1",
+      "main"
+     ],
+     "title": "Activity log",
+     "body": "Every change made in the admin — who did what, and when.",
+     "en": "And the activity log records every admin change.",
+     "hi": "और एक्टिविटी लॉग में हर एडमिन बदलाव दर्ज होता है।"
+    }
+   ]
+  }
+ ]
+}

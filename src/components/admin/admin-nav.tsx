@@ -31,8 +31,7 @@ import {
   Tags,
   Upload,
   Users,
-  X,
-} from 'lucide-react';
+  X, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BrandMark } from '@/components/brand-mark';
 
@@ -89,6 +88,7 @@ export const ADMIN_NAV = [
       { href: '/admin/settings', label: 'Settings', icon: Settings },
       { href: '/admin/health', label: 'System health', icon: Activity },
       { href: '/admin/activity', label: 'Activity log', icon: History },
+      { href: '/admin/guide', label: 'Guide', icon: BookOpen },
     ],
   },
 ];

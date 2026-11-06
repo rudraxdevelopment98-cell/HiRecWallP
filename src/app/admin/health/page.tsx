@@ -30,7 +30,7 @@ export default async function AdminHealthPage() {
     supabase.from('regions').select('code', { head: true, count: 'exact' }),
     supabase
       .from('orders')
-      .select('id, created_at, amount_minor, currency, profiles(email)')
+      .select('id, created_at, amount_minor, currency, profiles!orders_user_id_fkey(email)')
       .eq('status', 'created')
       .not('provider_order_id', 'is', null)
       .lt('created_at', hourAgo)

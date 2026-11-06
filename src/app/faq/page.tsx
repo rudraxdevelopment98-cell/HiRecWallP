@@ -21,8 +21,8 @@ const ALL_FAQS: (Faq & { topic: string; member?: boolean })[] = [
   { topic: 'Account', q: 'What is the daily free wallpaper?', a: 'Every day one premium wallpaper is free until midnight (India time). Sign in and press “Get it free today” — it stays in your library forever. You can also opt in to a daily email from the newsletter box.' },
   { topic: 'Licensing', q: 'Can I use wallpapers commercially?', a: 'The standard licence is personal use. A commercial licence can be added from each product page for use in products, ads and client work.' },
   { topic: 'Licensing', q: 'Why is there a watermark on the preview?', a: 'Previews are small and visibly watermarked to protect the artwork. Your download is the full-quality file with only an invisible per-buyer mark.' },
-  { topic: 'Refunds', q: 'What is your refund policy?', a: 'Digital goods are generally non-refundable once downloaded, but if a file is faulty or you were charged in error, contact us and we’ll make it right.' },
-  { topic: 'Account', q: 'How do I sign in?', a: 'Enter your email on the sign-in page and click the link we send you — no password needed.' },
+  { topic: 'Refunds', q: 'What is your refund policy?', a: 'Unused credit packs (within 14 days) and unused memberships (within 7 days) can be refunded in one click from Account → Orders. For anything else — a faulty file or a wrong charge — press “Get help” on the order and we’ll sort it out. Full details are in our Refund Policy.' },
+  { topic: 'Account', q: 'How do I sign in?', a: 'Sign in with your email and password, or ask for a one-time sign-in link by email (no password needed). Forgot your password? Use “Forgot password?” on the sign-in page. Step-by-step help with pictures is in our Guide.' },
 ];
 
 export default async function FaqPage() {

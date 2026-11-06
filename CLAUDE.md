@@ -450,3 +450,15 @@ Tracked in the final Phase-1 checklist: API keys, Razorpay (with International
 Payments enabled), Supabase project, R2 buckets, webhooks, DNS, Instagram/Pinterest
 accounts, image API key. Do **not** add any paid third-party service not listed
 in the spec without asking the owner first.
+
+## Guide + walkthrough videos (2026-11-06) — marketing/walkthrough
+
+- Written guide in the site: `/guide` + `/guide/[slug]` (customer + creator chapters, public, in sitemap/footer) and
+  `/admin/guide` (admin chapters, `requireAdmin`, sidebar "Guide"). Content = `src/lib/guide-content.json` + `public/guide/*.webp`,
+  **generated** — don't hand-edit. Source of truth: `marketing/walkthrough/steps.json` (page, highlight selectors, written
+  text, Hindi + English voice lines). Flow: `capture.cjs` (screenshots + highlight boxes from a seeded local site) →
+  `build-guide.cjs` (site content) and `render.cjs` (silent MP4 per chapter + voice MP3s + SRT). Re-run after UI changes.
+- Promo videos: `marketing/promo` (buyer + creator, site theme).
+- **PostgREST embeds:** `orders`, `support_tickets`, `gift_codes` and `referral_rewards` each have two FKs to `profiles`;
+  always embed with the FK hint (`profiles!orders_user_id_fkey(...)`), otherwise the query errors (PGRST201) and the page
+  shows nothing.
