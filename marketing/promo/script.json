@@ -1,0 +1,23 @@
+{
+  "buyer": [
+    {"id": "hook", "en": "Every day, the screen you look at most is your own.", "hi": "हर दिन, आप सबसे ज़्यादा जिसे देखते हैं — वो है आपकी अपनी स्क्रीन।"},
+    {"id": "beauty", "en": "So give it something truly beautiful. Ultra HD wallpapers, crafted in 4K.", "hi": "तो उसे दीजिए कुछ सच में खूबसूरत। अल्ट्रा एच डी वॉलपेपर्स, फ़ोर के क्वालिटी में।"},
+    {"id": "devices", "en": "Phone, tablet or desktop. Every size is included, and you can preview it on your own device before you buy.", "hi": "फ़ोन, टैबलेट या डेस्कटॉप — हर साइज़ साथ में मिलता है। और ख़रीदने से पहले, अपने ही डिवाइस पर प्रीव्यू देखिए।"},
+    {"id": "compare", "en": "A random free download is often compressed, cropped wrong, and comes with ads and an unclear licence. Here, you get the full quality file, every size, a clear licence, and no ads.", "hi": "फ्री साइट्स की इमेज अक्सर कंप्रेस्ड होती है, ग़लत क्रॉप होती है, साथ में ऐड्स, और लाइसेंस का कुछ पता नहीं। यहाँ मिलती है फुल क्वालिटी फ़ाइल, हर साइज़, साफ़ लाइसेंस, और कोई ऐड नहीं।"},
+    {"id": "value", "en": "And luxury doesn't have to be expensive. The Popular pack gives you thirty five wallpapers for two hundred and forty nine rupees. About seven rupees each.", "hi": "और लग्ज़री का मतलब महँगा नहीं। पॉपुलर पैक में, दो सौ उनचास रुपये में पैंतीस वॉलपेपर्स — यानी एक वॉलपेपर, लगभग सात रुपये का।"},
+    {"id": "library", "en": "Everything you unlock stays in your library, ready to download again when you switch devices.", "hi": "जो भी आप अनलॉक करते हैं, वो आपकी लाइब्रेरी में रहता है — डिवाइस बदलिए, और फिर से डाउनलोड कीजिए।"},
+    {"id": "free", "en": "Plus, a free wallpaper every day, and ten free credits when you sign up.", "hi": "साथ में, हर दिन एक फ्री वॉलपेपर, और साइन अप करने पर दस फ्री क्रेडिट्स।"},
+    {"id": "cta", "en": "Hi Rec Wall P. Your screen, upgraded.", "hi": "हाय रेक वॉल पी। आपकी स्क्रीन, अपग्रेडेड।"}
+  ],
+  "creator": [
+    {"id": "hook", "en": "You create beautiful art. So why does it sit in a folder?", "hi": "आप खूबसूरत आर्ट बनाते हैं। तो वो किसी फ़ोल्डर में क्यों पड़ी रहे?"},
+    {"id": "promise", "en": "Turn your wallpapers into income, with Hi Rec Wall P.", "hi": "अपने वॉलपेपर्स को कमाई में बदलिए — हाय रेक वॉल पी के साथ।"},
+    {"id": "steps", "en": "Join as a creator, upload your 4K art, and we handle the rest. Quality checks, the store, payments, and customers around the world.", "hi": "क्रिएटर बनिए, अपनी फ़ोर के आर्ट अपलोड कीजिए, और बाक़ी सब हम संभालते हैं — क्वालिटी चेक, स्टोर, पेमेंट्स, और दुनिया भर के कस्टमर्स।"},
+    {"id": "split", "en": "You keep seventy percent of every sale.", "hi": "हर सेल का सत्तर प्रतिशत, आपका।"},
+    {"id": "example", "en": "For example, a thousand paid downloads in a month would earn you about three thousand five hundred rupees. And commercial licences earn five times more.", "hi": "उदाहरण के लिए, एक महीने में एक हज़ार पेड डाउनलोड्स — यानी लगभग तीन हज़ार पाँच सौ रुपये। और कमर्शियल लाइसेंस पर, पाँच गुना ज़्यादा।"},
+    {"id": "affiliate", "en": "Share your personal link, and earn an extra ten percent on orders that come through it.", "hi": "अपना पर्सनल लिंक शेयर कीजिए, और उससे आए हर ऑर्डर पर, दस प्रतिशत एक्स्ट्रा कमाइए।"},
+    {"id": "compare", "en": "Selling alone means building a store, chasing payments and fighting piracy. Here, originals are never public, previews are watermarked, and tax is worked out on every payout.", "hi": "अकेले बेचने का मतलब — अपना स्टोर बनाना, पेमेंट्स के पीछे भागना, और पायरेसी से लड़ना। यहाँ ओरिजिनल फ़ाइल कभी पब्लिक नहीं होती, प्रीव्यू पर वॉटरमार्क होता है, और हर पेआउट पर टैक्स का हिसाब अपने आप।"},
+    {"id": "dashboard", "en": "Track every sale on your dashboard, and get paid every month.", "hi": "हर सेल अपने डैशबोर्ड पर देखिए, और हर महीने पेमेंट पाइए।"},
+    {"id": "cta", "en": "Create. Upload. Earn. Join as a creator today.", "hi": "बनाइए। अपलोड कीजिए। कमाइए। आज ही क्रिएटर बनिए।"}
+  ]
+}
