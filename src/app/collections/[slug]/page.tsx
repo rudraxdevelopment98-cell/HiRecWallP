@@ -7,11 +7,23 @@ import { Pagination } from '@/components/pagination';
 import { Reveal } from '@/components/reveal';
 import { getCategoryBySlug, getDisplayRegion, listCategories, searchWallpapers } from '@/lib/catalogue';
 import { parseExploreParams, type SearchParams } from '@/lib/explore-params';
+import { breadcrumbLd, categoryIntro, categoryTitle, isFilteredListing, itemListLd } from '@/lib/seo';
+import { jsonForScript } from '@/lib/safe-json';
+import { publicEnv } from '@/lib/env';
+import { wallpaperPath } from '@/lib/wallpaper-url';
 
-export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const params = await props.params;
+export async function generateMetadata(props: { params: Promise<{ slug: string }>; searchParams: Promise<SearchParams> }): Promise<Metadata> {
+  const [params, sp] = await Promise.all([props.params, props.searchParams]);
   const cat = await getCategoryBySlug(params.slug);
-  return { title: cat ? `${cat.name} Wallpapers` : 'Collection', description: cat ? `${cat.name} wallpapers in 4K & 5K.` : undefined };
+  if (!cat) return { title: 'Collection' };
+  const description = (cat.description ?? '').trim() || categoryIntro(cat.name, 0);
+  return {
+    title: categoryTitle(cat.name),
+    description: description.length > 165 ? `${description.slice(0, 162).trimEnd()}…` : description,
+    alternates: { canonical: `/collections/${cat.slug}` },
+    openGraph: { title: `${cat.name} Wallpapers`, description },
+    robots: isFilteredListing(sp) ? { index: false, follow: true } : undefined,
+  };
 }
 
 export default async function CollectionPage(
@@ -35,19 +47,28 @@ export default async function CollectionPage(
   if (!cat && items.length === 0 && process.env.NEXT_PUBLIC_SUPABASE_URL) notFound();
   const name = cat?.name ?? params.slug;
   const banner = cat?.thumbUrl ?? items[0]?.previewUrl ?? '/demo/hero.jpg';
+  const intro = (cat?.description ?? '').trim() || categoryIntro(name, result.total);
+  const site = publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+  const jsonLd = [
+    breadcrumbLd(site, [
+      { name: 'Home', path: '/' },
+      { name: 'Collections', path: '/collections' },
+      { name: `${name} Wallpapers`, path: `/collections/${params.slug}` },
+    ]),
+    itemListLd(site, items.map((w) => ({ name: w.title, path: wallpaperPath(w) }))),
+  ];
 
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(jsonLd) }} />
       {/* Hero banner */}
       <section className="relative h-56 overflow-hidden sm:h-72">
         <Image src={banner} alt={name} fill sizes="100vw" className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20" />
         <div className="container relative flex h-full flex-col justify-end pb-8 text-white">
           <p className="text-sm text-white/80">Collections · {name}</p>
-          <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">{name} Wallpapers</h1>
-          <p className="mt-1 max-w-xl text-sm text-white/80">
-            Explore the beauty of our {name.toLowerCase()} collection — curated in stunning 4K &amp; 5K.
-          </p>
+          <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">{name} Wallpapers 4K</h1>
+          <p className="mt-1 max-w-2xl text-sm text-white/85">{intro}</p>
         </div>
       </section>
 

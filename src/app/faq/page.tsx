@@ -1,8 +1,14 @@
 import type { Metadata } from 'next';
 import { FaqAccordion, type Faq } from '@/components/faq-accordion';
 import { getSettings } from '@/lib/settings';
+import { faqLd } from '@/lib/seo';
+import { jsonForScript } from '@/lib/safe-json';
 
-export const metadata: Metadata = { title: 'Help Centre / FAQ' };
+export const metadata: Metadata = {
+  title: 'FAQ – Downloads, Credits, Sizes & Licences',
+  description: 'Answers about downloading 4K wallpapers, credits and prices, sizes and exact fits, licences, refunds and your account.',
+  alternates: { canonical: '/faq' },
+};
 
 const ALL_FAQS: (Faq & { topic: string; member?: boolean })[] = [
   { topic: 'Purchases & Downloads', q: 'How do I download my wallpaper?', a: 'After purchase, open My Library and pick a size. Free wallpapers download straight from their page. Each download uses a secure link that expires after 60 seconds.' },
@@ -33,6 +39,7 @@ export default async function FaqPage() {
   }));
   return (
     <main className="container grid gap-8 py-12 lg:grid-cols-[220px_1fr]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(faqLd(FAQS)) }} />
       <aside className="lg:sticky lg:top-20 lg:self-start">
         <p className="mb-2 text-sm font-semibold">Help topics</p>
         <ul className="space-y-1 text-sm text-muted-foreground">

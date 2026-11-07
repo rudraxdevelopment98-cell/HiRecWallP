@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { TrackEvent } from '@/components/track-event';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,8 +13,13 @@ import { getTodayPick } from '@/lib/daily';
 import { getUser } from '@/lib/auth';
 import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listCategories, listPublishedWallpapers, listSets } from '@/lib/catalogue';
-import { getSettings } from '@/lib/settings';
+import { getSettings, socialLinks } from '@/lib/settings';
 import { wallpaperPath } from '@/lib/wallpaper-url';
+import { organizationLd, websiteLd } from '@/lib/seo';
+import { jsonForScript } from '@/lib/safe-json';
+import { publicEnv } from '@/lib/env';
+
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 
 export default async function HomePage() {
   const region = (await getDisplayRegion());
@@ -28,8 +34,12 @@ export default async function HomePage() {
   ]);
   const set = sets[0];
 
+  const site = publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+  const brand = publicEnv.NEXT_PUBLIC_BRAND_NAME;
+  const jsonLd = [websiteLd(site, brand), organizationLd(site, brand, Object.values(socialLinks(settings)).filter(Boolean))];
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(jsonLd) }} />
       <TrackEvent type="view" />
       {/* Hero */}
       <Hero />

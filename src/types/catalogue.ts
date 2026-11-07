@@ -8,6 +8,8 @@ export interface Category {
   name: string;
   parent_id: string | null;
   sort_order: number;
+  /** Intro for the category page / meta description (migration 0028). */
+  description?: string | null;
   /** Optional count for display in the category row. */
   count?: number;
   /** Optional thumbnail (demo/display). */
@@ -56,6 +58,7 @@ export interface WallpaperCard extends Wallpaper {
   /** Display metadata: resolution badge (largest paid size) and category label. */
   resolution?: '4K' | '5K';
   categoryName?: string;
+  categorySlug?: string;
 }
 
 export interface ExploreFilters {

@@ -131,3 +131,25 @@ export function screenForArt(screenW: number, screenH: number, dpr: number, artI
   const short = Math.min(a, b);
   return artIsPortrait ? { w: short, h: long } : { w: long, h: short };
 }
+
+export const deviceById = (id: string) => DEVICES.find((d) => d.id === id) ?? null;
+
+/** Plain steps to set a wallpaper on this kind of device (shown on device pages). */
+export function setWallpaperSteps(d: Device): { platform: string; steps: string[] } {
+  if (d.id.startsWith('iphone')) {
+    return { platform: 'iPhone', steps: ['Download the exact-fit file and save it to Photos.', 'Open Settings → Wallpaper → Add New Wallpaper → Photos.', 'Pick the wallpaper, then tap Add and choose lock screen, home screen or both.'] };
+  }
+  if (d.id.startsWith('ipad')) {
+    return { platform: 'iPad', steps: ['Download the exact-fit file and save it to Photos.', 'Open Settings → Wallpaper → Add New Wallpaper → Photos.', 'Pick the wallpaper and tap Add.'] };
+  }
+  if (d.id.startsWith('macbook') || d.id.startsWith('imac')) {
+    return { platform: 'Mac', steps: ['Download the exact-fit file.', 'Open System Settings → Wallpaper → Add Photo (or right-click the file in Finder → Set Desktop Picture).', 'Choose “Fill Screen”.'] };
+  }
+  if (d.kind === 'desktop') {
+    return { platform: 'Windows PC or monitor', steps: ['Download the exact-fit file.', 'Right-click it → Set as desktop background (or Settings → Personalisation → Background → Browse photos).', 'Choose “Fill” for the fit.'] };
+  }
+  return {
+    platform: d.kind === 'tablet' ? 'Android tablet' : 'Android phone',
+    steps: ['Download the exact-fit file to your Gallery.', 'Long-press an empty spot on the home screen → Wallpaper (or Wallpaper & style).', 'Choose the image from Gallery and set it for the lock screen, home screen or both.'],
+  };
+}

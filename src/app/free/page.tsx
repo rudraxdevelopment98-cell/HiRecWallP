@@ -1,14 +1,20 @@
 import type { Metadata } from 'next';
+import { isFilteredListing } from '@/lib/seo';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { Pagination } from '@/components/pagination';
 import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, searchWallpapers } from '@/lib/catalogue';
 import { parseExploreParams, type SearchParams } from '@/lib/explore-params';
 
-export const metadata: Metadata = {
-  title: 'Free wallpapers',
-  description: 'Free HD AI wallpapers — no account needed.',
-};
+export async function generateMetadata(props: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
+  const filtered = isFilteredListing(await props.searchParams);
+  return {
+    title: 'Free HD Wallpapers for Phone & Desktop – No Sign-up',
+    description: 'Download free HD wallpapers for your phone and desktop — no account needed. Plus a free premium 4K wallpaper every day.',
+    alternates: { canonical: '/free' },
+    robots: filtered ? { index: false, follow: true } : undefined,
+  };
+}
 
 export default async function FreePage(props: { searchParams: Promise<SearchParams> }) {
   const searchParams = await props.searchParams;

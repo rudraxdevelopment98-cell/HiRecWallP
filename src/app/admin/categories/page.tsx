@@ -8,6 +8,7 @@ const CATEGORY_FIELDS: FieldDef[] = [
   { name: 'name', label: 'Name' },
   { name: 'slug', label: 'URL slug', hint: '/collections/<slug>' },
   { name: 'sort_order', label: 'Order', type: 'number' },
+  { name: 'description', label: 'Intro (shown on the category page and in Google)', type: 'textarea', hint: '1–3 sentences with the words people search for, e.g. “Radha Krishna HD wallpapers for phone…”. Leave empty for a default.' },
 ];
 const SET_FIELDS: FieldDef[] = [
   { name: 'title', label: 'Title' },
@@ -19,7 +20,7 @@ export default async function AdminCategoriesPage() {
   await requireAdmin();
   const supabase = createServiceClient();
   const [{ data: categories }, { data: sets }, { data: rows }] = await Promise.all([
-    supabase.from('categories').select('id, name, slug, sort_order').order('sort_order'),
+    supabase.from('categories').select('id, name, slug, sort_order, description').order('sort_order'),
     supabase.from('wallpaper_sets').select('id, title, slug, description').order('title'),
     supabase.from('wallpapers').select('category_id, set_id'),
   ]);

@@ -483,3 +483,12 @@ in the spec without asking the owner first.
   Settings → History shows changes with Revert (first changes revert to `DEFAULT_SETTINGS`).
 - **Customer timeline:** `customerTimeline()` (src/lib/customer-timeline.ts) merges orders, credits, tickets, downloads, sign-ins
   (`admin_login_events()` reads the auth audit log when available), staff actions and staff emails (`/api/admin/customers/[id]/email`).
+
+## SEO / AEO / PWA (2026-11-07) — docs/SEO.md, migration 0028
+
+- `src/lib/seo.ts`: keyword titles/descriptions (`wallpaperTitle`, `wallpaperDescription`, `categoryTitle/Intro`) and JSON-LD
+  builders (WebSite+SearchAction, Organization, BreadcrumbList, licensable ImageObject, ItemList, FAQPage). Render with
+  `jsonForScript()`. Filtered/sorted/paged listings are `noindex,follow` via `isFilteredListing()`; canonicals everywhere.
+- Device landing pages `/wallpapers-for/[device]` (+ index) from `DEVICES` in `src/lib/fit.ts`; linked from "Fits these screens".
+- Category intro = `categories.description` (Admin → Categories). Sitemap includes categories, device pages and preview images.
+- `/llms.txt` (keep facts in sync with prices/refunds/licence), `manifest.webmanifest` + `public/icon-*.png` (installable PWA).

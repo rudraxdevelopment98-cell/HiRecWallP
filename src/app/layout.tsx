@@ -20,16 +20,20 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${brand} — Ultra-HD AI wallpapers`,
+    default: `${brand} — 4K & 5K Wallpapers for Phone, Tablet & Desktop`,
     template: `%s · ${brand}`,
   },
   description:
-    'Ultra-high-resolution AI-generated wallpapers for phone, desktop and tablet. Free picks and cheap premium downloads.',
+    'Ultra-HD 4K and 5K wallpapers for phone, tablet and desktop — AI-crafted art, every size included, an exact fit for your screen and a free wallpaper every day.',
+  applicationName: brand,
   openGraph: {
     type: 'website',
     siteName: brand,
     url: siteUrl,
+    locale: 'en_IN',
   },
+  twitter: { card: 'summary_large_image' },
+  formatDetection: { telephone: false },
   robots: { index: true, follow: true },
 };
 

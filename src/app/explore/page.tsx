@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { isFilteredListing } from '@/lib/seo';
 import { TrackEvent } from '@/components/track-event';
 import { WallpaperCard } from '@/components/wallpaper-card';
 import { FilterSidebar } from '@/components/filter-sidebar';
@@ -7,10 +8,16 @@ import { Reveal } from '@/components/reveal';
 import { getDisplayRegion, listCategories, searchWallpapers } from '@/lib/catalogue';
 import { parseExploreParams, type SearchParams } from '@/lib/explore-params';
 
-export const metadata: Metadata = {
-  title: 'Explore wallpapers',
-  description: 'Browse ultra-HD 4K & 5K wallpapers for phone, tablet and desktop.',
-};
+export async function generateMetadata(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  // Filtered / sorted / paged / searched views are duplicates of the base list: keep them out of the index.
+  const filtered = isFilteredListing(await props.searchParams);
+  return {
+    title: 'Explore 4K & 5K Wallpapers for Phone, Tablet & Desktop',
+    description: 'Browse ultra-HD 4K and 5K wallpapers — nature, abstract, AMOLED, devotional and festival art. Filter by device, orientation and resolution.',
+    alternates: { canonical: '/explore' },
+    robots: filtered ? { index: false, follow: true } : undefined,
+  };
+}
 
 const SORT_LABEL = { newest: 'Newest', oldest: 'Oldest', title: 'Name' } as const;
 

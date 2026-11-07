@@ -98,6 +98,8 @@ export const categorySchema = z.object({
   name: z.string().trim().min(1).max(60),
   slug,
   sort_order: z.number().int().min(0).max(10000),
+  // Intro on the category page + its meta description (SEO). Empty = a built-in default.
+  description: z.string().trim().max(600).optional().transform((v) => v || null),
 });
 
 export const setSchema = z.object({

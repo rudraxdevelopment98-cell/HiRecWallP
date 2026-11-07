@@ -161,7 +161,7 @@ type PriceRow = { region_code: string; current_price: number };
 type WallpaperRow = Wallpaper & {
   wallpaper_assets?: AssetRow[] | null;
   prices?: PriceRow[] | null;
-  categories?: { name: string } | null;
+  categories?: { name: string; slug?: string } | null;
 };
 
 /**
@@ -199,11 +199,12 @@ function toCard(row: WallpaperRow, region: RegionCode, fallbackPrice: number | n
     region,
     resolution: resolutionLabel(row.max_long_edge),
     categoryName: categories?.name,
+    categorySlug: categories?.slug,
   };
 }
 
 const CARD_SELECT =
-  '*, wallpaper_assets(variant, storage_key), prices(region_code, current_price), categories(name)';
+  '*, wallpaper_assets(variant, storage_key), prices(region_code, current_price), categories(name, slug)';
 
 /**
  * One page of published wallpapers matching the explore filters, plus totals

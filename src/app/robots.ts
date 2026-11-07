@@ -8,7 +8,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin', '/api', '/account', '/library', '/checkout'],
+        // Private or per-person pages (referral redirects, gift codes, sign-in flows) stay out of search.
+        disallow: ['/admin', '/api', '/account', '/library', '/checkout', '/cart', '/auth', '/login', '/r/', '/gift/', '/creator/'],
       },
     ],
     sitemap: `${base}/sitemap.xml`,

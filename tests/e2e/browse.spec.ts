@@ -87,3 +87,18 @@ test('guide: chapters with pictures, admin guide stays private', async ({ page }
   await page.goto('/admin/guide');
   await expect(page).toHaveURL(/\/login/);
 });
+
+test('SEO: device pages, llms.txt, manifest, robots and noindex on filtered lists', async ({ page, request }) => {
+  await page.goto('/wallpapers-for/iphone-16-pro');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('iPhone 16 Pro Wallpapers');
+  expect(await page.locator('script[type="application/ld+json"]').count()).toBeGreaterThan(0);
+  expect((await request.get('/wallpapers-for/not-a-device')).status()).toBe(404);
+  const llms = await request.get('/llms.txt');
+  expect(llms.status()).toBe(200);
+  expect(await llms.text()).toContain('1 credit = 1 wallpaper');
+  expect((await (await request.get('/manifest.webmanifest')).json()).display).toBe('standalone');
+  expect(await (await request.get('/robots.txt')).text()).toContain('Disallow: /r/');
+  await page.goto('/explore?sort=oldest');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/explore$/);
+});

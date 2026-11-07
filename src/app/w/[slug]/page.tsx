@@ -21,6 +21,7 @@ import { Reveal } from '@/components/reveal';
 import { DevicePreview } from '@/components/device-preview';
 import { FitDownload } from '@/components/fit-download';
 import { approxSource, fittingDevices, qualityLabel } from '@/lib/fit';
+import { breadcrumbLd, wallpaperDescription, wallpaperLd, wallpaperTitle } from '@/lib/seo';
 import { TrackEvent } from '@/components/track-event';
 import { getDisplayRegion, getWallpaperBySlug, listPublishedWallpapers } from '@/lib/catalogue';
 import { formatRegionPrice } from '@/lib/format';
@@ -34,11 +35,16 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const region = (await getDisplayRegion());
   const w = await getWallpaperBySlug(params.slug, region);
   if (!w) return { title: 'Wallpaper not found' };
+  const title = wallpaperTitle(w);
+  const description = wallpaperDescription(w);
+  const images = w.previewUrl ? [{ url: w.previewUrl, alt: w.alt_text ?? w.title }] : undefined;
   return {
-    title: w.title,
+    title,
+    description,
+    keywords: [...(w.tags ?? []), `${w.title} wallpaper`, `${w.categoryName ?? ''} wallpaper 4k`.trim()].filter(Boolean),
     alternates: { canonical: wallpaperPath(w) },
-    description: w.description ?? `${w.title} — ultra-HD AI wallpaper.`,
-    openGraph: { title: w.title, description: w.description ?? undefined, images: w.previewUrl ? [{ url: w.previewUrl }] : undefined },
+    openGraph: { type: 'article', title, description, url: wallpaperPath(w), images },
+    twitter: { card: 'summary_large_image', title, description, images: w.previewUrl ? [w.previewUrl] : undefined },
   };
 }
 
@@ -82,14 +88,14 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
   const commercialPrice = !w.is_free && w.price != null ? Math.ceil(w.price * COMMERCIAL_MULTIPLIER) : null;
   const cartBase = { id: w.id, slug: w.slug, title: w.title, image: w.previewUrl, resolution: w.resolution };
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ImageObject',
-    name: w.title,
-    description: w.description ?? undefined,
-    contentUrl: w.previewUrl ?? undefined,
-    creditText: publicEnv.NEXT_PUBLIC_BRAND_NAME,
-  };
+  const site = publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+  const brand = publicEnv.NEXT_PUBLIC_BRAND_NAME;
+  const crumbs = [
+    { name: 'Home', path: '/' },
+    ...(w.categoryName && w.categorySlug ? [{ name: `${w.categoryName} Wallpapers`, path: `/collections/${w.categorySlug}` }] : [{ name: 'Explore', path: '/explore' }]),
+    { name: w.title, path: canonical },
+  ];
+  const jsonLd = [wallpaperLd(site, brand, w, canonical), breadcrumbLd(site, crumbs)];
 
   return (
     <main className="container py-10">
@@ -102,7 +108,7 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
         {w.categoryName && (
           <>
             {' · '}
-            <Link href={`/explore?category=${encodeURIComponent(w.category_id?.replace('cat-', '') ?? '')}`} className="hover:text-foreground">
+            <Link href={w.categorySlug ? `/collections/${w.categorySlug}` : '/explore'} className="hover:text-foreground">
               {w.categoryName}
             </Link>
           </>
@@ -265,8 +271,10 @@ export default async function WallpaperDetailPage(props: { params: Promise<{ slu
               </p>
               <ul className="flex flex-wrap gap-2 text-xs">
                 {fits.slice(0, 14).map((d) => (
-                  <li key={d.id} className="rounded-full border bg-card px-3 py-1" title={`${d.w} × ${d.h}`}>
-                    {d.name}
+                  <li key={d.id}>
+                    <Link href={`/wallpapers-for/${d.id}`} className="inline-block rounded-full border bg-card px-3 py-1 hover:bg-secondary" title={`${d.w} × ${d.h}`}>
+                      {d.name}
+                    </Link>
                   </li>
                 ))}
                 {fits.length > 14 && <li className="px-2 py-1 text-muted-foreground">+{fits.length - 14} more</li>}

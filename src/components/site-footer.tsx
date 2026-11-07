@@ -12,6 +12,7 @@ const LINKS = [
   { href: '/contact', label: 'Contact' },
   { href: '/faq', label: 'FAQ' },
   { href: '/guide', label: 'Guide' },
+  { href: '/wallpapers-for', label: 'Wallpapers by device' },
   { href: '/terms', label: 'Terms & Conditions' },
   { href: '/privacy', label: 'Privacy Policy' },
   { href: '/licence', label: 'Licence' },
